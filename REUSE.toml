@@ -1,0 +1,44 @@
+version = 1
+SPDX-PackageName = "godunov_hydro"
+SPDX-PackageSupplier = "godunov_hydro authors"
+SPDX-PackageDownloadLocation = "https://github.com/kalypsso-dev/godunov_hydro"
+
+[[annotations]]
+path = [
+    "Readme.md",  "doc/**"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "godunov_hydro authors"
+SPDX-License-Identifier = "Apache-2.0 WITH LLVM-exception"
+
+[[annotations]]
+path = [
+    ".clang-format", ".clangd", ".pre-commit-config.yaml", "REUSE.toml", ".git-blame-ignore-revs", ".editorconfig", ".cmake-format.py", "**/.gitignore", "_typos.toml"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "godunov_hydro authors"
+SPDX-License-Identifier = "Unlicense"
+
+[[annotations]]
+path = [
+    "**/CMakeLists.txt", "**/*.cmake"
+]
+precedence = "override"
+SPDX-FileCopyrightText = "godunov_hydro authors"
+SPDX-License-Identifier = "Unlicense"
+
+[[annotations]]
+path = [
+    "app/**/*.ini", "app/**/*.sh", "app/**/*.py", "app/**/*.ini.tmpl", "app/**/*.sh.tmpl", "app/**/Readme.md", "app/**/readme.md", "**/Readme.md", "**/README.md"
+]
+precedence = "override"
+SPDX-FileCopyrightText = "godunov_hydro authors"
+SPDX-License-Identifier = "Apache-2.0 WITH LLVM-exception"
+
+[[annotations]]
+path = [
+    "app/sedov_blast/sedov_fortran/**"
+]
+precedence = "override"
+SPDX-FileCopyrightText = "F.X. Timmes"
+SPDX-License-Identifier = "Unlicense"
