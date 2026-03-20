@@ -1,0 +1,5 @@
+configure_file(run.py run.py COPYONLY)
+configure_file(test_four_quadrant_2d_gamma_1p4.ini.tmpl test_four_quadrant_2d_gamma_1p4.ini)
+configure_file(test_four_quadrant_3d_gamma_1p4.ini.tmpl test_four_quadrant_3d_gamma_1p4.ini)
+configure_file(test_four_quadrant_2d_gamma_1p666.ini.tmpl test_four_quadrant_2d_gamma_1p666.ini)
+configure_file(test_four_quadrant_3d_gamma_1p666.ini.tmpl test_four_quadrant_3d_gamma_1p666.ini)

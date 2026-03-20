@@ -1,0 +1,33 @@
+#!/bin/bash
+#MSUB -r kalypsso_gpu                   # Request name
+#MSUB -n ${NGPU}                        # Total number of tasks to use
+#MSUB -c 32                             # Assuming compute nodes have 128 cores and 4 GPUs
+#MSUB -T 1800                           # Elapsed time limit in seconds
+#MSUB -o kalypsso_3d_gpu_${NGPU}_%I.o   # Standard output. %I is the job id
+#MSUB -e kalypsso_3d_gpu_${NGPU}_%I.o   # Error output. %I is the job id
+#MSUB -q a100                           # Choosing partition of GPU nodes
+#MSUB -m work
+${PROJ_ID_ENABLE}#MSUB -A ${PROJECT_ID}               # Project ID
+set -x
+cd ${BRIDGE_MSUB_PWD}
+
+module load cmake/3.29.6 gnu/13.2.0 flavor/cuda/standard cuda/12.4 mpi/openmpi/4.1.7.2 flavor/hdf5/parallel hdf5/1.14.0
+
+echo "##############################################################"
+echo "Print submit job:"
+cat $0
+echo "##############################################################"
+
+INI_FILE=${INI_FILENAME}
+cat $INI_FILE
+
+# make sure GPU can initiate MPI transfers
+export UCX_RNDV_FRAG_MEM_TYPE=cuda
+
+# set the number of OpenMP threads per MPI task
+export OMP_NUM_THREADS=32
+export OMP_PROC_BIND=spread
+export OMP_PLACES=threads
+
+# launch computation with 1 GPU per MPI task
+ccc_mprun @CMAKE_CURRENT_BINARY_DIR@/solver_godunov_hydro --ini $INI_FILE --kokkos-map-device-id-by=mpi_rank
