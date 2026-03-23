@@ -477,14 +477,22 @@ InitBlastRefineFunctor<dim, device_t>::operator()(TagRefineGeometric const &,
       }
     }
 
-    auto d2 = (xyz[IX] - blast_center_x) * (xyz[IX] - blast_center_x) +
-              (xyz[IY] - blast_center_y) * (xyz[IY] - blast_center_y);
+    // auto d2 = (xyz[IX] - blast_center_x) * (xyz[IX] - blast_center_x) +
+    //           (xyz[IY] - blast_center_y) * (xyz[IY] - blast_center_y);
 
-    if constexpr (dim == 3)
-      d2 += (xyz[IZ] - blast_center_z) * (xyz[IZ] - blast_center_z);
+    // if constexpr (dim == 3)
+    //   d2 += (xyz[IZ] - blast_center_z) * (xyz[IZ] - blast_center_z);
 
-    if (fabs(sqrt(d2) - radius) < (block_length * KALYPSSO_NUM(1.25)))
+    // if (fabs(sqrt(d2) - radius) < (block_length * KALYPSSO_NUM(1.25)))
+    //   flag = AMRContextBase::KALYPSSO_DO_REFINE;
+
+    const auto dx = fabs(xyz[IX] - 0.5);
+    const auto dy = fabs(xyz[IY] - 0.5);
+
+    if (((xyz[IY] < 0.5) and dx < (block_length * KALYPSSO_NUM(0.95))) or
+        ((xyz[IX] < 0.5) and dy < (block_length * KALYPSSO_NUM(0.95))))
       flag = AMRContextBase::KALYPSSO_DO_REFINE;
+
 
   } // end if level == level_refine
 
