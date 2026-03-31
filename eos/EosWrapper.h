@@ -16,6 +16,7 @@
 #include <kalypsso/core/eos/VanDerWaalsGasEos.h>
 #include <kalypsso/core/eos/MieGruneisenEosSW.h>
 #include <kalypsso/core/eos/MieGruneisenEosCochranChan.h>
+#include <kalypsso/core/eos/MieGruneisenEosJWL.h>
 #include <kalypsso/core/eos/eos_utils.h>
 
 namespace kalypsso
@@ -48,6 +49,7 @@ public:
     , m_vdw_eos(config_map)
     , m_sw_eos(config_map)
     , m_cc_eos(config_map)
+    , m_jwl_eos(config_map)
   {}
 
   /**
@@ -76,6 +78,10 @@ public:
     else if (m_eos_type == +core::eos::EOS_TYPE::MIE_GRUNEISEN_CC)
     {
       return m_cc_eos.pressure_from_specific_eint(specific_eint, rho);
+    }
+    else if (m_eos_type == +core::eos::EOS_TYPE::MIE_GRUNEISEN_JWL)
+    {
+      return m_jwl_eos.pressure_from_specific_eint(specific_eint, rho);
     }
     return ZERO_F;
   }
@@ -107,6 +113,10 @@ public:
     {
       return m_cc_eos.pressure_from_volumic_eint(volumic_eint, rho);
     }
+    else if (m_eos_type == +core::eos::EOS_TYPE::MIE_GRUNEISEN_JWL)
+    {
+      return m_jwl_eos.pressure_from_volumic_eint(volumic_eint, rho);
+    }
     return ZERO_F;
   }
 
@@ -136,6 +146,10 @@ public:
     else if (m_eos_type == +core::eos::EOS_TYPE::MIE_GRUNEISEN_CC)
     {
       return m_cc_eos.specific_eint_from_pressure(pressure, rho);
+    }
+    else if (m_eos_type == +core::eos::EOS_TYPE::MIE_GRUNEISEN_JWL)
+    {
+      return m_jwl_eos.specific_eint_from_pressure(pressure, rho);
     }
     return ZERO_F;
   }
@@ -167,6 +181,10 @@ public:
     {
       return m_cc_eos.volumic_eint_from_pressure(pressure, rho);
     }
+    else if (m_eos_type == +core::eos::EOS_TYPE::MIE_GRUNEISEN_JWL)
+    {
+      return m_jwl_eos.volumic_eint_from_pressure(pressure, rho);
+    }
     return ZERO_F;
   }
 
@@ -196,6 +214,10 @@ public:
     else if (m_eos_type == +core::eos::EOS_TYPE::MIE_GRUNEISEN_CC)
     {
       return m_cc_eos.sound_speed(pressure, rho);
+    }
+    else if (m_eos_type == +core::eos::EOS_TYPE::MIE_GRUNEISEN_JWL)
+    {
+      return m_jwl_eos.sound_speed(pressure, rho);
     }
     return ZERO_F;
   }
@@ -242,6 +264,9 @@ private:
 
   //! Mie-Gruneisen Cochran-Chan EOS
   core::eos::MieGruneisenEosCochranChan m_cc_eos;
+
+  //! Mie-Gruneisen JWL EOS
+  core::eos::MieGruneisenEosJWL m_jwl_eos;
 
 }; // class EosWrapper
 
