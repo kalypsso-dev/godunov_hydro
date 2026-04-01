@@ -129,42 +129,84 @@ run_simulation(ParallelEnv const &       par_env,
   // here we do something specific to a given test case
   // =================================================================
 
+  // =================================================================================
+  // when doing a shock tube problem, dump a 1D slice of data
+  // =================================================================================
   if (!solver->problem_name().compare("sod"))
   {
-    // =================================================================================
-    // when doing a shock tube problem, dump a 1D slice of data
-    // =================================================================================
     auto solver_hydro = dynamic_cast<godunov_hydro::SolverGodunovHydro<dim, device_t> *>(solver);
-    // const auto st_params = SodParams(config_map);
 
-    const auto cell_var_ids = std::vector<int32_t>{
-      solver_hydro->hydro().get_fieldmap()[core::models::Hydro::ID],
-      solver_hydro->hydro().get_fieldmap()[core::models::Hydro::IP],
-      solver_hydro->hydro().get_fieldmap()[core::models::Hydro::IU],
-      solver_hydro->hydro().get_fieldmap()[core::models::Hydro::IV],
-      solver_hydro->hydro().get_fieldmap()[core::models::Hydro::IW],
-    };
+    // 1. save conservative variables
+    {
+      const auto cell_var_ids = std::vector<int32_t>{
+        solver_hydro->hydro().get_fieldmap()[core::models::Hydro::ID],
+        solver_hydro->hydro().get_fieldmap()[core::models::Hydro::IP],
+        solver_hydro->hydro().get_fieldmap()[core::models::Hydro::IU],
+        solver_hydro->hydro().get_fieldmap()[core::models::Hydro::IV],
+        solver_hydro->hydro().get_fieldmap()[core::models::Hydro::IW],
+      };
 
-    const auto cell_var_names =
-      std::vector<std::string>{ "rho", "pressure", "rhou", "rhov", "rhow" };
+      const auto cell_var_names =
+        std::vector<std::string>{ "rho", "e_tot", "rhou", "rhov", "rhow" };
 
-    kalypsso::core::ComputeDataSliceAlongLine<dim, device_t>::apply(
-      solver_hydro->U(),
-      0,
-      solver_hydro->mesh_map()->get_amr_mesh_info().local_num_quadrants(),
-      IX,
-      solver_hydro->mesh_map()->orchard_keys(),
-      cell_var_ids,
-      cell_var_names,
-      "sod",
-      par_env,
-      config_map);
+      kalypsso::core::ComputeDataSliceAlongLine<dim, device_t>::apply(
+        solver_hydro->U(),
+        0,
+        solver_hydro->mesh_map()->get_amr_mesh_info().local_num_quadrants(),
+        IX,
+        solver_hydro->mesh_map()->orchard_keys(),
+        cell_var_ids,
+        cell_var_names,
+        "sod",
+        par_env,
+        config_map);
+    }
+
+    // 2. save other valuable quantities: pressure
+    {
+      const auto thermal_pressure =
+        solver_hydro->get_derived_quantity(godunov_hydro::DERIVED_QUANTITY::THERMAL_PRESSURE);
+
+      const auto cell_var_ids = std::vector<int32_t>{ 0 };
+      const auto cell_var_names = std::vector<std::string>{ "pressure" };
+      kalypsso::core::ComputeDataSliceAlongLine<dim, device_t>::apply(
+        thermal_pressure,
+        0,
+        solver_hydro->mesh_map()->get_amr_mesh_info().local_num_quadrants(),
+        IX,
+        solver_hydro->mesh_map()->orchard_keys(),
+        cell_var_ids,
+        cell_var_names,
+        "sod",
+        par_env,
+        config_map);
+    }
+
+    // 3. save other valuable quantities: speed of sound
+    {
+      const auto speed_of_sound =
+        solver_hydro->get_derived_quantity(godunov_hydro::DERIVED_QUANTITY::SPEED_OF_SOUND);
+
+      const auto cell_var_ids = std::vector<int32_t>{ 0 };
+      const auto cell_var_names = std::vector<std::string>{ "speed_of_sound" };
+      kalypsso::core::ComputeDataSliceAlongLine<dim, device_t>::apply(
+        speed_of_sound,
+        0,
+        solver_hydro->mesh_map()->get_amr_mesh_info().local_num_quadrants(),
+        IX,
+        solver_hydro->mesh_map()->orchard_keys(),
+        cell_var_ids,
+        cell_var_names,
+        "sod",
+        par_env,
+        config_map);
+    }
   }
+  // =================================================================================
+  // when doing the isentropic vortex test case, compute error versus exact solution
+  // =================================================================================
   else if (!solver->problem_name().compare("isentropic_vortex"))
   {
-    // =================================================================================
-    // when doing the isentropic vortex test case, compute error versus exact solution
-    // =================================================================================
 
     if constexpr (dim == 2)
     {
@@ -202,6 +244,9 @@ run_simulation(ParallelEnv const &       par_env,
       }
     } // dim == 2
   }
+  // =================================================================================
+  // when doing the breaking wave test case, compute error versus exact solution
+  // =================================================================================
   else if (!solver->problem_name().compare("breaking_wave"))
   {
     if constexpr (dim == 2)
@@ -246,6 +291,9 @@ run_simulation(ParallelEnv const &       par_env,
       }
     } // dim == 2
   }
+  // =================================================================================
+  // when doing sedov blast test case, dump radial profile
+  // =================================================================================
   else if (!solver->problem_name().compare("blast") and
            config_map.getBool("blast", "compute_radial_profile", false))
   {
