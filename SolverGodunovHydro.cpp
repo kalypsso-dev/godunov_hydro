@@ -37,7 +37,6 @@
 #include <godunov_hydro/border_conditions/BCShockBubble.h>
 
 #include <godunov_hydro/scheme/ComputeDtHydroFunctor.h>
-#include <godunov_hydro/utils/ComputeDerivedQuantities.h>
 
 // Utils functor
 #include <kalypsso/core/ComputeSchlieren.h>
@@ -715,6 +714,40 @@ SolverGodunovHydro<dim, device_t>::total_mem_size_in_bytes()
 // =======================================================
 // =======================================================
 template <size_t dim, typename device_t>
+SolverGodunovHydro<dim, device_t>::DataArrayBlock_t
+SolverGodunovHydro<dim, device_t>::get_derived_quantity(DERIVED_QUANTITY derived_quantity)
+{
+  const auto & fm = m_hydro.get_fieldmap();
+  const auto   local_num_quadrants =
+    static_cast<int64_t>(m_mesh_map->get_amr_mesh_info().local_num_quadrants());
+
+  return ComputeDerivedQuantities<dim, device_t>::run(m_U,
+                                                      fm,
+                                                      derived_quantity,
+                                                      m_hydro_settings,
+                                                      m_godunov_implem->m_eos,
+                                                      0,
+                                                      local_num_quadrants,
+                                                      m_par_env);
+} // SolverGodunovHydro<dim, device_t>::get_derived_quantity
+
+// =======================================================
+// =======================================================
+template <size_t dim, typename device_t>
+SolverGodunovHydro<dim, device_t>::DataArrayBlockHost_t
+SolverGodunovHydro<dim, device_t>::get_derived_quantity_on_host(DERIVED_QUANTITY derived_quantity)
+{
+  const auto data = get_derived_quantity(derived_quantity);
+
+  const auto data_host = DataArrayBlock_t::create_host_mirror_view_and_copy(data);
+
+  return data_host;
+
+} // SolverGodunovHydro<dim, device_t>::get_derived_quantity_on_host
+
+// =======================================================
+// =======================================================
+template <size_t dim, typename device_t>
 void
 SolverGodunovHydro<dim, device_t>::save_solution_hdf5(bool pure_checkpoint)
 {
@@ -780,35 +813,26 @@ SolverGodunovHydro<dim, device_t>::save_solution_hdf5(bool pure_checkpoint)
     {
       if (is_present(write_variables, std::string{ "thermal_pressure" }))
       {
-        const auto thermal_pressure =
-          ComputeDerivedQuantities<dim, device_t>::run(m_U,
-                                                       fm,
-                                                       DERIVED_QUANTITY::THERMAL_PRESSURE,
-                                                       m_hydro_settings,
-                                                       m_godunov_implem->m_eos,
-                                                       0,
-                                                       local_num_quadrants,
-                                                       m_par_env);
         const auto thermal_pressure_host =
-          DataArrayBlock_t::create_host_mirror_view_and_copy(thermal_pressure);
+          get_derived_quantity_on_host(DERIVED_QUANTITY::THERMAL_PRESSURE);
 
         total_num_bytes += m_hdf5_writer->write_quadrant_attribute(
           thermal_pressure_host, 0, "thermal_pressure", 0, local_num_quadrants);
       }
 
+      if (is_present(write_variables, std::string{ "speed_of_sound" }))
+      {
+        const auto speed_of_sound_host =
+          get_derived_quantity_on_host(DERIVED_QUANTITY::SPEED_OF_SOUND);
+
+        total_num_bytes += m_hdf5_writer->write_quadrant_attribute(
+          speed_of_sound_host, 0, "speed_of_sound", 0, local_num_quadrants);
+      }
+
       if (is_present(write_variables, std::string{ "specific_ekin" }))
       {
-        const auto specific_ekin =
-          ComputeDerivedQuantities<dim, device_t>::run(m_U,
-                                                       fm,
-                                                       DERIVED_QUANTITY::SPECIFIC_EKIN,
-                                                       m_hydro_settings,
-                                                       m_godunov_implem->m_eos,
-                                                       0,
-                                                       local_num_quadrants,
-                                                       m_par_env);
         const auto specific_ekin_host =
-          DataArrayBlock_t::create_host_mirror_view_and_copy(specific_ekin);
+          get_derived_quantity_on_host(DERIVED_QUANTITY::SPECIFIC_EKIN);
 
         total_num_bytes += m_hdf5_writer->write_quadrant_attribute(
           specific_ekin_host, 0, "specific_ekin", 0, local_num_quadrants);
@@ -816,17 +840,8 @@ SolverGodunovHydro<dim, device_t>::save_solution_hdf5(bool pure_checkpoint)
 
       if (is_present(write_variables, std::string{ "local_mach_number" }))
       {
-        const auto local_mach_number =
-          ComputeDerivedQuantities<dim, device_t>::run(m_U,
-                                                       fm,
-                                                       DERIVED_QUANTITY::LOCAL_MACH_NUMBER,
-                                                       m_hydro_settings,
-                                                       m_godunov_implem->m_eos,
-                                                       0,
-                                                       local_num_quadrants,
-                                                       m_par_env);
         const auto local_mach_number_host =
-          DataArrayBlock_t::create_host_mirror_view_and_copy(local_mach_number);
+          get_derived_quantity_on_host(DERIVED_QUANTITY::LOCAL_MACH_NUMBER);
 
         total_num_bytes += m_hdf5_writer->write_quadrant_attribute(
           local_mach_number_host, 0, "local_mach_number", 0, local_num_quadrants);

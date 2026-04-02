@@ -33,12 +33,14 @@ namespace godunov_hydro
  * Derived quantities can be scalar or vector valued.
  *
  * - thermal pressure
+ * - speed of sound
  * - specific kinetic energy
  * - local Mach number : M =|u|/c where c is local speed of sound
  */
 // clang-format off
 BETTER_ENUM(DERIVED_QUANTITY, uint32_t,
             THERMAL_PRESSURE,
+            SPEED_OF_SOUND,
             SPECIFIC_EKIN,
             LOCAL_MACH_NUMBER
   )
@@ -144,6 +146,10 @@ struct ComputeDerivedQuantities
         {
           res(cell_index, 0, iOct) = qLoc[Hydro::IP];
         }
+        else if (quantity._to_integral() == +DERIVED_QUANTITY::SPEED_OF_SOUND)
+        {
+          res(cell_index, 0, iOct) = eos.sound_speed(qLoc[Hydro::IP], qLoc[Hydro::ID]);
+        }
         else if (quantity._to_integral() == +DERIVED_QUANTITY::SPECIFIC_EKIN)
         {
           res(cell_index, 0, iOct) = models::compute_ekin_from_primitives<dim>(qLoc);
@@ -183,6 +189,17 @@ struct ComputeDerivedQuantities
       return run(Udata,
                  fm,
                  DERIVED_QUANTITY::THERMAL_PRESSURE,
+                 hydro_settings,
+                 eos,
+                 iOct_begin,
+                 num_octs,
+                 par_env);
+    }
+    else if (quantity == "speed_of_sound")
+    {
+      return run(Udata,
+                 fm,
+                 DERIVED_QUANTITY::SPEED_OF_SOUND,
                  hydro_settings,
                  eos,
                  iOct_begin,
