@@ -59,21 +59,36 @@ def sod_plot(ini_filename):
 
     sod_ana_x = values['x']
     sod_ana_rho = values['rho']
+    sod_ana_p = values['p']
+    sod_ana_u = values['u']
 
     # load numerical solution
-    num_data = sod_num=np.loadtxt('sod_numerical_solution.csv', skiprows=1, delimiter=',',usecols=(1,2,6))
-    sod_num_x = sod_num[:,2]
-    sod_num_rho = sod_num[:,1]
-    sod_num_level = sod_num[:,0]
+    #num_data = sod_num=np.loadtxt('sod_numerical_solution.csv', skiprows=1, delimiter=',',usecols=(1,2,6))
+    #sod_num_x = sod_num[:,2]
+    #sod_num_rho = sod_num[:,1]
+    #sod_num_level = sod_num[:,0]
 
-    fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(11,8))
+    sod_num_x = np.load('sod_positions.npy')
+    sod_num_rho = np.load('sod_rho.npy')
+    sod_num_p = np.load('sod_pressure.npy')
+    sod_num_rhou = np.load('sod_rhou.npy')
+    sod_num_u = sod_num_rhou/sod_num_rho
+    sod_num_level = np.load('sod_level.npy')
+
+    fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, ncols=1, figsize=(8,11))
     #ax1 = plt.subplot(2,1,1)
     #ax2 = plt.subplot(2,1,2, sharex=ax1)
-    ax1.plot(sod_ana_x, sod_ana_rho, 'go-', label='analytical')
-    ax1.plot(sod_num_x, sod_num_rho, 'xb-', label='numerical')
-    ax2.plot(sod_num_x, sod_num_level, 'xb-', label='AMR levels')
+    ax1.plot(sod_ana_x, sod_ana_rho, 'g-', label='analytical - density')
+    ax1.plot(sod_num_x, sod_num_rho, 'xb', label='numerical - density')
+    ax2.plot(sod_ana_x, sod_ana_p, 'g-', label='analytical - pressure')
+    ax2.plot(sod_num_x, sod_num_p, 'xb', label='numerical - pressure')
+    ax3.plot(sod_ana_x, sod_ana_u, 'g-', label='analytical - velocity')
+    ax3.plot(sod_num_x, sod_num_u, 'xb', label='numerical - velocity')
+    ax4.plot(sod_num_x, sod_num_level, 'xb-', label='AMR levels')
     ax1.legend()
     ax2.legend()
+    ax3.legend()
+    ax4.legend()
     plt.suptitle('Sod at tEnd={} with gamma={}'.format(tEnd,gamma), fontsize=20)
     plt.show()
 
