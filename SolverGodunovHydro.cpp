@@ -714,8 +714,9 @@ SolverGodunovHydro<dim, device_t>::total_mem_size_in_bytes()
 // =======================================================
 // =======================================================
 template <size_t dim, typename device_t>
-SolverGodunovHydro<dim, device_t>::DataArrayBlock_t
+auto
 SolverGodunovHydro<dim, device_t>::get_derived_quantity(DERIVED_QUANTITY derived_quantity)
+  -> DataArrayBlock_t
 {
   const auto & fm = m_hydro.get_fieldmap();
   const auto   local_num_quadrants =
@@ -734,8 +735,9 @@ SolverGodunovHydro<dim, device_t>::get_derived_quantity(DERIVED_QUANTITY derived
 // =======================================================
 // =======================================================
 template <size_t dim, typename device_t>
-SolverGodunovHydro<dim, device_t>::DataArrayBlockHost_t
+auto
 SolverGodunovHydro<dim, device_t>::get_derived_quantity_on_host(DERIVED_QUANTITY derived_quantity)
+  -> DataArrayBlockHost_t
 {
   const auto data = get_derived_quantity(derived_quantity);
 
