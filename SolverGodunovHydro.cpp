@@ -751,7 +751,7 @@ SolverGodunovHydro<dim, device_t>::get_derived_quantity_on_host(DERIVED_QUANTITY
 // =======================================================
 template <size_t dim, typename device_t>
 void
-SolverGodunovHydro<dim, device_t>::save_solution_hdf5(bool pure_checkpoint)
+SolverGodunovHydro<dim, device_t>::save_solution_hdf5([[maybe_unused]] bool pure_checkpoint)
 {
 
 #ifdef KALYPSSO_CORE_USE_HDF5
