@@ -49,11 +49,11 @@ InitFourQuadrantDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &      
   const auto            eos = eos::EosWrapper<HostDevice>(config_map);
   [[maybe_unused]] bool valid = true;
 
-  for (int i = 0; i < 4; ++i)
+  for (size_t i = 0; i < 4; ++i)
     Us[i] = models::compute_conservative_variables<dim, HostDevice>(Us[i], settings, eos, valid);
   if constexpr (dim == 3)
   {
-    for (int i = 4; i < 8; ++i)
+    for (size_t i = 4; i < 8; ++i)
       Us[i] = models::compute_conservative_variables<dim, HostDevice>(Us[i], settings, eos, valid);
   }
 
