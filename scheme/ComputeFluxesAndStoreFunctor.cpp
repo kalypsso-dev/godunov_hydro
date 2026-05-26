@@ -114,11 +114,16 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::apply(ConfigMap const &            
 
   const auto nbIterations = num_quads * fluxes.num_cells();
 
+#ifdef KOKKOS_ENABLE_CUDA
+  using Property = Kokkos::Experimental::WorkItemProperty::HintHeavyWeight_t;
+#else
+  using Property = Kokkos::Experimental::WorkItemProperty::None_t;
+#endif
+
   // launch computation
   Kokkos::parallel_for("kalypsso::godunov_hydro::ComputeFluxesAndStoreFunctor",
-                       Kokkos::RangePolicy<exec_space>(0, nbIterations),
+                       Kokkos::RangePolicy<exec_space, Property>(0, nbIterations),
                        functor);
-
 } // apply
 
 // ====================================================================
