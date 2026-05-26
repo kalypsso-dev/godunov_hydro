@@ -128,17 +128,17 @@ public:
    * \param[in]  time step (as computed by CFL condition)
    *
    */
-  ReadFluxesAndConservativeUpdateFunctor(ConfigMap const &             config_map,
-                                         StencilHelper_t               stencil_helper,
-                                         orchard_key_view_t            orchard_keys,
-                                         conformal_status_view_type    conformal_status,
-                                         AMRMeshInfo                   amr_mesh_info,
-                                         DataArrayBlock_t              u_out,
-                                         DataArrayBlock_t              fluxes,
-                                         FieldMap<core::models::Hydro> fm,
-                                         int                           direction,
-                                         HydroSettings                 hydro_settings,
-                                         real_t                        dt);
+  ReadFluxesAndConservativeUpdateFunctor(ConfigMap const &                     config_map,
+                                         StencilHelper_t const &               stencil_helper,
+                                         orchard_key_view_t const &            orchard_keys,
+                                         conformal_status_view_type const &    conformal_status,
+                                         AMRMeshInfo const &                   amr_mesh_info,
+                                         DataArrayBlock_t const &              u_out,
+                                         DataArrayBlock_t const &              fluxes,
+                                         FieldMap<core::models::Hydro> const & fm,
+                                         int                                   direction,
+                                         HydroSettings const &                 hydro_settings,
+                                         real_t                                dt);
 
   // ==============================================================
   // ==============================================================
@@ -146,19 +146,19 @@ public:
   //!
   //! Use this member when computing primitive in a group of octant
   static void
-  apply(ConfigMap const &             config_map,
-        amr_hashmap_t                 amr_hashmap,
-        orchard_key_view_t            orchard_keys,
-        conformal_status_view_type    conformal_status,
-        AMRMeshInfo                   amr_mesh_info,
-        DataArrayBlock_t              Uout,
-        DataArrayBlock_t              fluxes,
-        FieldMap<core::models::Hydro> fm,
-        int                           direction,
-        brick_size_t<dim>             brick_sizes,
-        Kokkos::Array<bool, dim>      is_brick_periodic,
-        HydroSettings                 hydro_settings,
-        real_t                        dt);
+  apply(ConfigMap const &                     config_map,
+        amr_hashmap_t const &                 amr_hashmap,
+        orchard_key_view_t const &            orchard_keys,
+        conformal_status_view_type const &    conformal_status,
+        AMRMeshInfo const &                   amr_mesh_info,
+        DataArrayBlock_t const &              Uout,
+        DataArrayBlock_t const &              fluxes,
+        FieldMap<core::models::Hydro> const & fm,
+        int                                   direction,
+        brick_size_t<dim> const &             brick_sizes,
+        Kokkos::Array<bool, dim> const &      is_brick_periodic,
+        HydroSettings const &                 hydro_settings,
+        real_t                                dt);
 
   // ====================================================================
   // ====================================================================

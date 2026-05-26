@@ -18,25 +18,25 @@ namespace godunov_hydro
 /*************************************************/
 template <size_t dim, typename device_t>
 ComputeFluxesAndStoreFunctor<dim, device_t>::ComputeFluxesAndStoreFunctor(
-  orchard_key_view_t                orchard_keys,
-  AMRMeshInfo                       amr_mesh_info,
-  DataArrayBlock_t                  fluxes,
-  DataArrayGhostedBlock_t           q_ghosted,
-  DataArrayGhostedBlock_t           slopes_x,
-  DataArrayGhostedBlock_t           slopes_y,
-  DataArrayGhostedBlock_t           slopes_z,
-  FieldMap<core::models::Hydro>     fm,
-  int32_t                           iOct_flux_offset,
-  int32_t                           num_quads,
-  int                               direction,
-  HydroSettings const &             hydro_settings,
-  eos::EosWrapper<device_t> const & eos,
-  real_t                            dt,
-  real_t                            scaling_factor,
-  bool                              gravity_enabled,
-  UniformGravityField<dim>          gravity_field,
-  ViscosityParams                   viscosity,
-  TimeIntegrator                    time_integrator)
+  orchard_key_view_t const &            orchard_keys,
+  AMRMeshInfo const &                   amr_mesh_info,
+  DataArrayBlock_t const &              fluxes,
+  DataArrayGhostedBlock_t const &       q_ghosted,
+  DataArrayGhostedBlock_t const &       slopes_x,
+  DataArrayGhostedBlock_t const &       slopes_y,
+  DataArrayGhostedBlock_t const &       slopes_z,
+  FieldMap<core::models::Hydro> const & fm,
+  int32_t                               iOct_flux_offset,
+  int32_t                               num_quads,
+  int                                   direction,
+  HydroSettings const &                 hydro_settings,
+  eos::EosWrapper<device_t> const &     eos,
+  real_t                                dt,
+  real_t                                scaling_factor,
+  bool                                  gravity_enabled,
+  UniformGravityField<dim> const &      gravity_field,
+  ViscosityParams const &               viscosity,
+  TimeIntegrator                        time_integrator)
   : m_orchard_keys_device(orchard_keys)
   , m_amr_mesh_info(amr_mesh_info)
   , m_Fluxes(fluxes)
@@ -64,21 +64,21 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::ComputeFluxesAndStoreFunctor(
 // ==============================================================
 template <size_t dim, typename device_t>
 void
-ComputeFluxesAndStoreFunctor<dim, device_t>::apply(ConfigMap const &             config_map,
-                                                   orchard_key_view_t            orchard_keys,
-                                                   AMRMeshInfo                   amr_mesh_info,
-                                                   DataArrayBlock_t              fluxes,
-                                                   DataArrayGhostedBlock_t       q_ghosted,
-                                                   DataArrayGhostedBlock_t       slopes_x,
-                                                   DataArrayGhostedBlock_t       slopes_y,
-                                                   DataArrayGhostedBlock_t       slopes_z,
-                                                   FieldMap<core::models::Hydro> fm,
-                                                   int32_t                       iOct_flux_offset,
-                                                   int32_t                       num_quads,
-                                                   int                           direction,
-                                                   HydroSettings const &         hydro_settings,
+ComputeFluxesAndStoreFunctor<dim, device_t>::apply(ConfigMap const &               config_map,
+                                                   orchard_key_view_t const &      orchard_keys,
+                                                   AMRMeshInfo const &             amr_mesh_info,
+                                                   DataArrayBlock_t const &        fluxes,
+                                                   DataArrayGhostedBlock_t const & q_ghosted,
+                                                   DataArrayGhostedBlock_t const & slopes_x,
+                                                   DataArrayGhostedBlock_t const & slopes_y,
+                                                   DataArrayGhostedBlock_t const & slopes_z,
+                                                   FieldMap<core::models::Hydro> const & fm,
+                                                   int32_t               iOct_flux_offset,
+                                                   int32_t               num_quads,
+                                                   int                   direction,
+                                                   HydroSettings const & hydro_settings,
                                                    eos::EosWrapper<device_t> const & eos,
-                                                   ViscosityParams                   viscosity,
+                                                   ViscosityParams const &           viscosity,
                                                    real_t                            dt)
 {
   // Important note: the caller is responsible for provide a flux array with right shape.

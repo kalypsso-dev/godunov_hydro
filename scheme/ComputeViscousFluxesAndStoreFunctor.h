@@ -122,34 +122,34 @@ public:
    * \param[in]  time step (as computed by CFL condition)
    *
    */
-  ComputeViscousFluxesAndStoreFunctor(orchard_key_view_t            orchard_keys,
-                                      AMRMeshInfo                   amr_mesh_info,
-                                      DataArrayBlock_t              fluxes,
-                                      DataArrayGhostedBlock_t       q_ghosted,
-                                      FieldMap<core::models::Hydro> fm,
-                                      int32_t                       iOct_flux_offset,
-                                      int32_t                       num_quads,
-                                      int                           direction,
-                                      ViscosityParams               viscosity,
-                                      real_t                        dt,
-                                      real_t                        scaling_factor);
+  ComputeViscousFluxesAndStoreFunctor(orchard_key_view_t const &            orchard_keys,
+                                      AMRMeshInfo const &                   amr_mesh_info,
+                                      DataArrayBlock_t const &              fluxes,
+                                      DataArrayGhostedBlock_t const &       q_ghosted,
+                                      FieldMap<core::models::Hydro> const & fm,
+                                      int32_t                               iOct_flux_offset,
+                                      int32_t                               num_quads,
+                                      int                                   direction,
+                                      ViscosityParams const &               viscosity,
+                                      real_t                                dt,
+                                      real_t                                scaling_factor);
 
   // ==============================================================
   // ==============================================================
   //! static method which does it all: create and execute functor with range policy
   //!
   static void
-  apply(ConfigMap const &             config_map,
-        orchard_key_view_t            orchard_keys,
-        AMRMeshInfo                   amr_mesh_info,
-        DataArrayBlock_t              fluxes,
-        DataArrayGhostedBlock_t       q_ghosted,
-        FieldMap<core::models::Hydro> fm,
-        int32_t                       iOct_flux_offset,
-        int32_t                       num_quads,
-        int                           direction,
-        ViscosityParams               viscosity,
-        real_t                        dt);
+  apply(ConfigMap const &                     config_map,
+        orchard_key_view_t const &            orchard_keys,
+        AMRMeshInfo const &                   amr_mesh_info,
+        DataArrayBlock_t const &              fluxes,
+        DataArrayGhostedBlock_t const &       q_ghosted,
+        FieldMap<core::models::Hydro> const & fm,
+        int32_t                               iOct_flux_offset,
+        int32_t                               num_quads,
+        int                                   direction,
+        ViscosityParams const &               viscosity,
+        real_t                                dt);
 
   // ====================================================================
   // ====================================================================
