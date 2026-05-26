@@ -18,12 +18,12 @@ namespace godunov_hydro
 // ====================================================================
 template <size_t dim, typename device_t>
 void
-AddGravitySourceTerm<dim, device_t>::apply(ConfigMap const &             config_map,
-                                           DataArrayBlock_t              Uold,
-                                           DataArrayBlock_t              Unew,
-                                           FieldMap<core::models::Hydro> fm,
-                                           int32_t                       local_num_octants,
-                                           real_t                        dt)
+AddGravitySourceTerm<dim, device_t>::apply(ConfigMap const &                     config_map,
+                                           DataArrayBlock_t const &              Uold,
+                                           DataArrayBlock_t const &              Unew,
+                                           FieldMap<core::models::Hydro> const & fm,
+                                           int32_t                               local_num_octants,
+                                           real_t                                dt)
 {
 
   const auto gravity_field = get_uniform_gravity_vector<dim>(config_map);

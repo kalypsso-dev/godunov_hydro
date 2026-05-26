@@ -67,11 +67,11 @@ private:
   const real_t m_dt;
 
 public:
-  AddGravitySourceTerm(Kokkos::Array<real_t, dim>    grav,
-                       DataArrayBlock_t              Uold,
-                       DataArrayBlock_t              Unew,
-                       FieldMap<core::models::Hydro> fm,
-                       real_t                        dt)
+  AddGravitySourceTerm(Kokkos::Array<real_t, dim> const &    grav,
+                       DataArrayBlock_t const &              Uold,
+                       DataArrayBlock_t const &              Unew,
+                       FieldMap<core::models::Hydro> const & fm,
+                       real_t                                dt)
     : m_grav(grav)
     , m_Uold(Uold)
     , m_Unew(Unew)
@@ -89,12 +89,12 @@ public:
   //! \param[in] local_num_octant is the local (current MPI proc) number of octants
   //! \param[in] dt is time step
   static void
-  apply(ConfigMap const &             config_map,
-        DataArrayBlock_t              Uold,
-        DataArrayBlock_t              Unew,
-        FieldMap<core::models::Hydro> fm,
-        int32_t                       local_num_octants,
-        real_t                        dt);
+  apply(ConfigMap const &                     config_map,
+        DataArrayBlock_t const &              Uold,
+        DataArrayBlock_t const &              Unew,
+        FieldMap<core::models::Hydro> const & fm,
+        int32_t                               local_num_octants,
+        real_t                                dt);
 
   // // ====================================================================
   // // ====================================================================

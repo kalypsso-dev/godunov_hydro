@@ -20,25 +20,25 @@ namespace godunov_hydro
 // ====================================================================
 template <size_t dim, typename device_t>
 ComputeFluxesAndUpdateFunctor<dim, device_t>::ComputeFluxesAndUpdateFunctor(
-  ConfigMap const &                 config_map,
-  amr_hashmap_t                     amr_hashmap,
-  orchard_key_view_t                orchard_keys,
-  DataArrayBlock_t                  u,
-  DataArrayGhostedBlock_t           q,
-  DataArrayGhostedBlock_t           slopes_x,
-  DataArrayGhostedBlock_t           slopes_y,
-  DataArrayGhostedBlock_t           slopes_z,
-  FieldMap<core::models::Hydro>     fm,
-  int32_t                           iOct_begin,
-  int32_t                           num_octants,
-  Kokkos::Array<uint8_t, dim>       brick_sizes,
-  Kokkos::Array<bool, dim>          is_brick_periodic,
-  HydroSettings const &             hydro_settings,
-  eos::EosWrapper<device_t> const & eos,
-  real_t                            dt,
-  bool                              gravity_enabled,
-  UniformGravityField<dim>          gravity_field,
-  bool                              use_flux_oriented_computation)
+  ConfigMap const &                     config_map,
+  amr_hashmap_t const &                 amr_hashmap,
+  orchard_key_view_t const &            orchard_keys,
+  DataArrayBlock_t const &              u,
+  DataArrayGhostedBlock_t const &       q,
+  DataArrayGhostedBlock_t const &       slopes_x,
+  DataArrayGhostedBlock_t const &       slopes_y,
+  DataArrayGhostedBlock_t const &       slopes_z,
+  FieldMap<core::models::Hydro> const & fm,
+  int32_t                               iOct_begin,
+  int32_t                               num_octants,
+  Kokkos::Array<uint8_t, dim> const &   brick_sizes,
+  Kokkos::Array<bool, dim> const &      is_brick_periodic,
+  HydroSettings const &                 hydro_settings,
+  eos::EosWrapper<device_t> const &     eos,
+  real_t                                dt,
+  bool                                  gravity_enabled,
+  UniformGravityField<dim> const &      gravity_field,
+  bool                                  use_flux_oriented_computation)
   : m_amr_hashmap_device(amr_hashmap)
   , m_orchard_keys_device(orchard_keys)
   , m_mirror_orchard_keys_device()
@@ -73,23 +73,23 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::ComputeFluxesAndUpdateFunctor(
 template <size_t dim, typename device_t>
 void
 ComputeFluxesAndUpdateFunctor<dim, device_t>::apply_on_group(
-  ConfigMap const &                 config_map,
-  amr_hashmap_t                     amr_hashmap,
-  orchard_key_view_t                orchard_keys,
-  DataArrayBlock_t                  U,
-  DataArrayGhostedBlock_t           q,
-  DataArrayGhostedBlock_t           slopes_x,
-  DataArrayGhostedBlock_t           slopes_y,
-  DataArrayGhostedBlock_t           slopes_z,
-  FieldMap<core::models::Hydro>     fm,
-  int32_t                           iOct_begin,
-  int32_t                           num_octants,
-  Kokkos::Array<uint8_t, dim>       brick_sizes,
-  Kokkos::Array<bool, dim>          is_brick_periodic,
-  HydroSettings const &             hydro_settings,
-  eos::EosWrapper<device_t> const & eos,
-  real_t                            dt,
-  bool                              use_flux_oriented_computation)
+  ConfigMap const &                     config_map,
+  amr_hashmap_t const &                 amr_hashmap,
+  orchard_key_view_t const &            orchard_keys,
+  DataArrayBlock_t const &              U,
+  DataArrayGhostedBlock_t const &       q,
+  DataArrayGhostedBlock_t const &       slopes_x,
+  DataArrayGhostedBlock_t const &       slopes_y,
+  DataArrayGhostedBlock_t const &       slopes_z,
+  FieldMap<core::models::Hydro> const & fm,
+  int32_t                               iOct_begin,
+  int32_t                               num_octants,
+  Kokkos::Array<uint8_t, dim> const &   brick_sizes,
+  Kokkos::Array<bool, dim> const &      is_brick_periodic,
+  HydroSettings const &                 hydro_settings,
+  eos::EosWrapper<device_t> const &     eos,
+  real_t                                dt,
+  bool                                  use_flux_oriented_computation)
 {
 
   const auto gravity_enabled = config_map.getBool("gravity", "enabled", false);

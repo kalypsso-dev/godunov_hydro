@@ -109,26 +109,26 @@ public:
    * \param[in,out] userdata_out data array which we want to fill the block ghosts cells
    *
    */
-  ConvertToPrimitivesVariablesFunctor(StencilHelper_t const &           stencil_helper,
-                                      AMRMeshInfo const &               amr_mesh_info,
-                                      int32_t                           iOct_begin,
-                                      DataArrayBlock_t const &          userdata_in,
-                                      DataArrayGhostedBlock_t const &   userdata_out,
-                                      FieldMap<core::models::Hydro>     fm,
-                                      HydroSettings const &             hydro_settings,
-                                      eos::EosWrapper<device_t> const & eos,
-                                      CellCenteredProlongationType      prolongation);
+  ConvertToPrimitivesVariablesFunctor(StencilHelper_t const &               stencil_helper,
+                                      AMRMeshInfo const &                   amr_mesh_info,
+                                      int32_t                               iOct_begin,
+                                      DataArrayBlock_t const &              userdata_in,
+                                      DataArrayGhostedBlock_t const &       userdata_out,
+                                      FieldMap<core::models::Hydro> const & fm,
+                                      HydroSettings const &                 hydro_settings,
+                                      eos::EosWrapper<device_t> const &     eos,
+                                      CellCenteredProlongationType          prolongation);
 
   //! same as above, but specifying also the mirror keys array
-  ConvertToPrimitivesVariablesFunctor(StencilHelper_t const &           stencil_helper,
-                                      orchard_key_view_t const &        mirror_orchard_keys,
-                                      AMRMeshInfo const &               amr_mesh_info,
-                                      DataArrayBlock_t const &          userdata_in,
-                                      DataArrayGhostedBlock_t const &   userdata_out,
-                                      FieldMap<core::models::Hydro>     fm,
-                                      HydroSettings const &             hydro_settings,
-                                      eos::EosWrapper<device_t> const & eos,
-                                      CellCenteredProlongationType      prolongation);
+  ConvertToPrimitivesVariablesFunctor(StencilHelper_t const &               stencil_helper,
+                                      orchard_key_view_t const &            mirror_orchard_keys,
+                                      AMRMeshInfo const &                   amr_mesh_info,
+                                      DataArrayBlock_t const &              userdata_in,
+                                      DataArrayGhostedBlock_t const &       userdata_out,
+                                      FieldMap<core::models::Hydro> const & fm,
+                                      HydroSettings const &                 hydro_settings,
+                                      eos::EosWrapper<device_t> const &     eos,
+                                      CellCenteredProlongationType          prolongation);
 
   // ==============================================================
   // ==============================================================
@@ -136,19 +136,19 @@ public:
   //!
   //! Use this member when computing primitive in a group of octant
   static void
-  apply_on_group(ConfigMap const &                 config_map,
-                 amr_hashmap_t const &             amr_hashmap,
-                 orchard_key_view_t const &        orchard_keys,
-                 AMRMeshInfo const &               amr_mesh_info,
-                 int32_t                           iOct_begin,
-                 int32_t                           num_octants_in_group,
-                 DataArrayBlock_t const &          userdata_in,
-                 DataArrayGhostedBlock_t const &   userdata_out,
-                 FieldMap<core::models::Hydro>     fm,
-                 brick_size_t<dim> const &         brick_sizes,
-                 Kokkos::Array<bool, dim> const &  is_brick_periodic,
-                 HydroSettings const &             hydro_settings,
-                 eos::EosWrapper<device_t> const & eos);
+  apply_on_group(ConfigMap const &                     config_map,
+                 amr_hashmap_t const &                 amr_hashmap,
+                 orchard_key_view_t const &            orchard_keys,
+                 AMRMeshInfo const &                   amr_mesh_info,
+                 int32_t                               iOct_begin,
+                 int32_t                               num_octants_in_group,
+                 DataArrayBlock_t const &              userdata_in,
+                 DataArrayGhostedBlock_t const &       userdata_out,
+                 FieldMap<core::models::Hydro> const & fm,
+                 brick_size_t<dim> const &             brick_sizes,
+                 Kokkos::Array<bool, dim> const &      is_brick_periodic,
+                 HydroSettings const &                 hydro_settings,
+                 eos::EosWrapper<device_t> const &     eos);
 
   // ==============================================================
   // ==============================================================
@@ -156,18 +156,18 @@ public:
   //!
   //! Use this member when computing primitive only in mirror quadrants.
   static void
-  apply_in_mirrors(ConfigMap const &                 config_map,
-                   amr_hashmap_t const &             amr_hashmap,
-                   orchard_key_view_t const &        orchard_keys,
-                   orchard_key_view_t const &        mirror_orchard_keys,
-                   AMRMeshInfo const &               amr_mesh_info,
-                   DataArrayBlock_t const &          userdata_in,
-                   DataArrayGhostedBlock_t const &   userdata_out,
-                   FieldMap<core::models::Hydro>     fm,
-                   brick_size_t<dim> const &         brick_sizes,
-                   Kokkos::Array<bool, dim> const &  is_brick_periodic,
-                   HydroSettings const &             hydro_settings,
-                   eos::EosWrapper<device_t> const & eos);
+  apply_in_mirrors(ConfigMap const &                     config_map,
+                   amr_hashmap_t const &                 amr_hashmap,
+                   orchard_key_view_t const &            orchard_keys,
+                   orchard_key_view_t const &            mirror_orchard_keys,
+                   AMRMeshInfo const &                   amr_mesh_info,
+                   DataArrayBlock_t const &              userdata_in,
+                   DataArrayGhostedBlock_t const &       userdata_out,
+                   FieldMap<core::models::Hydro> const & fm,
+                   brick_size_t<dim> const &             brick_sizes,
+                   Kokkos::Array<bool, dim> const &      is_brick_periodic,
+                   HydroSettings const &                 hydro_settings,
+                   eos::EosWrapper<device_t> const &     eos);
 
   // ==============================================================
   // ==============================================================

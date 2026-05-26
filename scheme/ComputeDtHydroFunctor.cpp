@@ -19,16 +19,17 @@ namespace godunov_hydro
 // ====================================================================
 // ====================================================================
 template <size_t dim, typename device_t>
-ComputeDtHydroFunctor<dim, device_t>::ComputeDtHydroFunctor(ConfigMap const &          config_map,
-                                                            orchard_key_view_t const & orchard_keys,
-                                                            int32_t               local_num_octants,
-                                                            HydroSettings const & hydro_settings,
-                                                            FieldMap<core::models::Hydro> fm,
-                                                            block_size_t<dim> const & block_sizes,
-                                                            DataArrayBlock_t const &  Udata,
-                                                            eos::EosWrapper<device_t> const & eos,
-                                                            bool gravity_enabled,
-                                                            UniformGravityField<dim> gravity_field)
+ComputeDtHydroFunctor<dim, device_t>::ComputeDtHydroFunctor(
+  ConfigMap const &                     config_map,
+  orchard_key_view_t const &            orchard_keys,
+  int32_t                               local_num_octants,
+  HydroSettings const &                 hydro_settings,
+  FieldMap<core::models::Hydro> const & fm,
+  block_size_t<dim> const &             block_sizes,
+  DataArrayBlock_t const &              Udata,
+  eos::EosWrapper<device_t> const &     eos,
+  bool                                  gravity_enabled,
+  UniformGravityField<dim>              gravity_field)
   : m_orchard_keys(orchard_keys)
   , m_local_num_octants(local_num_octants)
   , m_hydro_settings(hydro_settings)
@@ -47,15 +48,15 @@ ComputeDtHydroFunctor<dim, device_t>::ComputeDtHydroFunctor(ConfigMap const &   
 // ====================================================================
 template <size_t dim, typename device_t>
 void
-ComputeDtHydroFunctor<dim, device_t>::apply(ConfigMap const &                 config_map,
-                                            orchard_key_view_t const &        orchard_keys,
-                                            int32_t                           local_num_octants,
-                                            HydroSettings const &             hydro_settings,
-                                            FieldMap<core::models::Hydro>     fm,
-                                            block_size_t<dim> const &         block_sizes,
-                                            DataArrayBlock_t const &          Udata,
-                                            eos::EosWrapper<device_t> const & eos,
-                                            real_t &                          invDt)
+ComputeDtHydroFunctor<dim, device_t>::apply(ConfigMap const &                     config_map,
+                                            orchard_key_view_t const &            orchard_keys,
+                                            int32_t                               local_num_octants,
+                                            HydroSettings const &                 hydro_settings,
+                                            FieldMap<core::models::Hydro> const & fm,
+                                            block_size_t<dim> const &             block_sizes,
+                                            DataArrayBlock_t const &              Udata,
+                                            eos::EosWrapper<device_t> const &     eos,
+                                            real_t &                              invDt)
 {
   const auto gravity_enabled = config_map.getBool("gravity", "enabled", false);
   const auto gravity_field = get_uniform_gravity_vector<dim>(config_map);

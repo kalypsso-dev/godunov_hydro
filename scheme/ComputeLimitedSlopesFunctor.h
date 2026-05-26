@@ -114,14 +114,14 @@ public:
    *
    *
    */
-  ComputeLimitedSlopesFunctor(DataArrayGhostedBlock_t       prim_var,
-                              DataArrayGhostedBlock_t       slopes_x,
-                              DataArrayGhostedBlock_t       slopes_y,
-                              DataArrayGhostedBlock_t       slopes_z,
-                              FieldMap<core::models::Hydro> fm,
-                              int32_t                       iOct_begin,
-                              int32_t                       num_octants,
-                              HydroSettings                 hydro_settings);
+  ComputeLimitedSlopesFunctor(DataArrayGhostedBlock_t const &       prim_var,
+                              DataArrayGhostedBlock_t const &       slopes_x,
+                              DataArrayGhostedBlock_t const &       slopes_y,
+                              DataArrayGhostedBlock_t const &       slopes_z,
+                              FieldMap<core::models::Hydro> const & fm,
+                              int32_t                               iOct_begin,
+                              int32_t                               num_octants,
+                              HydroSettings const &                 hydro_settings);
 
   // ====================================================================
   // ====================================================================
@@ -129,13 +129,13 @@ public:
   //!
   //! Use this member when computing slopes in a group of octant
   static void
-  apply_on_group(DataArrayGhostedBlock_t       primitive_vars,
-                 DataArrayGhostedBlock_t       slopes_x,
-                 DataArrayGhostedBlock_t       slopes_y,
-                 DataArrayGhostedBlock_t       slopes_z,
-                 FieldMap<core::models::Hydro> fm,
-                 int32_t                       num_octants,
-                 HydroSettings                 hydro_settings);
+  apply_on_group(DataArrayGhostedBlock_t const &       primitive_vars,
+                 DataArrayGhostedBlock_t const &       slopes_x,
+                 DataArrayGhostedBlock_t const &       slopes_y,
+                 DataArrayGhostedBlock_t const &       slopes_z,
+                 FieldMap<core::models::Hydro> const & fm,
+                 int32_t                               num_octants,
+                 HydroSettings const &                 hydro_settings);
 
   // ====================================================================
   // ====================================================================
@@ -156,14 +156,14 @@ public:
   //!
   //! Use this member when computing slopes in ghost quadrants.
   static void
-  apply_on_ghosts(DataArrayGhostedBlock_t       primitive_vars_mg,
-                  DataArrayGhostedBlock_t       slopes_x,
-                  DataArrayGhostedBlock_t       slopes_y,
-                  DataArrayGhostedBlock_t       slopes_z,
-                  FieldMap<core::models::Hydro> fm,
-                  int32_t                       num_mirrors,
-                  int32_t                       num_ghosts,
-                  HydroSettings                 hydro_settings);
+  apply_on_ghosts(DataArrayGhostedBlock_t const &       primitive_vars_mg,
+                  DataArrayGhostedBlock_t const &       slopes_x,
+                  DataArrayGhostedBlock_t const &       slopes_y,
+                  DataArrayGhostedBlock_t const &       slopes_z,
+                  FieldMap<core::models::Hydro> const & fm,
+                  int32_t                               num_mirrors,
+                  int32_t                               num_ghosts,
+                  HydroSettings const &                 hydro_settings);
 
   // ====================================================================
   // ====================================================================

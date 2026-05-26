@@ -18,26 +18,26 @@ namespace godunov_hydro
 /*************************************************/
 template <size_t dim, typename device_t>
 ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::ComputeFluxesAndConservativeUpdateFunctor(
-  ConfigMap const &                 config_map,
-  StencilHelper_t                   stencil_helper,
-  orchard_key_view_t                orchard_keys,
-  conformal_status_view_type        conformal_status,
-  AMRMeshInfo                       amr_mesh_info,
-  DataArrayBlock_t                  u_in,
-  DataArrayBlock_t                  u_out,
-  DataArrayGhostedBlock_t           q,
-  DataArrayGhostedBlock_t           slopes_x,
-  DataArrayGhostedBlock_t           slopes_y,
-  DataArrayGhostedBlock_t           slopes_z,
-  FieldMap<core::models::Hydro>     fm,
-  int32_t                           iOct_begin,
-  int32_t                           num_octants,
-  HydroSettings const &             hydro_settings,
-  eos::EosWrapper<device_t> const & eos,
-  real_t                            dt,
-  bool                              gravity_enabled,
-  UniformGravityField<dim>          gravity_field,
-  TimeIntegrator                    time_integrator)
+  ConfigMap const &                     config_map,
+  StencilHelper_t const &               stencil_helper,
+  orchard_key_view_t const &            orchard_keys,
+  conformal_status_view_type const &    conformal_status,
+  AMRMeshInfo const &                   amr_mesh_info,
+  DataArrayBlock_t const &              u_in,
+  DataArrayBlock_t const &              u_out,
+  DataArrayGhostedBlock_t const &       q,
+  DataArrayGhostedBlock_t const &       slopes_x,
+  DataArrayGhostedBlock_t const &       slopes_y,
+  DataArrayGhostedBlock_t const &       slopes_z,
+  FieldMap<core::models::Hydro> const & fm,
+  int32_t                               iOct_begin,
+  int32_t                               num_octants,
+  HydroSettings const &                 hydro_settings,
+  eos::EosWrapper<device_t> const &     eos,
+  real_t                                dt,
+  bool                                  gravity_enabled,
+  UniformGravityField<dim> const &      gravity_field,
+  TimeIntegrator                        time_integrator)
   : m_stencil_helper(stencil_helper)
   , m_orchard_keys_device(orchard_keys)
   , m_conformal_status(conformal_status)
@@ -69,25 +69,25 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::ComputeFluxesAndConser
 template <size_t dim, typename device_t>
 void
 ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::apply_on_group(
-  ConfigMap const &                 config_map,
-  amr_hashmap_t                     amr_hashmap,
-  orchard_key_view_t                orchard_keys,
-  conformal_status_view_type        conformal_status,
-  AMRMeshInfo                       amr_mesh_info,
-  DataArrayBlock_t                  Uin,
-  DataArrayBlock_t                  Uout,
-  DataArrayGhostedBlock_t           q,
-  DataArrayGhostedBlock_t           slopes_x,
-  DataArrayGhostedBlock_t           slopes_y,
-  DataArrayGhostedBlock_t           slopes_z,
-  FieldMap<core::models::Hydro>     fm,
-  int32_t                           iOct_begin,
-  int32_t                           num_octants,
-  brick_size_t<dim>                 brick_sizes,
-  Kokkos::Array<bool, dim>          is_brick_periodic,
-  HydroSettings const &             hydro_settings,
-  eos::EosWrapper<device_t> const & eos,
-  real_t                            dt)
+  ConfigMap const &                     config_map,
+  amr_hashmap_t const &                 amr_hashmap,
+  orchard_key_view_t const &            orchard_keys,
+  conformal_status_view_type const &    conformal_status,
+  AMRMeshInfo const &                   amr_mesh_info,
+  DataArrayBlock_t const &              Uin,
+  DataArrayBlock_t const &              Uout,
+  DataArrayGhostedBlock_t const &       q,
+  DataArrayGhostedBlock_t const &       slopes_x,
+  DataArrayGhostedBlock_t const &       slopes_y,
+  DataArrayGhostedBlock_t const &       slopes_z,
+  FieldMap<core::models::Hydro> const & fm,
+  int32_t                               iOct_begin,
+  int32_t                               num_octants,
+  brick_size_t<dim> const &             brick_sizes,
+  Kokkos::Array<bool, dim> const &      is_brick_periodic,
+  HydroSettings const &                 hydro_settings,
+  eos::EosWrapper<device_t> const &     eos,
+  real_t                                dt)
 {
 
   auto stencil_helper = StencilHelper_t(
@@ -134,23 +134,23 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::apply_on_group(
 template <size_t dim, typename device_t>
 void
 ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::apply_on_ghosts(
-  ConfigMap const &                 config_map,
-  amr_hashmap_t                     amr_hashmap,
-  orchard_key_view_t                orchard_keys,
-  conformal_status_view_type        conformal_status,
-  AMRMeshInfo                       amr_mesh_info,
-  DataArrayBlock_t                  Uin,
-  DataArrayBlock_t                  Uout,
-  DataArrayGhostedBlock_t           q,
-  DataArrayGhostedBlock_t           slopes_x,
-  DataArrayGhostedBlock_t           slopes_y,
-  DataArrayGhostedBlock_t           slopes_z,
-  FieldMap<core::models::Hydro>     fm,
-  brick_size_t<dim>                 brick_sizes,
-  Kokkos::Array<bool, dim>          is_brick_periodic,
-  HydroSettings const &             hydro_settings,
-  eos::EosWrapper<device_t> const & eos,
-  real_t                            dt)
+  ConfigMap const &                     config_map,
+  amr_hashmap_t const &                 amr_hashmap,
+  orchard_key_view_t const &            orchard_keys,
+  conformal_status_view_type const &    conformal_status,
+  AMRMeshInfo const &                   amr_mesh_info,
+  DataArrayBlock_t const &              Uin,
+  DataArrayBlock_t const &              Uout,
+  DataArrayGhostedBlock_t const &       q,
+  DataArrayGhostedBlock_t const &       slopes_x,
+  DataArrayGhostedBlock_t const &       slopes_y,
+  DataArrayGhostedBlock_t const &       slopes_z,
+  FieldMap<core::models::Hydro> const & fm,
+  brick_size_t<dim> const &             brick_sizes,
+  Kokkos::Array<bool, dim> const &      is_brick_periodic,
+  HydroSettings const &                 hydro_settings,
+  eos::EosWrapper<device_t> const &     eos,
+  real_t                                dt)
 {
 
   auto stencil_helper = StencilHelper_t(
