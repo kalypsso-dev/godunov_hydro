@@ -149,10 +149,6 @@ GodunovImplemV2<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayB
 
   KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // compute primitive variables in owned mirror blocks (U must have MPI ghost up to date)
   ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_in_mirrors(
     this->m_config_map,
@@ -162,7 +158,6 @@ GodunovImplemV2<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayB
     this->m_mesh_map.get_amr_mesh_info(),
     U,
     m_Q_ghosted_mg,
-    fm,
     this->m_brick_sizes,
     this->m_is_brick_periodic,
     this->m_hydro_settings,
@@ -181,10 +176,6 @@ GodunovImplemV2<dim, device_t>::convert_to_primitives_in_group_of_quads(DataArra
 
   KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // compute primitive variables in all owned blocks (U must have MPI ghost up to date)
   ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_on_group(
     this->m_config_map,
@@ -195,7 +186,6 @@ GodunovImplemV2<dim, device_t>::convert_to_primitives_in_group_of_quads(DataArra
     num_octant_in_group,
     U,
     m_Q_ghosted_group,
-    fm,
     this->m_brick_sizes,
     this->m_is_brick_periodic,
     this->m_hydro_settings,
@@ -212,16 +202,11 @@ GodunovImplemV2<dim, device_t>::compute_limited_slopes_in_group(int32_t num_octa
 
   KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_SLOPES);
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // compute limited slopes in all quadrants of q_group
   ComputeLimitedSlopesFunctor<dim, device_t>::apply_on_group(m_Q_ghosted_group,
                                                              m_Slopes_x_group,
                                                              m_Slopes_y_group,
                                                              m_Slopes_z_group,
-                                                             fm,
                                                              num_octants_to_process,
                                                              this->m_hydro_settings);
 
@@ -235,16 +220,11 @@ GodunovImplemV2<dim, device_t>::compute_limited_slopes_in_ghosts()
 {
   KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_SLOPES);
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // compute limited slopes in all quadrants that are ghost quadrants
   ComputeLimitedSlopesFunctor<dim, device_t>::apply_on_ghosts(m_Q_ghosted_mg,
                                                               m_Slopes_x_g,
                                                               m_Slopes_y_g,
                                                               m_Slopes_z_g,
-                                                              fm,
                                                               this->m_amr_mesh.local_num_mirrors(),
                                                               this->m_amr_mesh.local_num_ghosts(),
                                                               this->m_hydro_settings);
@@ -264,10 +244,6 @@ GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_group(DataArrayBloc
 
   KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_UPDATE);
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // compute fluxes and update all quadrant in a group of quadrants
   ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::apply_on_group(
     this->m_config_map,
@@ -281,7 +257,6 @@ GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_group(DataArrayBloc
     m_Slopes_x_group,
     m_Slopes_y_group,
     m_Slopes_z_group,
-    fm,
     iOct_begin,
     num_octants_to_process,
     this->m_brick_sizes,
@@ -303,10 +278,6 @@ GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_ghosts(DataArrayBlo
 
   KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_UPDATE);
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // compute incoming fluxes in all ghost quadrants and perform conservative update only at
   // interface between ghost and owned quadrants (in case the owned quadrant is coarser than the
   // ghost quadrant)
@@ -322,7 +293,6 @@ GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_ghosts(DataArrayBlo
     m_Slopes_x_g,
     m_Slopes_y_g,
     m_Slopes_z_g,
-    fm,
     this->m_brick_sizes,
     this->m_is_brick_periodic,
     this->m_hydro_settings,

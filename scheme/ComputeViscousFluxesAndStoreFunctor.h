@@ -8,12 +8,12 @@
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_VISCOUS_FLUXES_AND_STORE_FUNCTOR_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_VISCOUS_FLUXES_AND_STORE_FUNCTOR_H_
 
+#include <godunov_hydro/common.h>
 #include <kalypsso/core/kalypsso_core_base.h> // for assertm
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
 #include <kalypsso/core/orchard_key_base.h>
 #include <kalypsso/core/amr_hashmap.h>
-#include <kalypsso/core/FieldMap.h>
 #include <kalypsso/core/models/HydroState.h>
 #include <kalypsso/core/ConformalFaceStatus.h>
 #include <kalypsso/core/StencilHelper.h>
@@ -58,9 +58,6 @@ public:
   using DataArrayBlock_t = DataArrayBlock<dim, real_t, device_t>;
   using DataArrayGhostedBlock_t = DataArrayGhostedBlock<dim, real_t, device_t>;
 
-  // makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
-
   // makes enum Hydro::GradId available
   using Grad = kalypsso::core::models::Hydro::GradTensorId;
 
@@ -87,9 +84,6 @@ private:
   //! if implem version 0 : owned + ghost quadrants
   //! if implem version 1 : size of group of quadrants
   DataArrayGhostedBlock_t m_q;
-
-  //! field manager
-  FieldMap<core::models::Hydro> m_fm;
 
   //! offset to first octant in flux array where to write
   const int32_t m_iOct_flux_offset;
@@ -122,34 +116,32 @@ public:
    * \param[in]  time step (as computed by CFL condition)
    *
    */
-  ComputeViscousFluxesAndStoreFunctor(orchard_key_view_t const &            orchard_keys,
-                                      AMRMeshInfo const &                   amr_mesh_info,
-                                      DataArrayBlock_t const &              fluxes,
-                                      DataArrayGhostedBlock_t const &       q_ghosted,
-                                      FieldMap<core::models::Hydro> const & fm,
-                                      int32_t                               iOct_flux_offset,
-                                      int32_t                               num_quads,
-                                      int                                   direction,
-                                      ViscosityParams const &               viscosity,
-                                      real_t                                dt,
-                                      real_t                                scaling_factor);
+  ComputeViscousFluxesAndStoreFunctor(orchard_key_view_t const &      orchard_keys,
+                                      AMRMeshInfo const &             amr_mesh_info,
+                                      DataArrayBlock_t const &        fluxes,
+                                      DataArrayGhostedBlock_t const & q_ghosted,
+                                      int32_t                         iOct_flux_offset,
+                                      int32_t                         num_quads,
+                                      int                             direction,
+                                      ViscosityParams const &         viscosity,
+                                      real_t                          dt,
+                                      real_t                          scaling_factor);
 
   // ==============================================================
   // ==============================================================
   //! static method which does it all: create and execute functor with range policy
   //!
   static void
-  apply(ConfigMap const &                     config_map,
-        orchard_key_view_t const &            orchard_keys,
-        AMRMeshInfo const &                   amr_mesh_info,
-        DataArrayBlock_t const &              fluxes,
-        DataArrayGhostedBlock_t const &       q_ghosted,
-        FieldMap<core::models::Hydro> const & fm,
-        int32_t                               iOct_flux_offset,
-        int32_t                               num_quads,
-        int                                   direction,
-        ViscosityParams const &               viscosity,
-        real_t                                dt);
+  apply(ConfigMap const &               config_map,
+        orchard_key_view_t const &      orchard_keys,
+        AMRMeshInfo const &             amr_mesh_info,
+        DataArrayBlock_t const &        fluxes,
+        DataArrayGhostedBlock_t const & q_ghosted,
+        int32_t                         iOct_flux_offset,
+        int32_t                         num_quads,
+        int                             direction,
+        ViscosityParams const &         viscosity,
+        real_t                          dt);
 
   // ====================================================================
   // ====================================================================
@@ -167,8 +159,8 @@ public:
 
     Velocity_t q;
 
-    q[IX] = m_q(i, j, m_fm[Hydro::IU], iOct_local);
-    q[IY] = m_q(i, j, m_fm[Hydro::IV], iOct_local);
+    q[IX] = m_q(i, j, Hydro<dim>::IU, iOct_local);
+    q[IY] = m_q(i, j, Hydro<dim>::IV, iOct_local);
 
     return q;
 
@@ -191,9 +183,9 @@ public:
 
     Velocity_t q;
 
-    q[IX] = m_q(i, j, k, m_fm[Hydro::IU], iOct_local);
-    q[IY] = m_q(i, j, k, m_fm[Hydro::IV], iOct_local);
-    q[IZ] = m_q(i, j, k, m_fm[Hydro::IW], iOct_local);
+    q[IX] = m_q(i, j, k, Hydro<dim>::IU, iOct_local);
+    q[IY] = m_q(i, j, k, Hydro<dim>::IV, iOct_local);
+    q[IZ] = m_q(i, j, k, Hydro<dim>::IW, iOct_local);
 
     return q;
 
@@ -215,10 +207,10 @@ public:
   {
     iOct += m_iOct_flux_offset;
 
-    m_Fluxes(i, j, m_fm[Hydro::ID], iOct) = ZERO_F;
-    m_Fluxes(i, j, m_fm[Hydro::IE], iOct) = flux[Hydro::IE];
-    m_Fluxes(i, j, m_fm[Hydro::IU], iOct) = flux[Hydro::IU];
-    m_Fluxes(i, j, m_fm[Hydro::IV], iOct) = flux[Hydro::IV];
+    m_Fluxes(i, j, Hydro<dim>::ID, iOct) = ZERO_F;
+    m_Fluxes(i, j, Hydro<dim>::IE, iOct) = flux[Hydro<dim>::IE];
+    m_Fluxes(i, j, Hydro<dim>::IU, iOct) = flux[Hydro<dim>::IU];
+    m_Fluxes(i, j, Hydro<dim>::IV, iOct) = flux[Hydro<dim>::IV];
 
   } // set_flux - 2d
 
@@ -240,11 +232,11 @@ public:
   {
     iOct += m_iOct_flux_offset;
 
-    m_Fluxes(i, j, k, m_fm[Hydro::ID], iOct) = ZERO_F;
-    m_Fluxes(i, j, k, m_fm[Hydro::IE], iOct) = flux[Hydro::IE];
-    m_Fluxes(i, j, k, m_fm[Hydro::IU], iOct) = flux[Hydro::IU];
-    m_Fluxes(i, j, k, m_fm[Hydro::IV], iOct) = flux[Hydro::IV];
-    m_Fluxes(i, j, k, m_fm[Hydro::IW], iOct) = flux[Hydro::IW];
+    m_Fluxes(i, j, k, Hydro<dim>::ID, iOct) = ZERO_F;
+    m_Fluxes(i, j, k, Hydro<dim>::IE, iOct) = flux[Hydro<dim>::IE];
+    m_Fluxes(i, j, k, Hydro<dim>::IU, iOct) = flux[Hydro<dim>::IU];
+    m_Fluxes(i, j, k, Hydro<dim>::IV, iOct) = flux[Hydro<dim>::IV];
+    m_Fluxes(i, j, k, Hydro<dim>::IW, iOct) = flux[Hydro<dim>::IW];
 
   } // set_flux - 3d
 

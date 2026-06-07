@@ -18,22 +18,20 @@ namespace godunov_hydro
 // ==============================================================
 template <size_t dim, typename device_t>
 ConvertToPrimitivesVariablesFunctor<dim, device_t>::ConvertToPrimitivesVariablesFunctor(
-  StencilHelper_t const &               stencil_helper,
-  AMRMeshInfo const &                   amr_mesh_info,
-  int32_t                               iOct_begin,
-  DataArrayBlock_t const &              userdata_in,
-  DataArrayGhostedBlock_t const &       userdata_out,
-  FieldMap<core::models::Hydro> const & fm,
-  HydroSettings const &                 hydro_settings,
-  eos::EosWrapper<device_t> const &     eos,
-  CellCenteredProlongationType          prolongation)
+  StencilHelper_t const &           stencil_helper,
+  AMRMeshInfo const &               amr_mesh_info,
+  int32_t                           iOct_begin,
+  DataArrayBlock_t const &          userdata_in,
+  DataArrayGhostedBlock_t const &   userdata_out,
+  HydroSettings const &             hydro_settings,
+  eos::EosWrapper<device_t> const & eos,
+  CellCenteredProlongationType      prolongation)
   : m_stencil_helper(stencil_helper)
   , m_mirror_orchard_keys_device()
   , m_amr_mesh_info(amr_mesh_info)
   , m_iOct_begin(iOct_begin)
   , m_userdata_in(userdata_in)
   , m_userdata_out(userdata_out)
-  , m_fm(fm)
   , m_hydro_settings(hydro_settings)
   , m_eos(eos)
   , m_prolongation(prolongation)
@@ -48,22 +46,20 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::ConvertToPrimitivesVariables
 // same as above, but specifying also the mirror keys array
 template <size_t dim, typename device_t>
 ConvertToPrimitivesVariablesFunctor<dim, device_t>::ConvertToPrimitivesVariablesFunctor(
-  StencilHelper_t const &               stencil_helper,
-  orchard_key_view_t const &            mirror_orchard_keys,
-  AMRMeshInfo const &                   amr_mesh_info,
-  DataArrayBlock_t const &              userdata_in,
-  DataArrayGhostedBlock_t const &       userdata_out,
-  FieldMap<core::models::Hydro> const & fm,
-  HydroSettings const &                 hydro_settings,
-  eos::EosWrapper<device_t> const &     eos,
-  CellCenteredProlongationType          prolongation)
+  StencilHelper_t const &           stencil_helper,
+  orchard_key_view_t const &        mirror_orchard_keys,
+  AMRMeshInfo const &               amr_mesh_info,
+  DataArrayBlock_t const &          userdata_in,
+  DataArrayGhostedBlock_t const &   userdata_out,
+  HydroSettings const &             hydro_settings,
+  eos::EosWrapper<device_t> const & eos,
+  CellCenteredProlongationType      prolongation)
   : m_stencil_helper(stencil_helper)
   , m_mirror_orchard_keys_device(mirror_orchard_keys)
   , m_amr_mesh_info(amr_mesh_info)
   , m_iOct_begin(0) // not used when processing mirrors quad
   , m_userdata_in(userdata_in)
   , m_userdata_out(userdata_out)
-  , m_fm(fm)
   , m_hydro_settings(hydro_settings)
   , m_eos(eos)
   , m_prolongation(prolongation)
@@ -78,19 +74,18 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::ConvertToPrimitivesVariables
 template <size_t dim, typename device_t>
 void
 ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_on_group(
-  ConfigMap const &                     config_map,
-  amr_hashmap_t const &                 amr_hashmap,
-  orchard_key_view_t const &            orchard_keys,
-  AMRMeshInfo const &                   amr_mesh_info,
-  int32_t                               iOct_begin,
-  int32_t                               num_octants_in_group,
-  DataArrayBlock_t const &              userdata_in,
-  DataArrayGhostedBlock_t const &       userdata_out,
-  FieldMap<core::models::Hydro> const & fm,
-  brick_size_t<dim> const &             brick_sizes,
-  Kokkos::Array<bool, dim> const &      is_brick_periodic,
-  HydroSettings const &                 hydro_settings,
-  eos::EosWrapper<device_t> const &     eos)
+  ConfigMap const &                 config_map,
+  amr_hashmap_t const &             amr_hashmap,
+  orchard_key_view_t const &        orchard_keys,
+  AMRMeshInfo const &               amr_mesh_info,
+  int32_t                           iOct_begin,
+  int32_t                           num_octants_in_group,
+  DataArrayBlock_t const &          userdata_in,
+  DataArrayGhostedBlock_t const &   userdata_out,
+  brick_size_t<dim> const &         brick_sizes,
+  Kokkos::Array<bool, dim> const &  is_brick_periodic,
+  HydroSettings const &             hydro_settings,
+  eos::EosWrapper<device_t> const & eos)
 {
   // make sure the range of octants to process is valid
   assertm((iOct_begin + num_octants_in_group) <= amr_mesh_info.local_num_quadrants(),
@@ -105,7 +100,6 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_on_group(
     iOct_begin,
     userdata_in,
     userdata_out,
-    fm,
     hydro_settings,
     eos,
     get_cell_prolongation_type(config_map));
@@ -125,18 +119,17 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_on_group(
 template <size_t dim, typename device_t>
 void
 ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_in_mirrors(
-  ConfigMap const &                     config_map,
-  amr_hashmap_t const &                 amr_hashmap,
-  orchard_key_view_t const &            orchard_keys,
-  orchard_key_view_t const &            mirror_orchard_keys,
-  AMRMeshInfo const &                   amr_mesh_info,
-  DataArrayBlock_t const &              userdata_in,
-  DataArrayGhostedBlock_t const &       userdata_out,
-  FieldMap<core::models::Hydro> const & fm,
-  brick_size_t<dim> const &             brick_sizes,
-  Kokkos::Array<bool, dim> const &      is_brick_periodic,
-  HydroSettings const &                 hydro_settings,
-  eos::EosWrapper<device_t> const &     eos)
+  ConfigMap const &                 config_map,
+  amr_hashmap_t const &             amr_hashmap,
+  orchard_key_view_t const &        orchard_keys,
+  orchard_key_view_t const &        mirror_orchard_keys,
+  AMRMeshInfo const &               amr_mesh_info,
+  DataArrayBlock_t const &          userdata_in,
+  DataArrayGhostedBlock_t const &   userdata_out,
+  brick_size_t<dim> const &         brick_sizes,
+  Kokkos::Array<bool, dim> const &  is_brick_periodic,
+  HydroSettings const &             hydro_settings,
+  eos::EosWrapper<device_t> const & eos)
 {
 
   auto stencil_helper = StencilHelper_t(
@@ -148,7 +141,6 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_in_mirrors(
     amr_mesh_info,
     userdata_in,
     userdata_out,
-    fm,
     hydro_settings,
     eos,
     get_cell_prolongation_type(config_map));
@@ -176,14 +168,14 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::get_conservative_vars(const 
 {
   HydroState<dim> uLoc; // conservative variables in current cell
 
-  uLoc[Hydro::ID] = m_userdata_in(cellindex, m_fm[Hydro::ID], iOct);
-  uLoc[Hydro::IE] = m_userdata_in(cellindex, m_fm[Hydro::IE], iOct);
-  uLoc[Hydro::IU] = m_userdata_in(cellindex, m_fm[Hydro::IU], iOct);
-  uLoc[Hydro::IV] = m_userdata_in(cellindex, m_fm[Hydro::IV], iOct);
+  uLoc[Hydro<dim>::ID] = m_userdata_in(cellindex, Hydro<dim>::ID, iOct);
+  uLoc[Hydro<dim>::IE] = m_userdata_in(cellindex, Hydro<dim>::IE, iOct);
+  uLoc[Hydro<dim>::IU] = m_userdata_in(cellindex, Hydro<dim>::IU, iOct);
+  uLoc[Hydro<dim>::IV] = m_userdata_in(cellindex, Hydro<dim>::IV, iOct);
 
   if constexpr (dim == 3)
   {
-    uLoc[Hydro::IW] = m_userdata_in(cellindex, m_fm[Hydro::IW], iOct);
+    uLoc[Hydro<dim>::IW] = m_userdata_in(cellindex, Hydro<dim>::IW, iOct);
   }
 
   return uLoc;
@@ -214,16 +206,16 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::get_conservative_vars_restri
 
   HydroState<dim> uLoc; // conservative variables in current cell
 
-  for (auto ivar : { Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV })
+  for (auto ivar : { Hydro<dim>::ID, Hydro<dim>::IE, Hydro<dim>::IU, Hydro<dim>::IV })
   {
     uLoc[ivar] = m_stencil_helper.compute_siblings_average(
-      cell_loc, m_userdata_in.block_size(), m_fm[ivar], m_userdata_in);
+      cell_loc, m_userdata_in.block_size(), ivar, m_userdata_in);
   }
 
   if constexpr (dim == 3)
   {
-    uLoc[Hydro::IW] = m_stencil_helper.compute_siblings_average(
-      cell_loc, m_userdata_in.block_size(), m_fm[Hydro::IW], m_userdata_in);
+    uLoc[Hydro<dim>::IW] = m_stencil_helper.compute_siblings_average(
+      cell_loc, m_userdata_in.block_size(), Hydro<dim>::IW, m_userdata_in);
   }
 
   return uLoc;
@@ -239,13 +231,13 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::set_primitive_vars(
   const iOct_t            iOct_out,
   HydroState<dim> const & q) const
 {
-  m_userdata_out(cellindex_g, m_fm[Hydro::ID], iOct_out) = q[Hydro::ID];
-  m_userdata_out(cellindex_g, m_fm[Hydro::IP], iOct_out) = q[Hydro::IP];
-  m_userdata_out(cellindex_g, m_fm[Hydro::IU], iOct_out) = q[Hydro::IU];
-  m_userdata_out(cellindex_g, m_fm[Hydro::IV], iOct_out) = q[Hydro::IV];
+  m_userdata_out(cellindex_g, Hydro<dim>::ID, iOct_out) = q[Hydro<dim>::ID];
+  m_userdata_out(cellindex_g, Hydro<dim>::IP, iOct_out) = q[Hydro<dim>::IP];
+  m_userdata_out(cellindex_g, Hydro<dim>::IU, iOct_out) = q[Hydro<dim>::IU];
+  m_userdata_out(cellindex_g, Hydro<dim>::IV, iOct_out) = q[Hydro<dim>::IV];
   if constexpr (dim == 3)
   {
-    m_userdata_out(cellindex_g, m_fm[Hydro::IW], iOct_out) = q[Hydro::IW];
+    m_userdata_out(cellindex_g, Hydro<dim>::IW, iOct_out) = q[Hydro<dim>::IW];
   }
 
 } // set_primitive_vars
@@ -326,17 +318,17 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::linear_extrapolate_using_lim
 
   HydroState<dim> uLoc; // conservative variables in current cell
 
-  for (auto ivar : { Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV })
+  for (auto ivar : { Hydro<dim>::ID, Hydro<dim>::IE, Hydro<dim>::IU, Hydro<dim>::IV })
   {
     // compute limited slopes
     auto const dudx = m_stencil_helper.compute_minmod_slopes(
-      cell_loc_neigh, cell_loc_right_x, cell_loc_left_x, m_fm[ivar], m_userdata_in, slope_type);
+      cell_loc_neigh, cell_loc_right_x, cell_loc_left_x, ivar, m_userdata_in, slope_type);
     auto const dudy = m_stencil_helper.compute_minmod_slopes(
-      cell_loc_neigh, cell_loc_right_y, cell_loc_left_y, m_fm[ivar], m_userdata_in, slope_type);
+      cell_loc_neigh, cell_loc_right_y, cell_loc_left_y, ivar, m_userdata_in, slope_type);
 
     // extrapolate conservative variables
     uLoc[ivar] = m_userdata_in(cell_loc_neigh.cellindex(m_userdata_in.block_size()),
-                               m_fm[ivar],
+                               ivar,
                                cell_loc_neigh.iOct) +
                  KALYPSSO_NUM(0.25) * static_cast<real_t>(ix) * dudx +
                  KALYPSSO_NUM(0.25) * static_cast<real_t>(iy) * dudy;
@@ -345,9 +337,9 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::linear_extrapolate_using_lim
   // compute primitive variables in current cell
   const auto qLoc = godunov_hydro::models::compute_primitives<dim>(uLoc, m_hydro_settings, m_eos);
 
-  for (auto ivar : { Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV })
+  for (auto ivar : { Hydro<dim>::ID, Hydro<dim>::IE, Hydro<dim>::IU, Hydro<dim>::IV })
   {
-    m_userdata_out(cellindex_out, m_fm[ivar], iOct_out) = qLoc[ivar];
+    m_userdata_out(cellindex_out, ivar, iOct_out) = qLoc[ivar];
   }
 
 } // linear_extrapolate_using_limited_slopes - 2d
@@ -390,19 +382,20 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::linear_extrapolate_using_lim
 
   HydroState<dim> uLoc; // conservative variables in current cell
 
-  for (auto ivar : { Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV, Hydro::IW })
+  for (auto ivar :
+       { Hydro<dim>::ID, Hydro<dim>::IE, Hydro<dim>::IU, Hydro<dim>::IV, Hydro<dim>::IW })
   {
     // compute limited slopes
     auto const dudx = m_stencil_helper.compute_minmod_slopes(
-      cell_loc_neigh, cell_loc_right_x, cell_loc_left_x, m_fm[ivar], m_userdata_in, slope_type);
+      cell_loc_neigh, cell_loc_right_x, cell_loc_left_x, ivar, m_userdata_in, slope_type);
     auto const dudy = m_stencil_helper.compute_minmod_slopes(
-      cell_loc_neigh, cell_loc_right_y, cell_loc_left_y, m_fm[ivar], m_userdata_in, slope_type);
+      cell_loc_neigh, cell_loc_right_y, cell_loc_left_y, ivar, m_userdata_in, slope_type);
     auto const dudz = m_stencil_helper.compute_minmod_slopes(
-      cell_loc_neigh, cell_loc_right_z, cell_loc_left_z, m_fm[ivar], m_userdata_in, slope_type);
+      cell_loc_neigh, cell_loc_right_z, cell_loc_left_z, ivar, m_userdata_in, slope_type);
 
     // extrapolate conservative variables
     uLoc[ivar] = m_userdata_in(cell_loc_neigh.cellindex(m_userdata_in.block_size()),
-                               m_fm[ivar],
+                               ivar,
                                cell_loc_neigh.iOct) +
                  KALYPSSO_NUM(0.25) * static_cast<real_t>(ix) * dudx +
                  KALYPSSO_NUM(0.25) * static_cast<real_t>(iy) * dudy +
@@ -412,9 +405,10 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::linear_extrapolate_using_lim
   // compute primitive variables in current cell
   const auto qLoc = godunov_hydro::models::compute_primitives<dim>(uLoc, m_hydro_settings, m_eos);
 
-  for (auto ivar : { Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV, Hydro::IW })
+  for (auto ivar :
+       { Hydro<dim>::ID, Hydro<dim>::IE, Hydro<dim>::IU, Hydro<dim>::IV, Hydro<dim>::IW })
   {
-    m_userdata_out(cellindex_out, m_fm[ivar], iOct_out) = qLoc[ivar];
+    m_userdata_out(cellindex_out, ivar, iOct_out) = qLoc[ivar];
   }
 
 } // linear_extrapolate_using_limited_slopes - 3d
@@ -438,7 +432,7 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_o
 
   HydroState<dim> uLoc; // conservative variables in current cell
 
-  for (auto ivar : { Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV })
+  for (auto ivar : { Hydro<dim>::ID, Hydro<dim>::IE, Hydro<dim>::IU, Hydro<dim>::IV })
   {
     real_t val[3];
 
@@ -454,7 +448,7 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_o
         cell_loc_x_0,
         cell_loc_x_p1,
         cell_loc_neigh.level(),
-        m_fm[ivar],
+        ivar,
         m_userdata_in,
         ixyz[IX] == 0 ? m_cons_interpol.COEFS2_L : m_cons_interpol.COEFS2_R);
     }
@@ -466,9 +460,9 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_o
   // compute primitive variables in current cell
   const auto qLoc = godunov_hydro::models::compute_primitives<dim>(uLoc, m_hydro_settings, m_eos);
 
-  for (auto ivar : { Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV })
+  for (auto ivar : { Hydro<dim>::ID, Hydro<dim>::IE, Hydro<dim>::IU, Hydro<dim>::IV })
   {
-    m_userdata_out(cellindex_out, m_fm[ivar], iOct_out) = qLoc[ivar];
+    m_userdata_out(cellindex_out, ivar, iOct_out) = qLoc[ivar];
   }
 
 } // ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_order2 - 2d
@@ -492,7 +486,8 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_o
 
   HydroState<dim> uLoc; // conservative variables in current cell
 
-  for (auto ivar : { Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV, Hydro::IW })
+  for (auto ivar :
+       { Hydro<dim>::ID, Hydro<dim>::IE, Hydro<dim>::IU, Hydro<dim>::IV, Hydro<dim>::IW })
   {
     real_t valx[3][3];
 
@@ -510,7 +505,7 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_o
           cell_loc_x_0,
           cell_loc_x_p1,
           cell_loc_neigh.level(),
-          m_fm[ivar],
+          ivar,
           m_userdata_in,
           ixyz[IX] == 0 ? m_cons_interpol.COEFS2_L : m_cons_interpol.COEFS2_R);
       }
@@ -528,9 +523,10 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_o
   // compute primitive variables in current cell
   const auto qLoc = godunov_hydro::models::compute_primitives<dim>(uLoc, m_hydro_settings, m_eos);
 
-  for (auto ivar : { Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV, Hydro::IW })
+  for (auto ivar :
+       { Hydro<dim>::ID, Hydro<dim>::IE, Hydro<dim>::IU, Hydro<dim>::IV, Hydro<dim>::IW })
   {
-    m_userdata_out(cellindex_out, m_fm[ivar], iOct_out) = qLoc[ivar];
+    m_userdata_out(cellindex_out, ivar, iOct_out) = qLoc[ivar];
   }
 
 } // ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_order2 - 3d
@@ -553,7 +549,7 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_o
 
   HydroState<dim> uLoc; // conservative variables in current cell
 
-  for (auto ivar : { Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV })
+  for (auto ivar : { Hydro<dim>::ID, Hydro<dim>::IE, Hydro<dim>::IU, Hydro<dim>::IV })
   {
     real_t val[5];
 
@@ -573,7 +569,7 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_o
         cell_loc_x_p1,
         cell_loc_x_p2,
         cell_loc_neigh.level(),
-        m_fm[ivar],
+        ivar,
         m_userdata_in,
         ixyz[IX] == 0 ? m_cons_interpol.COEFS4_L : m_cons_interpol.COEFS4_R);
     }
@@ -585,9 +581,9 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_o
   // compute primitive variables in current cell
   const auto qLoc = godunov_hydro::models::compute_primitives<dim>(uLoc, m_hydro_settings, m_eos);
 
-  for (auto ivar : { Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV })
+  for (auto ivar : { Hydro<dim>::ID, Hydro<dim>::IE, Hydro<dim>::IU, Hydro<dim>::IV })
   {
-    m_userdata_out(cellindex_out, m_fm[ivar], iOct_out) = qLoc[ivar];
+    m_userdata_out(cellindex_out, ivar, iOct_out) = qLoc[ivar];
   }
 
 } // ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_order4 - 2d
@@ -610,7 +606,8 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_o
 
   HydroState<dim> uLoc; // conservative variables in current cell
 
-  for (auto ivar : { Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV, Hydro::IW })
+  for (auto ivar :
+       { Hydro<dim>::ID, Hydro<dim>::IE, Hydro<dim>::IU, Hydro<dim>::IV, Hydro<dim>::IW })
   {
     real_t valx[5][5];
 
@@ -632,7 +629,7 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_o
           cell_loc_x_p1,
           cell_loc_x_p2,
           cell_loc_neigh.level(),
-          m_fm[ivar],
+          ivar,
           m_userdata_in,
           ixyz[IX] == 0 ? m_cons_interpol.COEFS4_L : m_cons_interpol.COEFS4_R);
       }
@@ -657,9 +654,10 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_o
   // compute primitive variables in current cell
   const auto qLoc = godunov_hydro::models::compute_primitives<dim>(uLoc, m_hydro_settings, m_eos);
 
-  for (auto ivar : { Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV, Hydro::IW })
+  for (auto ivar :
+       { Hydro<dim>::ID, Hydro<dim>::IE, Hydro<dim>::IU, Hydro<dim>::IV, Hydro<dim>::IW })
   {
-    m_userdata_out(cellindex_out, m_fm[ivar], iOct_out) = qLoc[ivar];
+    m_userdata_out(cellindex_out, ivar, iOct_out) = qLoc[ivar];
   }
 
 } // ConvertToPrimitivesVariablesFunctor<dim, device_t>::conservative_interpolation_order4 - 3d

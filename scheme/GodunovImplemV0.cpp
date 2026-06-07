@@ -160,10 +160,6 @@ GodunovImplemV0<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayB
 
   KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // compute primitive variables in owned mirror blocks (U must have MPI ghost up to date)
   ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_in_mirrors(
     this->m_config_map,
@@ -173,7 +169,6 @@ GodunovImplemV0<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayB
     this->m_mesh_map.get_amr_mesh_info(),
     U,
     m_Q_ghosted_mg,
-    fm,
     this->m_brick_sizes,
     this->m_is_brick_periodic,
     this->m_hydro_settings,
@@ -189,10 +184,6 @@ GodunovImplemV0<dim, device_t>::convert_to_primitives(DataArrayBlock_t U)
 {
 
   KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
-
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
 
   //
   // step 1: convert to primitive variables in owned quadrants
@@ -212,7 +203,6 @@ GodunovImplemV0<dim, device_t>::convert_to_primitives(DataArrayBlock_t U)
     num_quads_owned,
     U,
     m_Q_ghosted,
-    fm,
     this->m_brick_sizes,
     this->m_is_brick_periodic,
     this->m_hydro_settings,
@@ -252,16 +242,11 @@ GodunovImplemV0<dim, device_t>::compute_limited_slopes_in_owned_and_ghosts()
   const auto num_quadrants_owned = this->m_mesh_map.get_amr_mesh_info().local_num_quadrants();
   const auto num_quadrants_ghost = this->m_mesh_map.get_amr_mesh_info().local_num_ghosts();
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // compute limited slopes in all quadrants (owned + ghost)
   ComputeLimitedSlopesFunctor<dim, device_t>::apply_on_group(m_Q_ghosted,
                                                              m_Slopes_x,
                                                              m_Slopes_y,
                                                              m_Slopes_z,
-                                                             fm,
                                                              num_quadrants_owned +
                                                                num_quadrants_ghost,
                                                              this->m_hydro_settings);
@@ -281,10 +266,6 @@ GodunovImplemV0<dim, device_t>::compute_fluxes_and_store_in_owned_and_ghosts(rea
   const auto num_quadrants_owned = this->m_mesh_map.get_amr_mesh_info().local_num_quadrants();
   const auto num_quadrants_ghost = this->m_mesh_map.get_amr_mesh_info().local_num_ghosts();
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // reshape flux to be a flux array in given direction
   auto flux_block_sizes = m_Q_ghosted.block_size();
   flux_block_sizes[direction]++;
@@ -299,7 +280,6 @@ GodunovImplemV0<dim, device_t>::compute_fluxes_and_store_in_owned_and_ghosts(rea
                                                      m_Slopes_x,
                                                      m_Slopes_y,
                                                      m_Slopes_z,
-                                                     fm,
                                                      0,
                                                      num_quadrants_owned + num_quadrants_ghost,
                                                      direction,
@@ -322,10 +302,6 @@ GodunovImplemV0<dim, device_t>::compute_viscous_fluxes_and_store_in_owned_and_gh
   const auto num_quadrants_owned = this->m_mesh_map.get_amr_mesh_info().local_num_quadrants();
   const auto num_quadrants_ghost = this->m_mesh_map.get_amr_mesh_info().local_num_ghosts();
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // reshape flux to be a flux array in given direction
   auto flux_block_sizes = m_Q_ghosted.block_size();
   flux_block_sizes[direction]++;
@@ -337,7 +313,6 @@ GodunovImplemV0<dim, device_t>::compute_viscous_fluxes_and_store_in_owned_and_gh
                                                             this->m_mesh_map.get_amr_mesh_info(),
                                                             m_Fluxes,
                                                             m_Q_ghosted,
-                                                            fm,
                                                             0,
                                                             num_quadrants_owned +
                                                               num_quadrants_ghost,
@@ -358,10 +333,6 @@ GodunovImplemV0<dim, device_t>::read_fluxes_and_update_in_owned(DataArrayBlock_t
 
   KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_UPDATE);
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // check flux array sizes
   {
     [[maybe_unused]] auto flux_block_sizes = m_Q_ghosted.block_size();
@@ -379,7 +350,6 @@ GodunovImplemV0<dim, device_t>::read_fluxes_and_update_in_owned(DataArrayBlock_t
                                                                this->m_mesh_map.get_amr_mesh_info(),
                                                                u_out,
                                                                m_Fluxes,
-                                                               fm,
                                                                direction,
                                                                this->m_brick_sizes,
                                                                this->m_is_brick_periodic,

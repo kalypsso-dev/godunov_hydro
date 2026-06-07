@@ -22,15 +22,13 @@ namespace godunov_hydro
 template <size_t dim, typename device_t>
 void
 InitTriplePointDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &             Udata,
-                                                 FieldMap<core::models::Hydro>        fm,
                                                  orchard_key_view_t<device_t> const & orchard_keys,
                                                  int32_t               local_num_octants,
                                                  HydroSettings const & settings,
                                                  ConfigMap const &     config_map)
 {
   // data init functor
-  InitTriplePointDataFunctor functor(
-    Udata, fm, orchard_keys, local_num_octants, settings, config_map);
+  InitTriplePointDataFunctor functor(Udata, orchard_keys, local_num_octants, settings, config_map);
 
   // compute total number of cells
   const auto nbCellsPerLeaf = Udata.num_cells();
@@ -56,12 +54,6 @@ InitTriplePointDataFunctor<dim, device_t>::operator()(const int32_t & global_ind
   const auto iOct = global_index / m_Udata.num_cells();
   const auto cell_index = global_index - iOct * m_Udata.num_cells();
 
-  constexpr auto ID = core::models::Hydro::ID;
-  constexpr auto IE = core::models::Hydro::IE;
-  constexpr auto IU = core::models::Hydro::IU;
-  constexpr auto IV = core::models::Hydro::IV;
-  constexpr auto IW = core::models::Hydro::IW;
-
   // compute ix,iy,iz of local cell inside
   // block from index
   auto iCoord = cellindex_to_coord<dim>(cell_index, block_sizes);
@@ -77,34 +69,34 @@ InitTriplePointDataFunctor<dim, device_t>::operator()(const int32_t & global_ind
   // initialize
   if (xyz[IX] <= m_triple_point_params.xd)
   {
-    m_Udata(cell_index, m_fm[ID], iOct) = m_triple_point_params.rho0;
-    m_Udata(cell_index, m_fm[IU], iOct) = ZERO_F;
-    m_Udata(cell_index, m_fm[IV], iOct) = ZERO_F;
+    m_Udata(cell_index, Hydro<dim>::ID, iOct) = m_triple_point_params.rho0;
+    m_Udata(cell_index, Hydro<dim>::IU, iOct) = ZERO_F;
+    m_Udata(cell_index, Hydro<dim>::IV, iOct) = ZERO_F;
     if constexpr (dim == 3)
-      m_Udata(cell_index, m_fm[IW], iOct) = 0.0;
-    m_Udata(cell_index, m_fm[IE], iOct) = m_eos_wrapper.volumic_eint_from_pressure(
+      m_Udata(cell_index, Hydro<dim>::IW, iOct) = 0.0;
+    m_Udata(cell_index, Hydro<dim>::IE, iOct) = m_eos_wrapper.volumic_eint_from_pressure(
       m_triple_point_params.p0, m_triple_point_params.rho0);
   }
   else
   {
     if (xyz[IY] <= KALYPSSO_NUM(1.5))
     {
-      m_Udata(cell_index, m_fm[ID], iOct) = m_triple_point_params.rho1;
-      m_Udata(cell_index, m_fm[IU], iOct) = ZERO_F;
-      m_Udata(cell_index, m_fm[IV], iOct) = ZERO_F;
+      m_Udata(cell_index, Hydro<dim>::ID, iOct) = m_triple_point_params.rho1;
+      m_Udata(cell_index, Hydro<dim>::IU, iOct) = ZERO_F;
+      m_Udata(cell_index, Hydro<dim>::IV, iOct) = ZERO_F;
       if constexpr (dim == 3)
-        m_Udata(cell_index, m_fm[IW], iOct) = 0.0;
-      m_Udata(cell_index, m_fm[IE], iOct) = m_eos_wrapper.volumic_eint_from_pressure(
+        m_Udata(cell_index, Hydro<dim>::IW, iOct) = 0.0;
+      m_Udata(cell_index, Hydro<dim>::IE, iOct) = m_eos_wrapper.volumic_eint_from_pressure(
         m_triple_point_params.p1, m_triple_point_params.rho1);
     }
     else
     {
-      m_Udata(cell_index, m_fm[ID], iOct) = m_triple_point_params.rho2;
-      m_Udata(cell_index, m_fm[IU], iOct) = ZERO_F;
-      m_Udata(cell_index, m_fm[IV], iOct) = ZERO_F;
+      m_Udata(cell_index, Hydro<dim>::ID, iOct) = m_triple_point_params.rho2;
+      m_Udata(cell_index, Hydro<dim>::IU, iOct) = ZERO_F;
+      m_Udata(cell_index, Hydro<dim>::IV, iOct) = ZERO_F;
       if constexpr (dim == 3)
-        m_Udata(cell_index, m_fm[IW], iOct) = 0.0;
-      m_Udata(cell_index, m_fm[IE], iOct) = m_eos_wrapper.volumic_eint_from_pressure(
+        m_Udata(cell_index, Hydro<dim>::IW, iOct) = 0.0;
+      m_Udata(cell_index, Hydro<dim>::IE, iOct) = m_eos_wrapper.volumic_eint_from_pressure(
         m_triple_point_params.p2, m_triple_point_params.rho2);
     }
   }
@@ -120,7 +112,6 @@ template <size_t dim, typename device_t>
 void
 InitTriplePointRefineFunctor<dim, device_t>::apply(
   DataArrayBlock_t const &             Udata,
-  FieldMap<core::models::Hydro>        fm,
   orchard_key_view_t<device_t> const & orchard_keys,
   amrflags_view_t const &              amrflags,
   int32_t                              local_num_octants,
@@ -130,7 +121,7 @@ InitTriplePointRefineFunctor<dim, device_t>::apply(
 {
   // iterate functor for refinement
   InitTriplePointRefineFunctor functor(
-    Udata, fm, orchard_keys, amrflags, local_num_octants, settings, level_refine, config_map);
+    Udata, orchard_keys, amrflags, local_num_octants, settings, level_refine, config_map);
 
   const auto refine_type = core::get_init_indicator(config_map);
 
@@ -232,7 +223,6 @@ InitTriplePoint<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver
 
   // first init of Udata
   InitTriplePointDataFunctor<dim, device_t>::apply(solver.U(),
-                                                   solver.hydro().get_fieldmap(),
                                                    solver.mesh_map()->orchard_keys(),
                                                    solver.amr_mesh()->local_num_quadrants(),
                                                    settings,
@@ -256,7 +246,6 @@ InitTriplePoint<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver
       // 2. update Udata
       //
       InitTriplePointDataFunctor<dim, device_t>::apply(solver.U(),
-                                                       solver.hydro().get_fieldmap(),
                                                        solver.mesh_map()->orchard_keys(),
                                                        solver.amr_mesh()->local_num_quadrants(),
                                                        settings,
@@ -284,7 +273,6 @@ InitTriplePoint<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver
       // 2. compute refine/coarsen flags
       //
       InitTriplePointRefineFunctor<dim, device_t>::apply(solver.U(),
-                                                         solver.hydro().get_fieldmap(),
                                                          solver.mesh_map()->orchard_keys(),
                                                          flags_d,
                                                          solver.amr_mesh()->local_num_quadrants(),
@@ -318,7 +306,6 @@ InitTriplePoint<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver
       // 6. update Udata
       //
       InitTriplePointDataFunctor<dim, device_t>::apply(solver.U(),
-                                                       solver.hydro().get_fieldmap(),
                                                        solver.mesh_map()->orchard_keys(),
                                                        solver.amr_mesh()->local_num_quadrants(),
                                                        settings,

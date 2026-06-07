@@ -18,22 +18,20 @@ namespace godunov_hydro
 /*************************************************/
 template <size_t dim, typename device_t>
 ComputeViscousFluxesAndStoreFunctor<dim, device_t>::ComputeViscousFluxesAndStoreFunctor(
-  orchard_key_view_t const &            orchard_keys,
-  AMRMeshInfo const &                   amr_mesh_info,
-  DataArrayBlock_t const &              fluxes,
-  DataArrayGhostedBlock_t const &       q_ghosted,
-  FieldMap<core::models::Hydro> const & fm,
-  int32_t                               iOct_flux_offset,
-  int32_t                               num_quads,
-  int                                   direction,
-  ViscosityParams const &               viscosity,
-  real_t                                dt,
-  real_t                                scaling_factor)
+  orchard_key_view_t const &      orchard_keys,
+  AMRMeshInfo const &             amr_mesh_info,
+  DataArrayBlock_t const &        fluxes,
+  DataArrayGhostedBlock_t const & q_ghosted,
+  int32_t                         iOct_flux_offset,
+  int32_t                         num_quads,
+  int                             direction,
+  ViscosityParams const &         viscosity,
+  real_t                          dt,
+  real_t                          scaling_factor)
   : m_orchard_keys_device(orchard_keys)
   , m_amr_mesh_info(amr_mesh_info)
   , m_Fluxes(fluxes)
   , m_q(q_ghosted)
-  , m_fm(fm)
   , m_iOct_flux_offset(iOct_flux_offset)
   , m_num_quads(num_quads)
   , m_direction(direction)
@@ -53,7 +51,6 @@ ComputeViscousFluxesAndStoreFunctor<dim, device_t>::apply(ConfigMap const &     
                                                           AMRMeshInfo const &        amr_mesh_info,
                                                           DataArrayBlock_t const &   fluxes,
                                                           DataArrayGhostedBlock_t const & q_ghosted,
-                                                          FieldMap<core::models::Hydro> const & fm,
                                                           int32_t                 iOct_flux_offset,
                                                           int32_t                 num_quads,
                                                           int                     direction,
@@ -71,7 +68,6 @@ ComputeViscousFluxesAndStoreFunctor<dim, device_t>::apply(ConfigMap const &     
                                                              amr_mesh_info,
                                                              fluxes,
                                                              q_ghosted,
-                                                             fm,
                                                              iOct_flux_offset,
                                                              num_quads,
                                                              direction,
@@ -202,9 +198,9 @@ ComputeViscousFluxesAndStoreFunctor<dim, device_t>::compute_viscous_fluxes_and_s
     real_t tau_xx = 2 * mu * (g[Grad::IUX] - HALF_F * (g[Grad::IUX] + g[Grad::IVY]));
     real_t tau_xy = mu * (g[Grad::IVX] + g[Grad::IUY]);
 
-    flux[Hydro::IU] = -tau_xx;
-    flux[Hydro::IV] = -tau_xy;
-    flux[Hydro::IE] = -velocity[IX] * tau_xx - velocity[IY] * tau_xy;
+    flux[Hydro<dim>::IU] = -tau_xx;
+    flux[Hydro<dim>::IV] = -tau_xy;
+    flux[Hydro<dim>::IE] = -velocity[IX] * tau_xx - velocity[IY] * tau_xy;
 
     // step 4 : accumulate flux in current cell
     const auto flux_cur = flux * dtdS_over_dV_cur;
@@ -221,9 +217,9 @@ ComputeViscousFluxesAndStoreFunctor<dim, device_t>::compute_viscous_fluxes_and_s
     real_t tau_yy = 2 * mu * (g[Grad::IVY] - HALF_F * (g[Grad::IUX] + g[Grad::IVY]));
     real_t tau_xy = mu * (g[Grad::IVX] + g[Grad::IUY]);
 
-    flux[Hydro::IU] = -tau_xy;
-    flux[Hydro::IV] = -tau_yy;
-    flux[Hydro::IE] = -velocity[IX] * tau_xy - velocity[IY] * tau_yy;
+    flux[Hydro<dim>::IU] = -tau_xy;
+    flux[Hydro<dim>::IV] = -tau_yy;
+    flux[Hydro<dim>::IE] = -velocity[IX] * tau_xy - velocity[IY] * tau_yy;
 
     // step 4 : accumulate flux in current cell
     const auto flux_cur = flux * dtdS_over_dV_cur;
@@ -283,10 +279,10 @@ ComputeViscousFluxesAndStoreFunctor<dim, device_t>::compute_viscous_fluxes_and_s
     real_t tau_yx = mu * (g[Grad::IVX] + g[Grad::IUY]);
     real_t tau_zx = mu * (g[Grad::IWX] + g[Grad::IUZ]);
 
-    flux[Hydro::IU] = -tau_xx;
-    flux[Hydro::IV] = -tau_yx;
-    flux[Hydro::IW] = -tau_zx;
-    flux[Hydro::IE] = -velocity[IX] * tau_xx - velocity[IY] * tau_yx - velocity[IZ] * tau_zx;
+    flux[Hydro<dim>::IU] = -tau_xx;
+    flux[Hydro<dim>::IV] = -tau_yx;
+    flux[Hydro<dim>::IW] = -tau_zx;
+    flux[Hydro<dim>::IE] = -velocity[IX] * tau_xx - velocity[IY] * tau_yx - velocity[IZ] * tau_zx;
 
     // step 4 : accumulate flux in current cell
     const auto flux_cur = flux * dtdS_over_dV_cur;
@@ -307,10 +303,10 @@ ComputeViscousFluxesAndStoreFunctor<dim, device_t>::compute_viscous_fluxes_and_s
       2 * mu * (g[Grad::IVY] - ONE_THIRD_F * (g[Grad::IUX] + g[Grad::IVY] + g[Grad::IWZ]));
     real_t tau_zy = mu * (g[Grad::IWY] + g[Grad::IVZ]);
 
-    flux[Hydro::IU] = -tau_xy;
-    flux[Hydro::IV] = -tau_yy;
-    flux[Hydro::IW] = -tau_zy;
-    flux[Hydro::IE] = -velocity[IX] * tau_xy - velocity[IY] * tau_yy - velocity[IZ] * tau_zy;
+    flux[Hydro<dim>::IU] = -tau_xy;
+    flux[Hydro<dim>::IV] = -tau_yy;
+    flux[Hydro<dim>::IW] = -tau_zy;
+    flux[Hydro<dim>::IE] = -velocity[IX] * tau_xy - velocity[IY] * tau_yy - velocity[IZ] * tau_zy;
 
     // step 4 : accumulate flux in current cell
     const auto flux_cur = flux * dtdS_over_dV_cur;
@@ -329,10 +325,10 @@ ComputeViscousFluxesAndStoreFunctor<dim, device_t>::compute_viscous_fluxes_and_s
     real_t tau_zz =
       2 * mu * (g[Grad::IWZ] - ONE_THIRD_F * (g[Grad::IUX] + g[Grad::IVY] + g[Grad::IWZ]));
 
-    flux[Hydro::IU] = -tau_xz;
-    flux[Hydro::IV] = -tau_yz;
-    flux[Hydro::IW] = -tau_zz;
-    flux[Hydro::IE] = -velocity[IX] * tau_xz - velocity[IY] * tau_yz - velocity[IZ] * tau_zz;
+    flux[Hydro<dim>::IU] = -tau_xz;
+    flux[Hydro<dim>::IV] = -tau_yz;
+    flux[Hydro<dim>::IW] = -tau_zz;
+    flux[Hydro<dim>::IE] = -velocity[IX] * tau_xz - velocity[IY] * tau_yz - velocity[IZ] * tau_zz;
 
     // step 4 : accumulate flux in current cell
     const auto flux_cur = flux * dtdS_over_dV_cur;

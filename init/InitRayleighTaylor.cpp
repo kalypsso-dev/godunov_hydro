@@ -22,7 +22,6 @@ template <size_t dim, typename device_t>
 void
 InitRayleighTaylorDataFunctor<dim, device_t>::apply(
   DataArrayBlock_t const &             Udata,
-  FieldMap<core::models::Hydro>        fm,
   orchard_key_view_t<device_t> const & orchard_keys,
   int32_t                              local_num_octants,
   HydroSettings const &                settings,
@@ -33,7 +32,7 @@ InitRayleighTaylorDataFunctor<dim, device_t>::apply(
 
   // data init functor
   InitRayleighTaylorDataFunctor functor(
-    Udata, fm, orchard_keys, local_num_octants, settings, rt_params, gravity_field, config_map);
+    Udata, orchard_keys, local_num_octants, settings, rt_params, gravity_field, config_map);
 
   // compute total number of cells
   const auto nbCellsPerLeaf = Udata.num_cells();
@@ -58,12 +57,6 @@ InitRayleighTaylorDataFunctor<dim, device_t>::operator()(const int32_t & global_
   const auto iOct = global_index / m_Udata.num_cells();
   const auto cell_index = global_index - iOct * m_Udata.num_cells();
   const auto block_sizes = m_Udata.block_size();
-
-  constexpr auto ID = core::models::Hydro::ID;
-  constexpr auto IP = core::models::Hydro::IP;
-  constexpr auto IU = core::models::Hydro::IU;
-  constexpr auto IV = core::models::Hydro::IV;
-  constexpr auto IW = core::models::Hydro::IW;
 
   // Rayleigh-Taylor problem parameters
   const auto                  rho_up = m_rt_params.rho_up;
@@ -139,13 +132,13 @@ InitRayleighTaylorDataFunctor<dim, device_t>::operator()(const int32_t & global_
       P = P0 + d * (m_grav[IX] * x + m_grav[IY] * y);
     }
 
-    m_Udata(cell_index, m_fm[ID], iOct) = d;
+    m_Udata(cell_index, Hydro<dim>::ID, iOct) = d;
 
-    m_Udata(cell_index, m_fm[IU], iOct) = ZERO_F;
+    m_Udata(cell_index, Hydro<dim>::IU, iOct) = ZERO_F;
 
     if (perturb_type == +RayleighTaylorPerturbationType::SINE)
     {
-      m_Udata(cell_index, m_fm[IV], iOct) =
+      m_Udata(cell_index, Hydro<dim>::IV, iOct) =
         ampl * d * (1 + cos(2 * PI_F * x * static_cast<real_t>(nx) / Lx)) *
         (1 + cos(2 * PI_F * y * static_cast<real_t>(ny) / Ly)) / 4;
     }
@@ -154,7 +147,7 @@ InitRayleighTaylorDataFunctor<dim, device_t>::operator()(const int32_t & global_
       // get random number state
       rng_state_t rand_gen = m_rand_pool.get_state();
 
-      m_Udata(cell_index, m_fm[IV], iOct) =
+      m_Udata(cell_index, Hydro<dim>::IV, iOct) =
         (static_cast<real_t>(rand_gen.drand()) - HALF_F) *
         (ONE_F + cos(2 * PI_F * y * static_cast<real_t>(ny) / Ly));
 
@@ -163,11 +156,12 @@ InitRayleighTaylorDataFunctor<dim, device_t>::operator()(const int32_t & global_
     }
 
     // clang-format off
-    auto ekin = HALF_F * (m_Udata(cell_index, m_fm[IU], iOct) * m_Udata(cell_index, m_fm[IU], iOct) +
-                          m_Udata(cell_index, m_fm[IV], iOct) * m_Udata(cell_index, m_fm[IV], iOct)) / d;
+    auto ekin = HALF_F * (m_Udata(cell_index, Hydro<dim>::IU, iOct) * m_Udata(cell_index, Hydro<dim>::IU, iOct) +
+                          m_Udata(cell_index, Hydro<dim>::IV, iOct) * m_Udata(cell_index, Hydro<dim>::IV, iOct)) / d;
     // clang-format on
 
-    m_Udata(cell_index, m_fm[IP], iOct) = m_eos_wrapper.volumic_eint_from_pressure(P, d) + ekin;
+    m_Udata(cell_index, Hydro<dim>::IP, iOct) =
+      m_eos_wrapper.volumic_eint_from_pressure(P, d) + ekin;
   }
   else if constexpr (dim == 3)
   {
@@ -218,14 +212,14 @@ InitRayleighTaylorDataFunctor<dim, device_t>::operator()(const int32_t & global_
       P = P0 + d * (m_grav[IX] * x + m_grav[IY] * y + m_grav[IZ] * z);
     }
 
-    m_Udata(cell_index, m_fm[ID], iOct) = d;
+    m_Udata(cell_index, Hydro<dim>::ID, iOct) = d;
 
-    m_Udata(cell_index, m_fm[IU], iOct) = ZERO_F;
-    m_Udata(cell_index, m_fm[IV], iOct) = ZERO_F;
+    m_Udata(cell_index, Hydro<dim>::IU, iOct) = ZERO_F;
+    m_Udata(cell_index, Hydro<dim>::IV, iOct) = ZERO_F;
 
     if (perturb_type == +RayleighTaylorPerturbationType::SINE)
     {
-      m_Udata(cell_index, m_fm[IW], iOct) =
+      m_Udata(cell_index, Hydro<dim>::IW, iOct) =
         ampl * d * (1 + cos(2 * PI_F * x * static_cast<real_t>(nx) / Lx)) *
         (1 + cos(2 * PI_F * y * static_cast<real_t>(ny) / Ly)) *
         (1 + cos(2 * PI_F * z * static_cast<real_t>(nz) / Lz)) / 8;
@@ -235,7 +229,7 @@ InitRayleighTaylorDataFunctor<dim, device_t>::operator()(const int32_t & global_
       // get random number state
       rng_state_t rand_gen = m_rand_pool.get_state();
 
-      m_Udata(cell_index, m_fm[IW], iOct) =
+      m_Udata(cell_index, Hydro<dim>::IW, iOct) =
         (static_cast<real_t>(rand_gen.drand()) - HALF_F) *
         (ONE_F + cos(2 * PI_F * z * static_cast<real_t>(nz) / Lz));
 
@@ -244,12 +238,13 @@ InitRayleighTaylorDataFunctor<dim, device_t>::operator()(const int32_t & global_
     }
 
     // clang-format off
-    auto ekin = HALF_F * (m_Udata(cell_index, m_fm[IU], iOct) * m_Udata(cell_index, m_fm[IU], iOct) +
-                          m_Udata(cell_index, m_fm[IV], iOct) * m_Udata(cell_index, m_fm[IV], iOct) +
-                          m_Udata(cell_index, m_fm[IW], iOct) * m_Udata(cell_index, m_fm[IW], iOct)) / d;
+    auto ekin = HALF_F * (m_Udata(cell_index, Hydro<dim>::IU, iOct) * m_Udata(cell_index, Hydro<dim>::IU, iOct) +
+                          m_Udata(cell_index, Hydro<dim>::IV, iOct) * m_Udata(cell_index, Hydro<dim>::IV, iOct) +
+                          m_Udata(cell_index, Hydro<dim>::IW, iOct) * m_Udata(cell_index, Hydro<dim>::IW, iOct)) / d;
     // clang-format on
 
-    m_Udata(cell_index, m_fm[IP], iOct) = m_eos_wrapper.volumic_eint_from_pressure(P, d) + ekin;
+    m_Udata(cell_index, Hydro<dim>::IP, iOct) =
+      m_eos_wrapper.volumic_eint_from_pressure(P, d) + ekin;
 
   } // end dim==3
 
@@ -264,7 +259,6 @@ template <size_t dim, typename device_t>
 void
 InitRayleighTaylorRefineFunctor<dim, device_t>::apply(
   DataArrayBlock_t const &             Udata,
-  FieldMap<core::models::Hydro>        fm,
   orchard_key_view_t<device_t> const & orchard_keys,
   amrflags_view_t const &              amrflags,
   int32_t                              local_num_octants,
@@ -276,7 +270,6 @@ InitRayleighTaylorRefineFunctor<dim, device_t>::apply(
 
   // iterate functor for refinement
   InitRayleighTaylorRefineFunctor functor(Udata,
-                                          fm,
                                           orchard_keys,
                                           amrflags,
                                           local_num_octants,
@@ -402,7 +395,6 @@ InitRayleighTaylor<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & sol
 
   // first init of Udata
   InitRayleighTaylorDataFunctor<dim, device_t>::apply(solver.U(),
-                                                      solver.hydro().get_fieldmap(),
                                                       solver.mesh_map()->orchard_keys(),
                                                       solver.amr_mesh()->local_num_quadrants(),
                                                       settings,
@@ -427,7 +419,6 @@ InitRayleighTaylor<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & sol
       // 2. update Udata
       //
       InitRayleighTaylorDataFunctor<dim, device_t>::apply(solver.U(),
-                                                          solver.hydro().get_fieldmap(),
                                                           solver.mesh_map()->orchard_keys(),
                                                           solver.amr_mesh()->local_num_quadrants(),
                                                           settings,
@@ -456,7 +447,6 @@ InitRayleighTaylor<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & sol
       //
       InitRayleighTaylorRefineFunctor<dim, device_t>::apply(
         solver.U(),
-        solver.hydro().get_fieldmap(),
         solver.mesh_map()->orchard_keys(),
         flags_d,
         solver.amr_mesh()->local_num_quadrants(),
@@ -490,7 +480,6 @@ InitRayleighTaylor<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & sol
       // 6. update Udata
       //
       InitRayleighTaylorDataFunctor<dim, device_t>::apply(solver.U(),
-                                                          solver.hydro().get_fieldmap(),
                                                           solver.mesh_map()->orchard_keys(),
                                                           solver.amr_mesh()->local_num_quadrants(),
                                                           settings,

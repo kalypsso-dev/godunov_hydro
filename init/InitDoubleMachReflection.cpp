@@ -23,7 +23,6 @@ template <size_t dim, typename device_t>
 void
 InitDoubleMachReflectionDataFunctor<dim, device_t>::apply(
   DataArrayBlock_t const &             Udata,
-  FieldMap<core::models::Hydro>        fm,
   orchard_key_view_t<device_t> const & orchard_keys,
   int32_t                              local_num_octants,
   HydroSettings const &                settings,
@@ -33,7 +32,7 @@ InitDoubleMachReflectionDataFunctor<dim, device_t>::apply(
 
   // data init functor
   InitDoubleMachReflectionDataFunctor functor(
-    Udata, fm, orchard_keys, local_num_octants, settings, dmrParams, config_map);
+    Udata, orchard_keys, local_num_octants, settings, dmrParams, config_map);
 
   // compute total number of cells
   const auto nbCellsPerLeaf = Udata.num_cells();
@@ -60,12 +59,6 @@ InitDoubleMachReflectionDataFunctor<dim, device_t>::operator()(const int32_t & g
 
   const auto block_sizes = m_Udata.block_size();
 
-  constexpr auto ID = core::models::Hydro::ID;
-  constexpr auto IE = core::models::Hydro::IE;
-  constexpr auto IU = core::models::Hydro::IU;
-  constexpr auto IV = core::models::Hydro::IV;
-  constexpr auto IW = core::models::Hydro::IW;
-
   // compute ix,iy,iz of local cell inside
   // block from index
   auto iCoord = cellindex_to_coord<dim>(cell_index, block_sizes);
@@ -81,27 +74,27 @@ InitDoubleMachReflectionDataFunctor<dim, device_t>::operator()(const int32_t & g
   // initialize
   if (m_dmrParams.is_point_in_post_shock_region(xyz[IX], xyz[IY], 0))
   {
-    m_Udata(cell_index, m_fm[ID], iOct) = m_dmrParams.rhoL;
-    m_Udata(cell_index, m_fm[IU], iOct) = m_dmrParams.rhoL * m_dmrParams.uL;
-    m_Udata(cell_index, m_fm[IV], iOct) = m_dmrParams.rhoL * m_dmrParams.vL;
-    m_Udata(cell_index, m_fm[IE], iOct) =
+    m_Udata(cell_index, Hydro<dim>::ID, iOct) = m_dmrParams.rhoL;
+    m_Udata(cell_index, Hydro<dim>::IU, iOct) = m_dmrParams.rhoL * m_dmrParams.uL;
+    m_Udata(cell_index, Hydro<dim>::IV, iOct) = m_dmrParams.rhoL * m_dmrParams.vL;
+    m_Udata(cell_index, Hydro<dim>::IE, iOct) =
       m_eos_wrapper.volumic_eint_from_pressure(m_dmrParams.pL, m_dmrParams.rhoL) +
       HALF_F * m_dmrParams.rhoL *
         (m_dmrParams.uL * m_dmrParams.uL + m_dmrParams.vL * m_dmrParams.vL);
   }
   else
   {
-    m_Udata(cell_index, m_fm[ID], iOct) = m_dmrParams.rhoR;
-    m_Udata(cell_index, m_fm[IU], iOct) = m_dmrParams.rhoR * m_dmrParams.uR;
-    m_Udata(cell_index, m_fm[IV], iOct) = m_dmrParams.rhoR * m_dmrParams.uR;
-    m_Udata(cell_index, m_fm[IE], iOct) =
+    m_Udata(cell_index, Hydro<dim>::ID, iOct) = m_dmrParams.rhoR;
+    m_Udata(cell_index, Hydro<dim>::IU, iOct) = m_dmrParams.rhoR * m_dmrParams.uR;
+    m_Udata(cell_index, Hydro<dim>::IV, iOct) = m_dmrParams.rhoR * m_dmrParams.uR;
+    m_Udata(cell_index, Hydro<dim>::IE, iOct) =
       m_eos_wrapper.volumic_eint_from_pressure(m_dmrParams.pR, m_dmrParams.rhoR) +
       HALF_F * m_dmrParams.rhoR *
         (m_dmrParams.uR * m_dmrParams.uR + m_dmrParams.vR * m_dmrParams.vR);
   }
 
   if constexpr (dim == 3)
-    m_Udata(cell_index, m_fm[IW], iOct) = ZERO_F;
+    m_Udata(cell_index, Hydro<dim>::IW, iOct) = ZERO_F;
 
 } // end InitDoubleMachReflectionDataFunctor::operator ()
 
@@ -114,7 +107,6 @@ template <size_t dim, typename device_t>
 void
 InitDoubleMachReflectionRefineFunctor<dim, device_t>::apply(
   DataArrayBlock_t const &             Udata,
-  FieldMap<core::models::Hydro>        fm,
   orchard_key_view_t<device_t> const & orchard_keys,
   amrflags_view_t const &              amrflags,
   int32_t                              local_num_octants,
@@ -126,7 +118,6 @@ InitDoubleMachReflectionRefineFunctor<dim, device_t>::apply(
 
   // iterate functor for refinement
   InitDoubleMachReflectionRefineFunctor functor(Udata,
-                                                fm,
                                                 orchard_keys,
                                                 amrflags,
                                                 local_num_octants,
@@ -235,7 +226,6 @@ InitDoubleMachReflection<dim, device_t>::apply(SolverGodunovHydro<dim, device_t>
   // first init of Udata
   InitDoubleMachReflectionDataFunctor<dim, device_t>::apply(
     solver.U(),
-    solver.hydro().get_fieldmap(),
     solver.mesh_map()->orchard_keys(),
     solver.amr_mesh()->local_num_quadrants(),
     settings,
@@ -260,7 +250,6 @@ InitDoubleMachReflection<dim, device_t>::apply(SolverGodunovHydro<dim, device_t>
       //
       InitDoubleMachReflectionDataFunctor<dim, device_t>::apply(
         solver.U(),
-        solver.hydro().get_fieldmap(),
         solver.mesh_map()->orchard_keys(),
         solver.amr_mesh()->local_num_quadrants(),
         settings,
@@ -289,7 +278,6 @@ InitDoubleMachReflection<dim, device_t>::apply(SolverGodunovHydro<dim, device_t>
       //
       InitDoubleMachReflectionRefineFunctor<dim, device_t>::apply(
         solver.U(),
-        solver.hydro().get_fieldmap(),
         solver.mesh_map()->orchard_keys(),
         flags_d,
         solver.amr_mesh()->local_num_quadrants(),
@@ -324,7 +312,6 @@ InitDoubleMachReflection<dim, device_t>::apply(SolverGodunovHydro<dim, device_t>
       //
       InitDoubleMachReflectionDataFunctor<dim, device_t>::apply(
         solver.U(),
-        solver.hydro().get_fieldmap(),
         solver.mesh_map()->orchard_keys(),
         solver.amr_mesh()->local_num_quadrants(),
         settings,

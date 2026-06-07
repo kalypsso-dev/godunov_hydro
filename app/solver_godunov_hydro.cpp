@@ -134,16 +134,14 @@ run_simulation(ParallelEnv const &       par_env,
   // =================================================================================
   if (!solver->problem_name().compare("sod"))
   {
+    using Hydro = godunov_hydro::models::Hydro<dim>;
+
     auto solver_hydro = dynamic_cast<godunov_hydro::SolverGodunovHydro<dim, device_t> *>(solver);
 
     // 1. save conservative variables
     {
       const auto cell_var_ids = std::vector<int32_t>{
-        solver_hydro->hydro().get_fieldmap()[core::models::Hydro::ID],
-        solver_hydro->hydro().get_fieldmap()[core::models::Hydro::IP],
-        solver_hydro->hydro().get_fieldmap()[core::models::Hydro::IU],
-        solver_hydro->hydro().get_fieldmap()[core::models::Hydro::IV],
-        solver_hydro->hydro().get_fieldmap()[core::models::Hydro::IW],
+        Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV, Hydro::IW,
       };
 
       const auto cell_var_names =
@@ -217,7 +215,6 @@ run_simulation(ParallelEnv const &       par_env,
       // re-initialize U2 with exact solution
       godunov_hydro::InitIsentropicVortexDataFunctor<2, device_t>::apply(
         solver2d->U2(),
-        solver2d->hydro().get_fieldmap(),
         solver2d->mesh_map()->orchard_keys(),
         solver2d->amr_mesh()->local_num_quadrants(),
         solver2d->hydro_settings(),
@@ -266,7 +263,6 @@ run_simulation(ParallelEnv const &       par_env,
         solver2d->mesh_map()->orchard_keys(),
         solver2d->amr_mesh()->local_num_quadrants(),
         solver2d->hydro_settings(),
-        solver2d->hydro().get_fieldmap(),
         tEnd,
         config_map);
 
@@ -306,7 +302,6 @@ run_simulation(ParallelEnv const &       par_env,
       config_map,
       solver_hydro->mesh_map()->orchard_keys(),
       solver_hydro->mesh_map()->get_amr_mesh_info().local_num_quadrants(),
-      solver_hydro->hydro().get_fieldmap(),
       solver_hydro->block_sizes(),
       solver_hydro->U());
   }

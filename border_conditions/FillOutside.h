@@ -22,7 +22,7 @@
 #include <kalypsso/core/utils_block.h> // for definition of function cellindex_to_coord and coord_to_cellindex
 #include <kalypsso/core/AMRMeshInfo.h>
 
-#include <kalypsso/core/models/Hydro.h>
+#include <godunov_hydro/models/Hydro.h>
 
 #include <kalypsso/core/FillOutside_utils.h>
 #include <../better-enums/enum.h>
@@ -99,8 +99,8 @@ public:
 
   using DataArrayBlock_t = DataArrayBlock<dim, real_t, device_t>;
 
-  // makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
+  /// makes enum Hydro::VarId available
+  using Hydro = models::Hydro<dim>;
 
   using bc_array_t = BorderConditionsConfig<BC_HYDRO>::bc_array_t<dim>;
 
@@ -120,7 +120,6 @@ public:
         AMRMeshInfo const &        amr_mesh_info,
         orchard_key_view_t const & orchard_keys,
         amr_hashmap_t const &      amr_hashmap,
-        FieldMap<Hydro> const &    fm,
         ConfigMap const &          config_map,
         ParallelEnv const &        par_env);
 
@@ -167,7 +166,6 @@ private:
    * \param[in] orchard_keys array of orchard key ordered by Morton order
    * \param[in] amr_hashmap unordered map from orchard key to memory index for owned and ghost
    *            quadrants
-   * \param fm Hydro variables to index mapper.
    * \param config_map Inputted config map.
    * \param par_env Parallel environment.
    *
@@ -179,7 +177,6 @@ private:
                          AMRMeshInfo const &        amr_mesh_info,
                          orchard_key_view_t const & orchard_keys,
                          amr_hashmap_t const &      amr_hashmap,
-                         FieldMap<Hydro> const &    fm,
                          ConfigMap const &          config_map,
                          ParallelEnv const &        par_env);
 
@@ -196,9 +193,6 @@ private:
   //! AMR unordered map which maps orchard keys to quadrant number for all key in the mesh
   //! (owned quadrants and ghost quadrants)
   amr_hashmap_t m_amr_hashmap_device;
-
-  //! Variables to index mapping
-  FieldMap<Hydro> m_fm;
 
   //! p4est brick connectivity sizes
   const brick_size_t<dim> m_brick_size;

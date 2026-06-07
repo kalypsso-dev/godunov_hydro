@@ -26,7 +26,6 @@
 #include <kalypsso/core/AMRMeshInfo.h>
 #include <kalypsso/core/problems/DoubleMachReflectionParams.h>
 
-#include <kalypsso/core/models/Hydro.h>
 #include <godunov_hydro/eos/EosWrapper.h>
 #include <godunov_hydro/common.h>
 #include <godunov_hydro/models/utils_hydro.h>
@@ -58,19 +57,19 @@ struct BCDoubleMachReflection
 
     // get primitive variables
     HydroState<dim> qL, qR;
-    qL[Hydro::ID] = dmr_params.rhoL;
-    qL[Hydro::IU] = dmr_params.uL;
-    qL[Hydro::IV] = dmr_params.vL;
+    qL[Hydro<dim>::ID] = dmr_params.rhoL;
+    qL[Hydro<dim>::IU] = dmr_params.uL;
+    qL[Hydro<dim>::IV] = dmr_params.vL;
     if constexpr (dim == 3)
-      qL[Hydro::IW] = ZERO_F;
-    qL[Hydro::IP] = dmr_params.pL;
+      qL[Hydro<dim>::IW] = ZERO_F;
+    qL[Hydro<dim>::IP] = dmr_params.pL;
 
-    qR[Hydro::ID] = dmr_params.rhoR;
-    qR[Hydro::IU] = dmr_params.uR;
-    qR[Hydro::IV] = dmr_params.vR;
+    qR[Hydro<dim>::ID] = dmr_params.rhoR;
+    qR[Hydro<dim>::IU] = dmr_params.uR;
+    qR[Hydro<dim>::IV] = dmr_params.vR;
     if constexpr (dim == 3)
-      qR[Hydro::IW] = ZERO_F;
-    qR[Hydro::IP] = dmr_params.pR;
+      qR[Hydro<dim>::IW] = ZERO_F;
+    qR[Hydro<dim>::IP] = dmr_params.pR;
 
     // get conservative variables
     uL = models::compute_conservative_variables<dim, HostDevice>(qL, settings, eos_wrapper, valid);
@@ -93,14 +92,14 @@ struct BCDoubleMachReflection
   KOKKOS_FUNCTION real_t
   bc_state([[maybe_unused]] real_t x, [[maybe_unused]] real_t y, int var, bool is_left) const
   {
-    if (var == core::models::Hydro::ID)
-      return is_left ? uL[Hydro::ID] : uR[Hydro::ID];
-    else if (var == core::models::Hydro::IE)
-      return is_left ? uL[Hydro::IE] : uR[Hydro::IE];
-    else if (var == core::models::Hydro::IU)
-      return is_left ? uL[Hydro::IU] : uR[Hydro::IU];
-    else if (var == core::models::Hydro::IV)
-      return is_left ? uL[Hydro::IV] : uR[Hydro::IV];
+    if (var == Hydro<dim>::ID)
+      return is_left ? uL[Hydro<dim>::ID] : uR[Hydro<dim>::ID];
+    else if (var == Hydro<dim>::IE)
+      return is_left ? uL[Hydro<dim>::IE] : uR[Hydro<dim>::IE];
+    else if (var == Hydro<dim>::IU)
+      return is_left ? uL[Hydro<dim>::IU] : uR[Hydro<dim>::IU];
+    else if (var == Hydro<dim>::IV)
+      return is_left ? uL[Hydro<dim>::IV] : uR[Hydro<dim>::IV];
     return ZERO_F;
   } // bc_state - 2d
 
@@ -112,19 +111,19 @@ struct BCDoubleMachReflection
            int                     var,
            bool                    is_left) const
   {
-    if (var == core::models::Hydro::ID)
-      return is_left ? uL[Hydro::ID] : uR[Hydro::ID];
-    else if (var == core::models::Hydro::IE)
-      return is_left ? uL[Hydro::IE] : uR[Hydro::IE];
-    else if (var == core::models::Hydro::IU)
-      return is_left ? uL[Hydro::IU] : uR[Hydro::IU];
-    else if (var == core::models::Hydro::IV)
-      return is_left ? uL[Hydro::IV] : uR[Hydro::IV];
-    else if (var == core::models::Hydro::IW)
+    if (var == Hydro<dim>::ID)
+      return is_left ? uL[Hydro<dim>::ID] : uR[Hydro<dim>::ID];
+    else if (var == Hydro<dim>::IE)
+      return is_left ? uL[Hydro<dim>::IE] : uR[Hydro<dim>::IE];
+    else if (var == Hydro<dim>::IU)
+      return is_left ? uL[Hydro<dim>::IU] : uR[Hydro<dim>::IU];
+    else if (var == Hydro<dim>::IV)
+      return is_left ? uL[Hydro<dim>::IV] : uR[Hydro<dim>::IV];
+    else if (var == Hydro<dim>::IW)
     {
       if constexpr (dim == 3)
       {
-        return is_left ? uL[Hydro::IW] : uR[Hydro::IW];
+        return is_left ? uL[Hydro<dim>::IW] : uR[Hydro<dim>::IW];
       }
       else
       {
@@ -168,9 +167,6 @@ public:
   using orchard_key_view_t = typename orchard_key_base_t<device_t>::view_t;
 
   using DataArrayBlock_t = DataArrayBlock<dim, real_t, device_t>;
-
-  // makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
 
   // ==============================================================
   // ==============================================================

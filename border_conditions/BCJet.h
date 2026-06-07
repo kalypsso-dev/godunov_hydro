@@ -26,7 +26,6 @@
 #include <kalypsso/core/AMRMeshInfo.h>
 #include <kalypsso/core/init_func.h> // for InitFunc1 and InitFunc2
 
-#include <kalypsso/core/models/Hydro.h>
 #include <godunov_hydro/eos/EosWrapper.h>
 #include <godunov_hydro/common.h>
 #include <godunov_hydro/models/utils_hydro.h>
@@ -71,12 +70,12 @@ struct BCJet
     // primitive variables
     HydroState<dim> q;
 
-    q[Hydro::ID] = config_map.getReal("jet", "rho", KALYPSSO_NUM(1.0));
-    q[Hydro::IU] = config_map.getReal("jet", "u", KALYPSSO_NUM(100.0));
-    q[Hydro::IV] = config_map.getReal("jet", "v", KALYPSSO_NUM(0.0));
+    q[Hydro<dim>::ID] = config_map.getReal("jet", "rho", KALYPSSO_NUM(1.0));
+    q[Hydro<dim>::IU] = config_map.getReal("jet", "u", KALYPSSO_NUM(100.0));
+    q[Hydro<dim>::IV] = config_map.getReal("jet", "v", KALYPSSO_NUM(0.0));
     if constexpr (dim == 3)
-      q[Hydro::IW] = config_map.getReal("jet", "w", KALYPSSO_NUM(0.0));
-    q[Hydro::IP] = config_map.getReal("jet", "pressure", KALYPSSO_NUM(1.0));
+      q[Hydro<dim>::IW] = config_map.getReal("jet", "w", KALYPSSO_NUM(0.0));
+    q[Hydro<dim>::IP] = config_map.getReal("jet", "pressure", KALYPSSO_NUM(1.0));
 
     // get conservative variables
     [[maybe_unused]] bool valid = true;
@@ -162,9 +161,6 @@ public:
   using orchard_key_view_t = typename orchard_key_base_t<device_t>::view_t;
 
   using DataArrayBlock_t = DataArrayBlock<dim, real_t, device_t>;
-
-  // makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
 
   // ==============================================================
   // ==============================================================

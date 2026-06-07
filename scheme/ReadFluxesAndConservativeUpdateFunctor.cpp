@@ -18,24 +18,22 @@ namespace godunov_hydro
 /*************************************************/
 template <size_t dim, typename device_t>
 ReadFluxesAndConservativeUpdateFunctor<dim, device_t>::ReadFluxesAndConservativeUpdateFunctor(
-  ConfigMap const &                     config_map,
-  StencilHelper_t const &               stencil_helper,
-  orchard_key_view_t const &            orchard_keys,
-  conformal_status_view_type const &    conformal_status,
-  AMRMeshInfo const &                   amr_mesh_info,
-  DataArrayBlock_t const &              u_out,
-  DataArrayBlock_t const &              fluxes,
-  FieldMap<core::models::Hydro> const & fm,
-  int                                   direction,
-  HydroSettings const &                 hydro_settings,
-  real_t                                dt)
+  ConfigMap const &                  config_map,
+  StencilHelper_t const &            stencil_helper,
+  orchard_key_view_t const &         orchard_keys,
+  conformal_status_view_type const & conformal_status,
+  AMRMeshInfo const &                amr_mesh_info,
+  DataArrayBlock_t const &           u_out,
+  DataArrayBlock_t const &           fluxes,
+  int                                direction,
+  HydroSettings const &              hydro_settings,
+  real_t                             dt)
   : m_stencil_helper(stencil_helper)
   , m_orchard_keys_device(orchard_keys)
   , m_conformal_status(conformal_status)
   , m_amr_mesh_info(amr_mesh_info)
   , m_Uout(u_out)
   , m_Fluxes(fluxes)
-  , m_fm(fm)
   , m_direction(direction)
   , m_num_owned(amr_mesh_info.local_num_quadrants())
   , m_num_ghosts(amr_mesh_info.local_num_ghosts())
@@ -50,19 +48,18 @@ ReadFluxesAndConservativeUpdateFunctor<dim, device_t>::ReadFluxesAndConservative
 template <size_t dim, typename device_t>
 void
 ReadFluxesAndConservativeUpdateFunctor<dim, device_t>::apply(
-  ConfigMap const &                     config_map,
-  amr_hashmap_t const &                 amr_hashmap,
-  orchard_key_view_t const &            orchard_keys,
-  conformal_status_view_type const &    conformal_status,
-  AMRMeshInfo const &                   amr_mesh_info,
-  DataArrayBlock_t const &              Uout,
-  DataArrayBlock_t const &              fluxes,
-  FieldMap<core::models::Hydro> const & fm,
-  int                                   direction,
-  brick_size_t<dim> const &             brick_sizes,
-  Kokkos::Array<bool, dim> const &      is_brick_periodic,
-  HydroSettings const &                 hydro_settings,
-  real_t                                dt)
+  ConfigMap const &                  config_map,
+  amr_hashmap_t const &              amr_hashmap,
+  orchard_key_view_t const &         orchard_keys,
+  conformal_status_view_type const & conformal_status,
+  AMRMeshInfo const &                amr_mesh_info,
+  DataArrayBlock_t const &           Uout,
+  DataArrayBlock_t const &           fluxes,
+  int                                direction,
+  brick_size_t<dim> const &          brick_sizes,
+  Kokkos::Array<bool, dim> const &   is_brick_periodic,
+  HydroSettings const &              hydro_settings,
+  real_t                             dt)
 {
   // Important note: the caller is responsible for providing a flux array with right shape.
   {
@@ -81,7 +78,6 @@ ReadFluxesAndConservativeUpdateFunctor<dim, device_t>::apply(
                                                                 amr_mesh_info,
                                                                 Uout,
                                                                 fluxes,
-                                                                fm,
                                                                 direction,
                                                                 hydro_settings,
                                                                 dt);

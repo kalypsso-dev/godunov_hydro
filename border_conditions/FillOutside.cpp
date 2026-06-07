@@ -26,14 +26,12 @@ FillOutsideCellFunctor<dim, device_t>::FillOutsideCellFunctor(
   AMRMeshInfo const &        amr_mesh_info,
   orchard_key_view_t const & orchard_keys,
   amr_hashmap_t const &      amr_hashmap,
-  FieldMap<Hydro> const &    fm,
   ConfigMap const &          config_map,
   ParallelEnv const &        par_env)
   : m_userdata(userdata)
   , m_amr_mesh_info(amr_mesh_info)
   , m_orchard_keys_device(orchard_keys)
   , m_amr_hashmap_device(amr_hashmap)
-  , m_fm(fm)
   , m_brick_size(get_brick_sizes<dim>(config_map))
   , m_brick_periodicity(get_brick_periodicity<dim>(config_map))
   , m_bc_types(BorderConditionsConfig<BC_HYDRO>::read_border_condition<dim>(config_map, par_env))
@@ -47,14 +45,13 @@ FillOutsideCellFunctor<dim, device_t>::apply(DataArrayBlock_t const &   userdata
                                              AMRMeshInfo const &        amr_mesh_info,
                                              orchard_key_view_t const & orchard_keys,
                                              amr_hashmap_t const &      amr_hashmap,
-                                             FieldMap<Hydro> const &    fm,
                                              ConfigMap const &          config_map,
                                              ParallelEnv const &        par_env)
 {
 
   // create compute functor
   FillOutsideCellFunctor<dim, device_t> functor(
-    userdata, amr_mesh_info, orchard_keys, amr_hashmap, fm, config_map, par_env);
+    userdata, amr_mesh_info, orchard_keys, amr_hashmap, config_map, par_env);
 
   const int32_t start_octant = amr_mesh_info.first_outside_quad_local_id();
   const int32_t end_octant = start_octant + amr_mesh_info.total_local_number_of_outside_quads();
@@ -165,7 +162,7 @@ FillOutsideCellFunctor<dim, device_t>::operator()(const index_t & i_global) cons
             m_userdata(i_cell_inside, ivar, i_oct_inside);
         }
 
-        m_userdata(i_cell_outside, m_fm[Hydro::VarId(Hydro::IU + dir)], i_oct_outside) *= -1;
+        m_userdata(i_cell_outside, Hydro::IU + dir, i_oct_outside) *= -1;
 
       } // end BC_HYDRO::WALL
     } // end if is_at_domain_border

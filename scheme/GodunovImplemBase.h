@@ -120,13 +120,10 @@ public:
 
     KALYPSSO_PROFILING_REGION(m_profiling_mgr, NUM_SCHEME_GRAVITY);
 
-    const auto & fm = this->m_hydro.get_fieldmap();
-
     AddGravitySourceTerm<dim, device_t>::apply(
       this->m_config_map,
       u_in,
       u_out,
-      fm,
       this->m_mesh_map.get_amr_mesh_info().local_num_quadrants(),
       dt);
 

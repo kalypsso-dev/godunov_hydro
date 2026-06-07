@@ -18,25 +18,24 @@ namespace godunov_hydro
 /*************************************************/
 template <size_t dim, typename device_t>
 ComputeFluxesAndStoreFunctor<dim, device_t>::ComputeFluxesAndStoreFunctor(
-  orchard_key_view_t const &            orchard_keys,
-  AMRMeshInfo const &                   amr_mesh_info,
-  DataArrayBlock_t const &              fluxes,
-  DataArrayGhostedBlock_t const &       q_ghosted,
-  DataArrayGhostedBlock_t const &       slopes_x,
-  DataArrayGhostedBlock_t const &       slopes_y,
-  DataArrayGhostedBlock_t const &       slopes_z,
-  FieldMap<core::models::Hydro> const & fm,
-  int32_t                               iOct_flux_offset,
-  int32_t                               num_quads,
-  int                                   direction,
-  HydroSettings const &                 hydro_settings,
-  eos::EosWrapper<device_t> const &     eos,
-  real_t                                dt,
-  real_t                                scaling_factor,
-  bool                                  gravity_enabled,
-  UniformGravityField<dim> const &      gravity_field,
-  ViscosityParams const &               viscosity,
-  TimeIntegrator                        time_integrator)
+  orchard_key_view_t const &        orchard_keys,
+  AMRMeshInfo const &               amr_mesh_info,
+  DataArrayBlock_t const &          fluxes,
+  DataArrayGhostedBlock_t const &   q_ghosted,
+  DataArrayGhostedBlock_t const &   slopes_x,
+  DataArrayGhostedBlock_t const &   slopes_y,
+  DataArrayGhostedBlock_t const &   slopes_z,
+  int32_t                           iOct_flux_offset,
+  int32_t                           num_quads,
+  int                               direction,
+  HydroSettings const &             hydro_settings,
+  eos::EosWrapper<device_t> const & eos,
+  real_t                            dt,
+  real_t                            scaling_factor,
+  bool                              gravity_enabled,
+  UniformGravityField<dim> const &  gravity_field,
+  ViscosityParams const &           viscosity,
+  TimeIntegrator                    time_integrator)
   : m_orchard_keys_device(orchard_keys)
   , m_amr_mesh_info(amr_mesh_info)
   , m_Fluxes(fluxes)
@@ -44,7 +43,6 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::ComputeFluxesAndStoreFunctor(
   , m_slopes_x(slopes_x)
   , m_slopes_y(slopes_y)
   , m_slopes_z(slopes_z)
-  , m_fm(fm)
   , m_iOct_flux_offset(iOct_flux_offset)
   , m_num_quads(num_quads)
   , m_direction(direction)
@@ -72,11 +70,10 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::apply(ConfigMap const &            
                                                    DataArrayGhostedBlock_t const & slopes_x,
                                                    DataArrayGhostedBlock_t const & slopes_y,
                                                    DataArrayGhostedBlock_t const & slopes_z,
-                                                   FieldMap<core::models::Hydro> const & fm,
-                                                   int32_t               iOct_flux_offset,
-                                                   int32_t               num_quads,
-                                                   int                   direction,
-                                                   HydroSettings const & hydro_settings,
+                                                   int32_t                         iOct_flux_offset,
+                                                   int32_t                         num_quads,
+                                                   int                             direction,
+                                                   HydroSettings const &           hydro_settings,
                                                    eos::EosWrapper<device_t> const & eos,
                                                    ViscosityParams const &           viscosity,
                                                    real_t                            dt)
@@ -99,7 +96,6 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::apply(ConfigMap const &            
     slopes_x,
     slopes_y,
     slopes_z,
-    fm,
     iOct_flux_offset,
     num_quads,
     direction,
@@ -140,24 +136,24 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::reconstruct_state_2d(const HydroSta
   auto const & smallp = m_hydro_settings.smallp;
 
   // retrieve primitive variables in current quadrant
-  auto const & r = q[Hydro::ID];
-  auto const & p = q[Hydro::IP];
-  auto const & u = q[Hydro::IU];
-  auto const & v = q[Hydro::IV];
+  auto const & r = q[Hydro<dim>::ID];
+  auto const & p = q[Hydro<dim>::IP];
+  auto const & u = q[Hydro<dim>::IU];
+  auto const & v = q[Hydro<dim>::IV];
   // auto const w = 0.0;
 
   const auto c = m_eos.sound_speed(p, r);
 
-  auto const drx = m_slopes_x(is, js, m_fm[Hydro::ID], iOct_local);
-  auto const dpx = m_slopes_x(is, js, m_fm[Hydro::IP], iOct_local);
-  auto const dux = m_slopes_x(is, js, m_fm[Hydro::IU], iOct_local);
-  auto const dvx = m_slopes_x(is, js, m_fm[Hydro::IV], iOct_local);
+  auto const drx = m_slopes_x(is, js, Hydro<dim>::ID, iOct_local);
+  auto const dpx = m_slopes_x(is, js, Hydro<dim>::IP, iOct_local);
+  auto const dux = m_slopes_x(is, js, Hydro<dim>::IU, iOct_local);
+  auto const dvx = m_slopes_x(is, js, Hydro<dim>::IV, iOct_local);
   // auto const dwx = 0.0;
 
-  auto const dry = m_slopes_y(is, js, m_fm[Hydro::ID], iOct_local);
-  auto const dpy = m_slopes_y(is, js, m_fm[Hydro::IP], iOct_local);
-  auto const duy = m_slopes_y(is, js, m_fm[Hydro::IU], iOct_local);
-  auto const dvy = m_slopes_y(is, js, m_fm[Hydro::IV], iOct_local);
+  auto const dry = m_slopes_y(is, js, Hydro<dim>::ID, iOct_local);
+  auto const dpy = m_slopes_y(is, js, Hydro<dim>::IP, iOct_local);
+  auto const duy = m_slopes_y(is, js, Hydro<dim>::IU, iOct_local);
+  auto const dvy = m_slopes_y(is, js, Hydro<dim>::IV, iOct_local);
   // auto const dwy = 0.0;
 
   // reconstruct state on interface
@@ -174,16 +170,16 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::reconstruct_state_2d(const HydroSta
                      (-v * dpy - dvy * r * c * c) * dtdy;
     // clang-format on
 
-    qr[Hydro::ID] = r + HALF_F * sr0 + offsets[IX] * drx + offsets[IY] * dry;
-    qr[Hydro::IP] = p + HALF_F * sp0 + offsets[IX] * dpx + offsets[IY] * dpy;
-    qr[Hydro::IU] = u + HALF_F * su0 + offsets[IX] * dux + offsets[IY] * duy;
-    qr[Hydro::IV] = v + HALF_F * sv0 + offsets[IX] * dvx + offsets[IY] * dvy;
+    qr[Hydro<dim>::ID] = r + HALF_F * sr0 + offsets[IX] * drx + offsets[IY] * dry;
+    qr[Hydro<dim>::IP] = p + HALF_F * sp0 + offsets[IX] * dpx + offsets[IY] * dpy;
+    qr[Hydro<dim>::IU] = u + HALF_F * su0 + offsets[IX] * dux + offsets[IY] * duy;
+    qr[Hydro<dim>::IV] = v + HALF_F * sv0 + offsets[IX] * dvx + offsets[IY] * dvy;
 
     // add gravity predictor step
     if (m_gravity_enabled)
     {
-      qr[Hydro::IU] += m_gravity_field[IX] * HALF_F * m_dt;
-      qr[Hydro::IV] += m_gravity_field[IY] * HALF_F * m_dt;
+      qr[Hydro<dim>::IU] += m_gravity_field[IX] * HALF_F * m_dt;
+      qr[Hydro<dim>::IV] += m_gravity_field[IY] * HALF_F * m_dt;
     }
 
     // add viscous force predictor
@@ -194,14 +190,14 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::reconstruct_state_2d(const HydroSta
   }
   else
   {
-    qr[Hydro::ID] = r + offsets[IX] * drx + offsets[IY] * dry;
-    qr[Hydro::IP] = p + offsets[IX] * dpx + offsets[IY] * dpy;
-    qr[Hydro::IU] = u + offsets[IX] * dux + offsets[IY] * duy;
-    qr[Hydro::IV] = v + offsets[IX] * dvx + offsets[IY] * dvy;
+    qr[Hydro<dim>::ID] = r + offsets[IX] * drx + offsets[IY] * dry;
+    qr[Hydro<dim>::IP] = p + offsets[IX] * dpx + offsets[IY] * dpy;
+    qr[Hydro<dim>::IU] = u + offsets[IX] * dux + offsets[IY] * duy;
+    qr[Hydro<dim>::IV] = v + offsets[IX] * dvx + offsets[IY] * dvy;
   }
 
-  qr[Hydro::ID] = fmax(smallr, qr[Hydro::ID]);
-  qr[Hydro::IP] = fmax(smallp * qr[Hydro::ID], qr[Hydro::IP]);
+  qr[Hydro<dim>::ID] = fmax(smallr, qr[Hydro<dim>::ID]);
+  qr[Hydro<dim>::IP] = fmax(smallp * qr[Hydro<dim>::ID], qr[Hydro<dim>::IP]);
 
   return qr;
 
@@ -229,32 +225,32 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::reconstruct_state_3d(const HydroSta
   auto const & smallp = m_hydro_settings.smallp;
 
   // retrieve primitive variables in current quadrant
-  const real_t & r = q[Hydro::ID];
-  const real_t & p = q[Hydro::IP];
-  const real_t & u = q[Hydro::IU];
-  const real_t & v = q[Hydro::IV];
-  const real_t & w = q[Hydro::IW];
+  const real_t & r = q[Hydro<dim>::ID];
+  const real_t & p = q[Hydro<dim>::IP];
+  const real_t & u = q[Hydro<dim>::IU];
+  const real_t & v = q[Hydro<dim>::IV];
+  const real_t & w = q[Hydro<dim>::IW];
 
   const auto c = m_eos.sound_speed(p, r);
 
   // retrieve variations = dx * slopes
-  const real_t drx = m_slopes_x(is, js, ks, m_fm[Hydro::ID], iOct_local);
-  const real_t dpx = m_slopes_x(is, js, ks, m_fm[Hydro::IP], iOct_local);
-  const real_t dux = m_slopes_x(is, js, ks, m_fm[Hydro::IU], iOct_local);
-  const real_t dvx = m_slopes_x(is, js, ks, m_fm[Hydro::IV], iOct_local);
-  const real_t dwx = m_slopes_x(is, js, ks, m_fm[Hydro::IW], iOct_local);
+  const real_t drx = m_slopes_x(is, js, ks, Hydro<dim>::ID, iOct_local);
+  const real_t dpx = m_slopes_x(is, js, ks, Hydro<dim>::IP, iOct_local);
+  const real_t dux = m_slopes_x(is, js, ks, Hydro<dim>::IU, iOct_local);
+  const real_t dvx = m_slopes_x(is, js, ks, Hydro<dim>::IV, iOct_local);
+  const real_t dwx = m_slopes_x(is, js, ks, Hydro<dim>::IW, iOct_local);
 
-  const real_t dry = m_slopes_y(is, js, ks, m_fm[Hydro::ID], iOct_local);
-  const real_t dpy = m_slopes_y(is, js, ks, m_fm[Hydro::IP], iOct_local);
-  const real_t duy = m_slopes_y(is, js, ks, m_fm[Hydro::IU], iOct_local);
-  const real_t dvy = m_slopes_y(is, js, ks, m_fm[Hydro::IV], iOct_local);
-  const real_t dwy = m_slopes_y(is, js, ks, m_fm[Hydro::IW], iOct_local);
+  const real_t dry = m_slopes_y(is, js, ks, Hydro<dim>::ID, iOct_local);
+  const real_t dpy = m_slopes_y(is, js, ks, Hydro<dim>::IP, iOct_local);
+  const real_t duy = m_slopes_y(is, js, ks, Hydro<dim>::IU, iOct_local);
+  const real_t dvy = m_slopes_y(is, js, ks, Hydro<dim>::IV, iOct_local);
+  const real_t dwy = m_slopes_y(is, js, ks, Hydro<dim>::IW, iOct_local);
 
-  const real_t drz = m_slopes_z(is, js, ks, m_fm[Hydro::ID], iOct_local);
-  const real_t dpz = m_slopes_z(is, js, ks, m_fm[Hydro::IP], iOct_local);
-  const real_t duz = m_slopes_z(is, js, ks, m_fm[Hydro::IU], iOct_local);
-  const real_t dvz = m_slopes_z(is, js, ks, m_fm[Hydro::IV], iOct_local);
-  const real_t dwz = m_slopes_z(is, js, ks, m_fm[Hydro::IW], iOct_local);
+  const real_t drz = m_slopes_z(is, js, ks, Hydro<dim>::ID, iOct_local);
+  const real_t dpz = m_slopes_z(is, js, ks, Hydro<dim>::IP, iOct_local);
+  const real_t duz = m_slopes_z(is, js, ks, Hydro<dim>::IU, iOct_local);
+  const real_t dvz = m_slopes_z(is, js, ks, Hydro<dim>::IV, iOct_local);
+  const real_t dwz = m_slopes_z(is, js, ks, Hydro<dim>::IW, iOct_local);
 
   // reconstruct state on interface
   HydroState<3> qr;
@@ -280,18 +276,23 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::reconstruct_state_3d(const HydroSta
                        (-w * dpz - dwz * r * c * c) * dtdz;
     // clang-format on
 
-    qr[Hydro::ID] = r + HALF_F * sr0 + offsets[IX] * drx + offsets[IY] * dry + offsets[IZ] * drz;
-    qr[Hydro::IP] = p + HALF_F * sp0 + offsets[IX] * dpx + offsets[IY] * dpy + offsets[IZ] * dpz;
-    qr[Hydro::IU] = u + HALF_F * su0 + offsets[IX] * dux + offsets[IY] * duy + offsets[IZ] * duz;
-    qr[Hydro::IV] = v + HALF_F * sv0 + offsets[IX] * dvx + offsets[IY] * dvy + offsets[IZ] * dvz;
-    qr[Hydro::IW] = w + HALF_F * sw0 + offsets[IX] * dwx + offsets[IY] * dwy + offsets[IZ] * dwz;
+    qr[Hydro<dim>::ID] =
+      r + HALF_F * sr0 + offsets[IX] * drx + offsets[IY] * dry + offsets[IZ] * drz;
+    qr[Hydro<dim>::IP] =
+      p + HALF_F * sp0 + offsets[IX] * dpx + offsets[IY] * dpy + offsets[IZ] * dpz;
+    qr[Hydro<dim>::IU] =
+      u + HALF_F * su0 + offsets[IX] * dux + offsets[IY] * duy + offsets[IZ] * duz;
+    qr[Hydro<dim>::IV] =
+      v + HALF_F * sv0 + offsets[IX] * dvx + offsets[IY] * dvy + offsets[IZ] * dvz;
+    qr[Hydro<dim>::IW] =
+      w + HALF_F * sw0 + offsets[IX] * dwx + offsets[IY] * dwy + offsets[IZ] * dwz;
 
     // add gravity predictor step
     if (m_gravity_enabled)
     {
-      qr[Hydro::IU] += m_gravity_field[IX] * HALF_F * m_dt;
-      qr[Hydro::IV] += m_gravity_field[IY] * HALF_F * m_dt;
-      qr[Hydro::IW] += m_gravity_field[IZ] * HALF_F * m_dt;
+      qr[Hydro<dim>::IU] += m_gravity_field[IX] * HALF_F * m_dt;
+      qr[Hydro<dim>::IV] += m_gravity_field[IY] * HALF_F * m_dt;
+      qr[Hydro<dim>::IW] += m_gravity_field[IZ] * HALF_F * m_dt;
     }
 
     // add viscous force predictor
@@ -302,15 +303,15 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::reconstruct_state_3d(const HydroSta
   }
   else
   {
-    qr[Hydro::ID] = r + offsets[IX] * drx + offsets[IY] * dry + offsets[IZ] * drz;
-    qr[Hydro::IP] = p + offsets[IX] * dpx + offsets[IY] * dpy + offsets[IZ] * dpz;
-    qr[Hydro::IU] = u + offsets[IX] * dux + offsets[IY] * duy + offsets[IZ] * duz;
-    qr[Hydro::IV] = v + offsets[IX] * dvx + offsets[IY] * dvy + offsets[IZ] * dvz;
-    qr[Hydro::IW] = w + offsets[IX] * dwx + offsets[IY] * dwy + offsets[IZ] * dwz;
+    qr[Hydro<dim>::ID] = r + offsets[IX] * drx + offsets[IY] * dry + offsets[IZ] * drz;
+    qr[Hydro<dim>::IP] = p + offsets[IX] * dpx + offsets[IY] * dpy + offsets[IZ] * dpz;
+    qr[Hydro<dim>::IU] = u + offsets[IX] * dux + offsets[IY] * duy + offsets[IZ] * duz;
+    qr[Hydro<dim>::IV] = v + offsets[IX] * dvx + offsets[IY] * dvy + offsets[IZ] * dvz;
+    qr[Hydro<dim>::IW] = w + offsets[IX] * dwx + offsets[IY] * dwy + offsets[IZ] * dwz;
   }
 
-  qr[Hydro::ID] = fmax(smallr, qr[Hydro::ID]);
-  qr[Hydro::IP] = fmax(smallp * qr[Hydro::ID], qr[Hydro::IP]);
+  qr[Hydro<dim>::ID] = fmax(smallr, qr[Hydro<dim>::ID]);
+  qr[Hydro<dim>::IP] = fmax(smallp * qr[Hydro<dim>::ID], qr[Hydro<dim>::IP]);
 
   return qr;
 
@@ -331,29 +332,29 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::add_viscous_predictor_2d(HydroState
                                                                       real_t          dy) const
 {
   // kinematic viscosity
-  const auto nu = m_viscosity.mu / m_q(is, js, m_fm[Hydro::ID], iOct_local);
+  const auto nu = m_viscosity.mu / m_q(is, js, Hydro<dim>::ID, iOct_local);
 
   // IU
-  const auto d2udx2 = m_q(is + 1, js, m_fm[Hydro::IU], iOct_local) +
-                      m_q(is - 1, js, m_fm[Hydro::IU], iOct_local) -
-                      2 * m_q(is, js, m_fm[Hydro::IU], iOct_local);
-  qr[Hydro::IU] += HALF_F * nu * d2udx2 / dx * dtdx;
+  const auto d2udx2 = m_q(is + 1, js, Hydro<dim>::IU, iOct_local) +
+                      m_q(is - 1, js, Hydro<dim>::IU, iOct_local) -
+                      2 * m_q(is, js, Hydro<dim>::IU, iOct_local);
+  qr[Hydro<dim>::IU] += HALF_F * nu * d2udx2 / dx * dtdx;
 
-  const auto d2udy2 = m_q(is, js + 1, m_fm[Hydro::IU], iOct_local) +
-                      m_q(is, js - 1, m_fm[Hydro::IU], iOct_local) -
-                      2 * m_q(is, js, m_fm[Hydro::IU], iOct_local);
-  qr[Hydro::IU] += HALF_F * nu * d2udy2 / dy * dtdy;
+  const auto d2udy2 = m_q(is, js + 1, Hydro<dim>::IU, iOct_local) +
+                      m_q(is, js - 1, Hydro<dim>::IU, iOct_local) -
+                      2 * m_q(is, js, Hydro<dim>::IU, iOct_local);
+  qr[Hydro<dim>::IU] += HALF_F * nu * d2udy2 / dy * dtdy;
 
   // IV
-  const auto d2vdx2 = m_q(is + 1, js, m_fm[Hydro::IV], iOct_local) +
-                      m_q(is - 1, js, m_fm[Hydro::IV], iOct_local) -
-                      2 * m_q(is, js, m_fm[Hydro::IV], iOct_local);
-  qr[Hydro::IV] += HALF_F * nu * d2vdx2 / dx * dtdx;
+  const auto d2vdx2 = m_q(is + 1, js, Hydro<dim>::IV, iOct_local) +
+                      m_q(is - 1, js, Hydro<dim>::IV, iOct_local) -
+                      2 * m_q(is, js, Hydro<dim>::IV, iOct_local);
+  qr[Hydro<dim>::IV] += HALF_F * nu * d2vdx2 / dx * dtdx;
 
-  const auto d2vdy2 = m_q(is, js + 1, m_fm[Hydro::IV], iOct_local) +
-                      m_q(is, js - 1, m_fm[Hydro::IV], iOct_local) -
-                      2 * m_q(is, js, m_fm[Hydro::IV], iOct_local);
-  qr[Hydro::IV] += HALF_F * nu * d2vdy2 / dy * dtdy;
+  const auto d2vdy2 = m_q(is, js + 1, Hydro<dim>::IV, iOct_local) +
+                      m_q(is, js - 1, Hydro<dim>::IV, iOct_local) -
+                      2 * m_q(is, js, Hydro<dim>::IV, iOct_local);
+  qr[Hydro<dim>::IV] += HALF_F * nu * d2vdy2 / dy * dtdy;
 } // add_viscous_predictor_2d
 
 // ====================================================================
@@ -374,55 +375,55 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::add_viscous_predictor_3d(HydroState
                                                                       real_t          dz) const
 {
   // kinematic viscosity
-  const auto nu = m_viscosity.mu / m_q(is, js, ks, m_fm[Hydro::ID], iOct_local);
+  const auto nu = m_viscosity.mu / m_q(is, js, ks, Hydro<dim>::ID, iOct_local);
 
   // IU
-  const auto d2udx2 = m_q(is + 1, js, ks, m_fm[Hydro::IU], iOct_local) +
-                      m_q(is - 1, js, ks, m_fm[Hydro::IU], iOct_local) -
-                      2 * m_q(is, js, ks, m_fm[Hydro::IU], iOct_local);
-  qr[Hydro::IU] += HALF_F * nu * d2udx2 / dx * dtdx;
+  const auto d2udx2 = m_q(is + 1, js, ks, Hydro<dim>::IU, iOct_local) +
+                      m_q(is - 1, js, ks, Hydro<dim>::IU, iOct_local) -
+                      2 * m_q(is, js, ks, Hydro<dim>::IU, iOct_local);
+  qr[Hydro<dim>::IU] += HALF_F * nu * d2udx2 / dx * dtdx;
 
-  const auto d2udy2 = m_q(is, js + 1, ks, m_fm[Hydro::IU], iOct_local) +
-                      m_q(is, js - 1, ks, m_fm[Hydro::IU], iOct_local) -
-                      2 * m_q(is, js, ks, m_fm[Hydro::IU], iOct_local);
-  qr[Hydro::IU] += HALF_F * nu * d2udy2 / dy * dtdy;
+  const auto d2udy2 = m_q(is, js + 1, ks, Hydro<dim>::IU, iOct_local) +
+                      m_q(is, js - 1, ks, Hydro<dim>::IU, iOct_local) -
+                      2 * m_q(is, js, ks, Hydro<dim>::IU, iOct_local);
+  qr[Hydro<dim>::IU] += HALF_F * nu * d2udy2 / dy * dtdy;
 
-  const auto d2udz2 = m_q(is, js, ks + 1, m_fm[Hydro::IU], iOct_local) +
-                      m_q(is, js, ks - 1, m_fm[Hydro::IU], iOct_local) -
-                      2 * m_q(is, js, ks, m_fm[Hydro::IU], iOct_local);
-  qr[Hydro::IU] += HALF_F * nu * d2udz2 / dz * dtdz;
+  const auto d2udz2 = m_q(is, js, ks + 1, Hydro<dim>::IU, iOct_local) +
+                      m_q(is, js, ks - 1, Hydro<dim>::IU, iOct_local) -
+                      2 * m_q(is, js, ks, Hydro<dim>::IU, iOct_local);
+  qr[Hydro<dim>::IU] += HALF_F * nu * d2udz2 / dz * dtdz;
 
   // IV
-  const auto d2vdx2 = m_q(is + 1, js, ks, m_fm[Hydro::IV], iOct_local) +
-                      m_q(is - 1, js, ks, m_fm[Hydro::IV], iOct_local) -
-                      2 * m_q(is, js, ks, m_fm[Hydro::IV], iOct_local);
-  qr[Hydro::IV] += HALF_F * nu * d2vdx2 / dx * dtdx;
+  const auto d2vdx2 = m_q(is + 1, js, ks, Hydro<dim>::IV, iOct_local) +
+                      m_q(is - 1, js, ks, Hydro<dim>::IV, iOct_local) -
+                      2 * m_q(is, js, ks, Hydro<dim>::IV, iOct_local);
+  qr[Hydro<dim>::IV] += HALF_F * nu * d2vdx2 / dx * dtdx;
 
-  const auto d2vdy2 = m_q(is, js + 1, ks, m_fm[Hydro::IV], iOct_local) +
-                      m_q(is, js - 1, ks, m_fm[Hydro::IV], iOct_local) -
-                      2 * m_q(is, js, ks, m_fm[Hydro::IV], iOct_local);
-  qr[Hydro::IV] += HALF_F * nu * d2vdy2 / dy * dtdy;
+  const auto d2vdy2 = m_q(is, js + 1, ks, Hydro<dim>::IV, iOct_local) +
+                      m_q(is, js - 1, ks, Hydro<dim>::IV, iOct_local) -
+                      2 * m_q(is, js, ks, Hydro<dim>::IV, iOct_local);
+  qr[Hydro<dim>::IV] += HALF_F * nu * d2vdy2 / dy * dtdy;
 
-  const auto d2vdz2 = m_q(is, js, ks + 1, m_fm[Hydro::IV], iOct_local) +
-                      m_q(is, js, ks - 1, m_fm[Hydro::IV], iOct_local) -
-                      2 * m_q(is, js, ks, m_fm[Hydro::IV], iOct_local);
-  qr[Hydro::IV] += HALF_F * nu * d2vdz2 / dz * dtdz;
+  const auto d2vdz2 = m_q(is, js, ks + 1, Hydro<dim>::IV, iOct_local) +
+                      m_q(is, js, ks - 1, Hydro<dim>::IV, iOct_local) -
+                      2 * m_q(is, js, ks, Hydro<dim>::IV, iOct_local);
+  qr[Hydro<dim>::IV] += HALF_F * nu * d2vdz2 / dz * dtdz;
 
   // IW
-  const auto d2wdx2 = m_q(is + 1, js, ks, m_fm[Hydro::IW], iOct_local) +
-                      m_q(is - 1, js, ks, m_fm[Hydro::IW], iOct_local) -
-                      2 * m_q(is, js, ks, m_fm[Hydro::IW], iOct_local);
-  qr[Hydro::IW] += HALF_F * nu * d2wdx2 / dx * dtdx;
+  const auto d2wdx2 = m_q(is + 1, js, ks, Hydro<dim>::IW, iOct_local) +
+                      m_q(is - 1, js, ks, Hydro<dim>::IW, iOct_local) -
+                      2 * m_q(is, js, ks, Hydro<dim>::IW, iOct_local);
+  qr[Hydro<dim>::IW] += HALF_F * nu * d2wdx2 / dx * dtdx;
 
-  const auto d2wdy2 = m_q(is, js + 1, ks, m_fm[Hydro::IW], iOct_local) +
-                      m_q(is, js - 1, ks, m_fm[Hydro::IW], iOct_local) -
-                      2 * m_q(is, js, ks, m_fm[Hydro::IW], iOct_local);
-  qr[Hydro::IW] += HALF_F * nu * d2wdy2 / dy * dtdy;
+  const auto d2wdy2 = m_q(is, js + 1, ks, Hydro<dim>::IW, iOct_local) +
+                      m_q(is, js - 1, ks, Hydro<dim>::IW, iOct_local) -
+                      2 * m_q(is, js, ks, Hydro<dim>::IW, iOct_local);
+  qr[Hydro<dim>::IW] += HALF_F * nu * d2wdy2 / dy * dtdy;
 
-  const auto d2wdz2 = m_q(is, js, ks + 1, m_fm[Hydro::IW], iOct_local) +
-                      m_q(is, js, ks - 1, m_fm[Hydro::IW], iOct_local) -
-                      2 * m_q(is, js, ks, m_fm[Hydro::IW], iOct_local);
-  qr[Hydro::IW] += HALF_F * nu * d2wdz2 / dz * dtdz;
+  const auto d2wdz2 = m_q(is, js, ks + 1, Hydro<dim>::IW, iOct_local) +
+                      m_q(is, js, ks - 1, Hydro<dim>::IW, iOct_local) -
+                      2 * m_q(is, js, ks, Hydro<dim>::IW, iOct_local);
+  qr[Hydro<dim>::IW] += HALF_F * nu * d2wdz2 / dz * dtdz;
 } // add_viscous_predictor_3d
 
 // ====================================================================
@@ -521,13 +522,13 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::compute_fluxes_and_store_2d(
       qprim, is, js, iOct_local, offsets, dtdS_over_dV_cur, dtdS_over_dV_cur, dx, dx);
 
     // swap IU / IV
-    my_swap(qL[Hydro::IU], qL[Hydro::IV]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IV]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IV]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IV]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<2>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IV]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IV]);
 
     // step 4 : accumulate flux in current cell
     const auto flux_cur = flux * dtdS_over_dV_cur;
@@ -673,13 +674,13 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::compute_fluxes_and_store_3d(
                                    dx);
 
     // swap IU / IV
-    my_swap(qL[Hydro::IU], qL[Hydro::IV]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IV]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IV]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IV]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<3>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IV]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IV]);
 
     // step 4 : accumulate flux in current cell
     const auto flux_cur = flux * dtdS_over_dV_cur;
@@ -728,13 +729,13 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::compute_fluxes_and_store_3d(
                                    dx);
 
     // swap IU / IW
-    my_swap(qL[Hydro::IU], qL[Hydro::IW]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IW]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IW]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IW]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<3>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IW]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IW]);
 
     // step 4 : accumulate flux in current cell
     const auto flux_cur = flux * dtdS_over_dV_cur;

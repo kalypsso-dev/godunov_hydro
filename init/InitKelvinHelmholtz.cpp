@@ -22,7 +22,6 @@ template <size_t dim, typename device_t>
 void
 InitKelvinHelmholtzDataFunctor<dim, device_t>::apply(
   DataArrayBlock_t const &             Udata,
-  FieldMap<core::models::Hydro>        fm,
   orchard_key_view_t<device_t> const & orchard_keys,
   int32_t                              local_num_octants,
   HydroSettings const &                settings,
@@ -32,7 +31,7 @@ InitKelvinHelmholtzDataFunctor<dim, device_t>::apply(
 
   // data init functor
   InitKelvinHelmholtzDataFunctor functor(
-    Udata, fm, orchard_keys, local_num_octants, settings, khParams, config_map);
+    Udata, orchard_keys, local_num_octants, settings, khParams, config_map);
 
   // compute total number of cells
   const auto nbCellsPerLeaf = Udata.num_cells();
@@ -58,12 +57,6 @@ InitKelvinHelmholtzDataFunctor<dim, device_t>::operator()(const int32_t & global
   const auto cell_index = global_index - iOct * m_Udata.num_cells();
 
   const auto block_sizes = m_Udata.block_size();
-
-  constexpr auto ID = core::models::Hydro::ID;
-  constexpr auto IP = core::models::Hydro::IP;
-  constexpr auto IU = core::models::Hydro::IU;
-  constexpr auto IV = core::models::Hydro::IV;
-  constexpr auto IW = core::models::Hydro::IW;
 
   // Kelvin Helmholtz problem parameters
   const auto d_in = m_khParams.d_in;
@@ -128,10 +121,10 @@ InitKelvinHelmholtzDataFunctor<dim, device_t>::operator()(const int32_t & global
       u += ampl * (static_cast<real_t>(rand_gen.drand()) - HALF_F);
       v += ampl * (static_cast<real_t>(rand_gen.drand()) - HALF_F);
 
-      m_Udata(cell_index, m_fm[ID], iOct) = d;
-      m_Udata(cell_index, m_fm[IU], iOct) = d * u;
-      m_Udata(cell_index, m_fm[IV], iOct) = d * v;
-      m_Udata(cell_index, m_fm[IP], iOct) =
+      m_Udata(cell_index, Hydro<dim>::ID, iOct) = d;
+      m_Udata(cell_index, Hydro<dim>::IU, iOct) = d * u;
+      m_Udata(cell_index, Hydro<dim>::IV, iOct) = d * v;
+      m_Udata(cell_index, Hydro<dim>::IP, iOct) =
         m_eos_wrapper.volumic_eint_from_pressure(pressure, d) + HALF_F * d * (u * u + v * v);
 
       // free random number, so that it can be used by other threads later
@@ -157,10 +150,10 @@ InitKelvinHelmholtzDataFunctor<dim, device_t>::operator()(const int32_t & global
       const real_t u = v1 + ramp * (v2 - v1);
       const real_t v = w0 * sin(static_cast<real_t>(n) * PI_F * xyz[IX]);
 
-      m_Udata(cell_index, m_fm[ID], iOct) = d;
-      m_Udata(cell_index, m_fm[IU], iOct) = d * u;
-      m_Udata(cell_index, m_fm[IV], iOct) = d * v;
-      m_Udata(cell_index, m_fm[IP], iOct) =
+      m_Udata(cell_index, Hydro<dim>::ID, iOct) = d;
+      m_Udata(cell_index, Hydro<dim>::IU, iOct) = d * u;
+      m_Udata(cell_index, Hydro<dim>::IV, iOct) = d * v;
+      m_Udata(cell_index, Hydro<dim>::IP, iOct) =
         m_eos_wrapper.volumic_eint_from_pressure(pressure, d) + HALF_F * d * (u * u + v * v);
     }
     else if (m_khParams.p_sine_stone)
@@ -175,10 +168,10 @@ InitKelvinHelmholtzDataFunctor<dim, device_t>::operator()(const int32_t & global
       auto const u = HALF_F * tanh(ytilde / L);
       auto const v = ampl * cos(4 * PI_F * (xn - HALF_F)) * exp(-ytilde * ytilde / sigma / sigma);
 
-      m_Udata(cell_index, m_fm[ID], iOct) = d;
-      m_Udata(cell_index, m_fm[IU], iOct) = d * u;
-      m_Udata(cell_index, m_fm[IV], iOct) = d * v;
-      m_Udata(cell_index, m_fm[IP], iOct) =
+      m_Udata(cell_index, Hydro<dim>::ID, iOct) = d;
+      m_Udata(cell_index, Hydro<dim>::IU, iOct) = d * u;
+      m_Udata(cell_index, Hydro<dim>::IV, iOct) = d * v;
+      m_Udata(cell_index, Hydro<dim>::IP, iOct) =
         m_eos_wrapper.volumic_eint_from_pressure(pressure, d) + HALF_F * d * (u * u + v * v);
     }
   }
@@ -222,12 +215,13 @@ InitKelvinHelmholtzDataFunctor<dim, device_t>::operator()(const int32_t & global
       v += ampl * (static_cast<real_t>(rand_gen.drand()) - HALF_F);
       w += ampl * (static_cast<real_t>(rand_gen.drand()) - HALF_F);
 
-      m_Udata(cell_index, m_fm[ID], iOct) = d;
-      m_Udata(cell_index, m_fm[IU], iOct) = d * u;
-      m_Udata(cell_index, m_fm[IV], iOct) = d * v;
-      m_Udata(cell_index, m_fm[IW], iOct) = d * w;
-      m_Udata(cell_index, m_fm[IP], iOct) = m_eos_wrapper.volumic_eint_from_pressure(pressure, d) +
-                                            HALF_F * d * (u * u + v * v + w * w);
+      m_Udata(cell_index, Hydro<dim>::ID, iOct) = d;
+      m_Udata(cell_index, Hydro<dim>::IU, iOct) = d * u;
+      m_Udata(cell_index, Hydro<dim>::IV, iOct) = d * v;
+      m_Udata(cell_index, Hydro<dim>::IW, iOct) = d * w;
+      m_Udata(cell_index, Hydro<dim>::IP, iOct) =
+        m_eos_wrapper.volumic_eint_from_pressure(pressure, d) +
+        HALF_F * d * (u * u + v * v + w * w);
 
       // free random number, so that it can be used by other threads later
       m_rand_pool.free_state(rand_gen);
@@ -260,12 +254,13 @@ InitKelvinHelmholtzDataFunctor<dim, device_t>::operator()(const int32_t & global
       const real_t w = w0 * sin(static_cast<real_t>(n) * PI_F * xyz[IX]) *
                        sin(static_cast<real_t>(n) * PI_F * xyz[IY]);
 
-      m_Udata(cell_index, m_fm[ID], iOct) = d;
-      m_Udata(cell_index, m_fm[IU], iOct) = d * u;
-      m_Udata(cell_index, m_fm[IV], iOct) = d * v;
-      m_Udata(cell_index, m_fm[IW], iOct) = d * w;
-      m_Udata(cell_index, m_fm[IP], iOct) = m_eos_wrapper.volumic_eint_from_pressure(pressure, d) +
-                                            HALF_F * d * (u * u + v * v + w * w);
+      m_Udata(cell_index, Hydro<dim>::ID, iOct) = d;
+      m_Udata(cell_index, Hydro<dim>::IU, iOct) = d * u;
+      m_Udata(cell_index, Hydro<dim>::IV, iOct) = d * v;
+      m_Udata(cell_index, Hydro<dim>::IW, iOct) = d * w;
+      m_Udata(cell_index, Hydro<dim>::IP, iOct) =
+        m_eos_wrapper.volumic_eint_from_pressure(pressure, d) +
+        HALF_F * d * (u * u + v * v + w * w);
     }
     else if (m_khParams.p_sine_stone)
     {
@@ -280,12 +275,13 @@ InitKelvinHelmholtzDataFunctor<dim, device_t>::operator()(const int32_t & global
       auto const v = ampl * cos(4 * PI_F * (xn - HALF_F)) * exp(-ytilde * ytilde / sigma / sigma);
       auto const w = ZERO_F;
 
-      m_Udata(cell_index, m_fm[ID], iOct) = d;
-      m_Udata(cell_index, m_fm[IU], iOct) = d * u;
-      m_Udata(cell_index, m_fm[IV], iOct) = d * v;
-      m_Udata(cell_index, m_fm[IW], iOct) = d * w;
-      m_Udata(cell_index, m_fm[IP], iOct) = m_eos_wrapper.volumic_eint_from_pressure(pressure, d) +
-                                            HALF_F * d * (u * u + v * v + w * w);
+      m_Udata(cell_index, Hydro<dim>::ID, iOct) = d;
+      m_Udata(cell_index, Hydro<dim>::IU, iOct) = d * u;
+      m_Udata(cell_index, Hydro<dim>::IV, iOct) = d * v;
+      m_Udata(cell_index, Hydro<dim>::IW, iOct) = d * w;
+      m_Udata(cell_index, Hydro<dim>::IP, iOct) =
+        m_eos_wrapper.volumic_eint_from_pressure(pressure, d) +
+        HALF_F * d * (u * u + v * v + w * w);
     }
   }
 } // end InitKelvinHelmholtzDataFunctor::operator ()
@@ -299,7 +295,6 @@ template <size_t dim, typename device_t>
 void
 InitKelvinHelmholtzRefineFunctor<dim, device_t>::apply(
   DataArrayBlock_t const &             Udata,
-  FieldMap<core::models::Hydro>        fm,
   orchard_key_view_t<device_t> const & orchard_keys,
   amrflags_view_t const &              amrflags,
   int32_t                              local_num_octants,
@@ -310,15 +305,8 @@ InitKelvinHelmholtzRefineFunctor<dim, device_t>::apply(
   auto khParams = KHParams(config_map);
 
   // iterate functor for refinement
-  InitKelvinHelmholtzRefineFunctor functor(Udata,
-                                           fm,
-                                           orchard_keys,
-                                           amrflags,
-                                           local_num_octants,
-                                           settings,
-                                           khParams,
-                                           level_refine,
-                                           config_map);
+  InitKelvinHelmholtzRefineFunctor functor(
+    Udata, orchard_keys, amrflags, local_num_octants, settings, khParams, level_refine, config_map);
 
   const auto refine_type = core::get_init_indicator(config_map);
 
@@ -440,7 +428,6 @@ InitKelvinHelmholtz<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & so
 
   // first init of Udata
   InitKelvinHelmholtzDataFunctor<dim, device_t>::apply(solver.U(),
-                                                       solver.hydro().get_fieldmap(),
                                                        solver.mesh_map()->orchard_keys(),
                                                        solver.amr_mesh()->local_num_quadrants(),
                                                        settings,
@@ -464,7 +451,6 @@ InitKelvinHelmholtz<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & so
       // 2. update Udata
       //
       InitKelvinHelmholtzDataFunctor<dim, device_t>::apply(solver.U(),
-                                                           solver.hydro().get_fieldmap(),
                                                            solver.mesh_map()->orchard_keys(),
                                                            solver.amr_mesh()->local_num_quadrants(),
                                                            settings,
@@ -494,7 +480,6 @@ InitKelvinHelmholtz<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & so
       //
       InitKelvinHelmholtzRefineFunctor<dim, device_t>::apply(
         solver.U(),
-        solver.hydro().get_fieldmap(),
         solver.mesh_map()->orchard_keys(),
         flags_d,
         solver.amr_mesh()->local_num_quadrants(),
@@ -528,7 +513,6 @@ InitKelvinHelmholtz<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & so
       // 6. update Udata
       //
       InitKelvinHelmholtzDataFunctor<dim, device_t>::apply(solver.U(),
-                                                           solver.hydro().get_fieldmap(),
                                                            solver.mesh_map()->orchard_keys(),
                                                            solver.amr_mesh()->local_num_quadrants(),
                                                            settings,

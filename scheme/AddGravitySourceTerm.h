@@ -11,10 +11,9 @@
 
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
-#include <kalypsso/core/FieldMap.h>
-#include <kalypsso/core/models/utils_hydro.h> // for computePrimitives
+#include <kalypsso/core/models/utils_hydro.h>      // for computePrimitives
 #include <kalypsso/core/GravityField.h>
-
+#include <godunov_hydro/common.h>
 
 namespace kalypsso
 {
@@ -41,9 +40,6 @@ public:
   //! our kokkos execution space
   using exec_space = typename device_t::execution_space;
 
-  // makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
-
   //! global cell index
   using index_t = int32_t;
 
@@ -57,9 +53,6 @@ private:
   //! conservative variables right after hydro update (will be modified here)
   DataArrayBlock_t m_Unew;
 
-  //! field manager
-  FieldMap<core::models::Hydro> m_fm;
-
   //! number of cells per leaf
   const int32_t m_nbCellsPerLeaf;
 
@@ -67,15 +60,13 @@ private:
   const real_t m_dt;
 
 public:
-  AddGravitySourceTerm(Kokkos::Array<real_t, dim> const &    grav,
-                       DataArrayBlock_t const &              Uold,
-                       DataArrayBlock_t const &              Unew,
-                       FieldMap<core::models::Hydro> const & fm,
-                       real_t                                dt)
+  AddGravitySourceTerm(Kokkos::Array<real_t, dim> const & grav,
+                       DataArrayBlock_t const &           Uold,
+                       DataArrayBlock_t const &           Unew,
+                       real_t                             dt)
     : m_grav(grav)
     , m_Uold(Uold)
     , m_Unew(Unew)
-    , m_fm(fm)
     , m_nbCellsPerLeaf(Uold.num_cells())
     , m_dt(dt){};
 
@@ -85,16 +76,14 @@ public:
   //!
   //! \param[in] Uold is conservative variables array at beginning of time step
   //! \param[in,out] Unew is conservative variables array after hydro step
-  //! \param[in] fm is the field map
   //! \param[in] local_num_octant is the local (current MPI proc) number of octants
   //! \param[in] dt is time step
   static void
-  apply(ConfigMap const &                     config_map,
-        DataArrayBlock_t const &              Uold,
-        DataArrayBlock_t const &              Unew,
-        FieldMap<core::models::Hydro> const & fm,
-        int32_t                               local_num_octants,
-        real_t                                dt);
+  apply(ConfigMap const &        config_map,
+        DataArrayBlock_t const & Uold,
+        DataArrayBlock_t const & Unew,
+        int32_t                  local_num_octants,
+        real_t                   dt);
 
   // // ====================================================================
   // // ====================================================================

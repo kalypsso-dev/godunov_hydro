@@ -124,9 +124,6 @@ public:
 
   using DataArrayBlock_t = DataArrayBlock<dim, real_t, device_t>;
 
-  // makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
-
   // ==============================================================
   // ==============================================================
   /** Fill outside octant cells.
