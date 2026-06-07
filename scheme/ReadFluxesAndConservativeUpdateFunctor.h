@@ -14,14 +14,10 @@
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
 #include <kalypsso/core/orchard_key_base.h>
 #include <kalypsso/core/amr_hashmap.h>
-#include <kalypsso/core/models/HydroState.h>
 #include <kalypsso/core/models/RiemannSolvers.h>
 #include <kalypsso/core/ConformalFaceStatus.h>
 #include <kalypsso/core/StencilHelper.h>
 #include <kalypsso/core/AMRMeshInfo.h>
-
-// utils hydro
-#include <kalypsso/core/models/utils_hydro.h>
 
 #include <type_traits>
 

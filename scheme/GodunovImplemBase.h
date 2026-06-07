@@ -19,8 +19,6 @@
 #include <kalypsso/core/MeshMap.h>
 #include <kalypsso/core/config_utils.h> // for get_block_sizes
 
-#include <kalypsso/core/models/Hydro.h>
-
 #include <kalypsso/core/ViscosityParams.h>
 
 #include <kalypsso/utils/monitoring/ProfilingManager.h>

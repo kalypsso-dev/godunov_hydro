@@ -15,8 +15,8 @@
 #include <kalypsso/utils/mpi/ParallelEnv.h>
 
 // hydro utils (conservative versus primitive variable, equation of state, ...)
-#include <kalypsso/core/models/HydroState.h>
-#include <kalypsso/core/models/utils_hydro.h>
+#include <godunov_hydro/models/HydroState.h>
+#include <godunov_hydro/models/utils_hydro.h>
 #include <kalypsso/core/utils_block.h>
 
 #include <godunov_hydro/models/Hydro.h>

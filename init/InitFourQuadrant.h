@@ -12,8 +12,6 @@
 
 #include <kalypsso/core/problems/FourQuadrantParams.h>
 #include <kalypsso/core/problems/initRiemannConfig2d.h>
-#include <kalypsso/core/models/HydroState.h>
-
 #include <kalypsso/core/problems/init_cond_utils.h>
 
 namespace kalypsso

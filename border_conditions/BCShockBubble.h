@@ -27,7 +27,6 @@
 
 #include <kalypsso/core/problems/ShockBubbleParams.h>
 
-#include <kalypsso/core/models/Hydro.h>
 #include <godunov_hydro/eos/EosWrapper.h>
 #include <godunov_hydro/common.h>
 

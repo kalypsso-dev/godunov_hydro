@@ -9,12 +9,11 @@
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_LIMITED_SLOPES_H_
 
 #include <godunov_hydro/common.h>
+
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
 
 // hydro utils (conservative versus primitive variable, equation of state, ...)
-#include <kalypsso/core/models/HydroState.h>
-#include <kalypsso/core/models/utils_hydro.h>
 #include <kalypsso/core/utils_block.h>
 
 namespace kalypsso
@@ -57,7 +56,7 @@ public:
   using DataArrayGhostedBlock_t = DataArrayGhostedBlock<dim, real_t, device_t>;
 
   // makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
+  using Hydro = models::Hydro<dim>;
 
 private:
   //! a ghosted block array of primitive variables (ghost width is 2)

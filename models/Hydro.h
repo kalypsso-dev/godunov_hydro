@@ -46,6 +46,19 @@ public:
     VARID_COUNT = HYDRO_VARID_COUNT /*!< invalid index, just counting number of fields */
   };
 
+  enum GradTensorId : Id_t
+  {
+    IUX = 0, /*!< du/dx */
+    IUY = 1, /*!< du/dy */
+    IUZ = 2, /*!< du/dz */
+    IVX = 3, /*!< dv/dx */
+    IVY = 4, /*!< dv/dy */
+    IVZ = 5, /*!< dv/dz */
+    IWX = 6, /*!< dw/dx */
+    IWY = 7, /*!< dw/dy */
+    IWZ = 8, /*!< dw/dz */
+  };
+
   using var_names_t = std::array<std::string, static_cast<size_t>(VARID_COUNT)>;
   static const var_names_t ID_TO_NAMES;
 

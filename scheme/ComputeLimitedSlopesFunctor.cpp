@@ -153,7 +153,7 @@ ComputeLimitedSlopesFunctor<dim, device_t>::compute_limited_slopes(index_t const
     auto const & i = coord[IX];
     auto const & j = coord[IY];
 
-    for (int ivar = 0; ivar < nbvar_hydro<dim>(); ++ivar)
+    for (size_t ivar = 0; ivar < Hydro::nbvar(); ++ivar)
     {
       // clang-format off
       m_slopes_x(i, j, ivar, iOct_out) = slope_unsplit_scalar(m_q(i + 0, j, ivar, iOct_in),
@@ -172,7 +172,7 @@ ComputeLimitedSlopesFunctor<dim, device_t>::compute_limited_slopes(index_t const
     auto const & j = coord[IY];
     auto const & k = coord[IZ];
 
-    for (int ivar = 0; ivar < nbvar_hydro<dim>(); ++ivar)
+    for (size_t ivar = 0; ivar < Hydro::nbvar(); ++ivar)
     {
       m_slopes_x(i, j, k, ivar, iOct_out) = slope_unsplit_scalar(m_q(i + 0, j, k, ivar, iOct_in),
                                                                  m_q(i + 1, j, k, ivar, iOct_in),

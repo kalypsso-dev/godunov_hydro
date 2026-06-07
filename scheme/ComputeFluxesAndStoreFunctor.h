@@ -9,12 +9,12 @@
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_FLUXES_AND_STORE_FUNCTOR_H_
 
 #include <godunov_hydro/common.h>
+
 #include <kalypsso/core/kalypsso_core_base.h> // for assertm
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
 #include <kalypsso/core/orchard_key_base.h>
 #include <kalypsso/core/amr_hashmap.h>
-#include <kalypsso/core/models/HydroState.h>
 #include <kalypsso/core/models/RiemannSolvers.h>
 #include <kalypsso/core/ConformalFaceStatus.h>
 #include <kalypsso/core/StencilHelper.h>
@@ -22,9 +22,6 @@
 #include <kalypsso/core/GravityField.h>
 #include <kalypsso/core/ViscosityParams.h>
 #include <kalypsso/core/TimeIntegratorConfig.h>
-
-// utils hydro
-#include <kalypsso/core/models/utils_hydro.h>
 
 // equation of state wrapper
 #include <godunov_hydro/eos/EosWrapper.h>

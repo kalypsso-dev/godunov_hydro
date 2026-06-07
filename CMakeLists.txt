@@ -40,6 +40,7 @@ set(GODUNOV_HYDRO_SRCS
     init/InitWoodward.cpp
     init/InitWoodward.h
     models/Hydro.h
+    models/HydroState.h
     models/utils_hydro.h
     profiling.h
     scheme/AddGravitySourceTerm.cpp

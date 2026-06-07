@@ -13,9 +13,7 @@
 
 #include <kalypsso/core/kalypsso_core_config.h>
 #include <kalypsso/core/DataArrayBlock.h>
-#include <kalypsso/core/models/Hydro.h>
 #include <kalypsso/core/models/HydroSettings.h>
-#include <kalypsso/core/models/HydroState.h>
 #include <kalypsso/core/orchard_key_base.h>
 #include <kalypsso/core/amr_hashmap.h>
 #include <kalypsso/core/AMRContext.h>
@@ -23,6 +21,8 @@
 
 #include <godunov_hydro/eos/EosWrapper.h>
 #include <godunov_hydro/models/Hydro.h>
+#include <godunov_hydro/models/HydroState.h>
+#include <godunov_hydro/models/utils_hydro.h>
 
 #include <../better-enums/enum.h>
 

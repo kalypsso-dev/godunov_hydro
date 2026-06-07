@@ -24,7 +24,6 @@
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/AMRmesh.h>
 #include <kalypsso/core/MeshMap.h>
-#include <kalypsso/core/models/Hydro.h>
 #include <kalypsso/utils/mpi/ParallelEnv.h>
 #include <kalypsso/core/utils_block.h>
 #include <kalypsso/core/TimeIntegratorConfig.h>

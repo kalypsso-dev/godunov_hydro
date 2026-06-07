@@ -12,9 +12,10 @@
 
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/HydroParams.h>
-#include <kalypsso/core/models/Hydro.h>
-#include <kalypsso/core/models/HydroState.h>
 #include <kalypsso/core/models/HydroSettings.h>
+
+#include <godunov_hydro/models/Hydro.h>
+#include <godunov_hydro/models/HydroState.h>
 #include <godunov_hydro/eos/EosWrapper.h>
 
 namespace kalypsso
@@ -39,7 +40,7 @@ template <size_t dim>
 KOKKOS_INLINE_FUNCTION real_t
 compute_ekin_from_primitives(const HydroState<dim> & q)
 {
-  using Hydro = core::models::Hydro;
+  using Hydro = models::Hydro<dim>;
 
   real_t ekin = q[Hydro::IU] * q[Hydro::IU] + q[Hydro::IV] * q[Hydro::IV];
   if constexpr (dim == 3)
@@ -66,7 +67,7 @@ KOKKOS_INLINE_FUNCTION HydroState<dim>
                                           eos::EosWrapper<device_t> const & eos,
                                           bool &                            valid)
 {
-  using Hydro = core::models::Hydro;
+  using Hydro = models::Hydro<dim>;
 
   real_t smallr = settings.smallr;
 
@@ -155,7 +156,7 @@ KOKKOS_INLINE_FUNCTION HydroState<dim>
                                                       eos::EosWrapper<device_t> const & eos,
                                                       bool &                            valid)
 {
-  using Hydro = core::models::Hydro;
+  using Hydro = models::Hydro<dim>;
 
   real_t smallr = settings.smallr;
 

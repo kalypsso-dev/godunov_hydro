@@ -8,19 +8,16 @@
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_DT_HYDRO_FUNCTOR_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_DT_HYDRO_FUNCTOR_H_
 
+#include <godunov_hydro/common.h>
+
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
 #include <kalypsso/core/orchard_key_base.h>
-
-// hydro utils (conservative versus primitive variable, equation of state, ...)
-#include <kalypsso/core/models/HydroState.h>
-#include <kalypsso/core/models/utils_hydro.h>
 #include <kalypsso/core/utils_block.h>
 #include <kalypsso/core/GravityField.h>
 #include <kalypsso/core/ViscosityParams.h>
 
 #include <godunov_hydro/eos/EosWrapper.h>
-#include <godunov_hydro/common.h>
 
 namespace kalypsso
 {

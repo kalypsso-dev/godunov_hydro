@@ -9,19 +9,16 @@
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_VISCOUS_FLUXES_AND_STORE_FUNCTOR_H_
 
 #include <godunov_hydro/common.h>
+
 #include <kalypsso/core/kalypsso_core_base.h> // for assertm
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
 #include <kalypsso/core/orchard_key_base.h>
 #include <kalypsso/core/amr_hashmap.h>
-#include <kalypsso/core/models/HydroState.h>
 #include <kalypsso/core/ConformalFaceStatus.h>
 #include <kalypsso/core/StencilHelper.h>
 #include <kalypsso/core/AMRMeshInfo.h>
 #include <kalypsso/core/ViscosityParams.h>
-
-// utils hydro
-#include <kalypsso/core/models/utils_hydro.h>
 
 #include <type_traits>
 
@@ -59,7 +56,7 @@ public:
   using DataArrayGhostedBlock_t = DataArrayGhostedBlock<dim, real_t, device_t>;
 
   // makes enum Hydro::GradId available
-  using Grad = kalypsso::core::models::Hydro::GradTensorId;
+  using Grad = typename models::Hydro<dim>::GradTensorId;
 
   // access quadrant <-> orchard key (hence AMR level and quadrant size)
   using orchard_key_view_t = typename orchard_key_base_t<device_t>::view_t;

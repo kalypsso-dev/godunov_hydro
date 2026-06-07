@@ -12,7 +12,7 @@
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
 
-#include <kalypsso/core/models/HydroState.h>
+#include <godunov_hydro/models/HydroState.h>
 #include <godunov_hydro/models/utils_hydro.h> // for primitive/conservative variables conversion
 #include <godunov_hydro/models/Hydro.h>
 
