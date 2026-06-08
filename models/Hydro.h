@@ -1,12 +1,12 @@
-// SPDX-FileCopyrightText: 2025 kalypsso-dev/godunov_five_eq authors
+// SPDX-FileCopyrightText: 2025 kalypsso-dev/godunov_hydro authors
 //
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 /**
  * \file Hydro.h
  */
-#ifndef KALYPSSO_GODUNOV_HYDRO_MODELS_FIVE_EQ_H_
-#define KALYPSSO_GODUNOV_HYDRO_MODELS_FIVE_EQ_H_
+#ifndef KALYPSSO_GODUNOV_HYDRO_MODELS_HYDRO_H_
+#define KALYPSSO_GODUNOV_HYDRO_MODELS_HYDRO_H_
 
 #include <kalypsso/core/kokkos_shared.h>
 
@@ -32,7 +32,7 @@ public:
   using Id_t = int32_t;
 
   /**
-   * Five equations models field ids
+   * Euler equations models field ids
    */
   enum VarId : Id_t
   {
@@ -109,4 +109,4 @@ const typename Hydro<dim>::var_names_t Hydro<dim>::ID_TO_NAMES = Hydro<dim>::get
 
 } // namespace kalypsso
 
-#endif // KALYPSSO_GODUNOV_HYDRO_MODELS_FIVE_EQ_H_
+#endif // KALYPSSO_GODUNOV_HYDRO_MODELS_HYDRO_H_

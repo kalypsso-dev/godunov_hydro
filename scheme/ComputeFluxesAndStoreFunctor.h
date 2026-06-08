@@ -15,7 +15,6 @@
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
 #include <kalypsso/core/orchard_key_base.h>
 #include <kalypsso/core/amr_hashmap.h>
-#include <kalypsso/core/models/RiemannSolvers.h>
 #include <kalypsso/core/ConformalFaceStatus.h>
 #include <kalypsso/core/StencilHelper.h>
 #include <kalypsso/core/AMRMeshInfo.h>
@@ -25,6 +24,7 @@
 
 // equation of state wrapper
 #include <godunov_hydro/eos/EosWrapper.h>
+#include <godunov_hydro/models/RiemannSolvers.h>
 
 #include <type_traits>
 

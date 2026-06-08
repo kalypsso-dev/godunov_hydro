@@ -18,11 +18,11 @@
 #include <kalypsso/core/orchard_key_base.h>
 #include <kalypsso/core/amr_hashmap.h>
 #include <kalypsso/core/Kokkos_Array_extensions.h>
-#include <kalypsso/core/models/RiemannSolvers.h>
 #include <kalypsso/core/GravityField.h>
 
 // equation of state wrapper
 #include <godunov_hydro/eos/EosWrapper.h>
+#include <godunov_hydro/models/RiemannSolvers.h>
 
 #include <type_traits>
 
