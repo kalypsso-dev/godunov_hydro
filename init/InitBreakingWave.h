@@ -65,9 +65,6 @@ private:
   //! BreakingWave problem specific parameters (used on device)
   BreakingWaveParams m_bwParams;
 
-  //! field manager
-  FieldMap<core::models::Hydro> m_fm;
-
   //! get geometrical scaling factor
   const real_t m_scaling_factor;
 
@@ -85,7 +82,6 @@ private:
                               int32_t                              local_num_octants,
                               HydroSettings const &                settings,
                               BreakingWaveParams const &           bwParams,
-                              FieldMap<core::models::Hydro>        fm,
                               real_t                               t_eval,
                               ConfigMap const &                    config_map)
     : m_Udata(Udata)
@@ -93,7 +89,6 @@ private:
     , m_local_num_octants(local_num_octants)
     , m_settings(settings)
     , m_bwParams(bwParams)
-    , m_fm(fm)
     , m_scaling_factor(get_scaling_factor(config_map))
     , m_xyz_min(get_xyz_min<dim>(config_map))
     , m_t_eval(t_eval){};
@@ -105,7 +100,6 @@ public:
         orchard_key_view_t<device_t> const & orchard_keys,
         int32_t                              local_num_octants,
         HydroSettings const &                settings,
-        FieldMap<core::models::Hydro>        fm,
         real_t                               t_eval,
         ConfigMap const &                    config_map);
 

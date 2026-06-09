@@ -19,22 +19,19 @@ namespace godunov_hydro
 // ====================================================================
 // ====================================================================
 template <size_t dim, typename device_t>
-ComputeDtHydroFunctor<dim, device_t>::ComputeDtHydroFunctor(
-  ConfigMap const &                     config_map,
-  orchard_key_view_t const &            orchard_keys,
-  int32_t                               local_num_octants,
-  HydroSettings const &                 hydro_settings,
-  FieldMap<core::models::Hydro> const & fm,
-  block_size_t<dim> const &             block_sizes,
-  DataArrayBlock_t const &              Udata,
-  eos::EosWrapper<device_t> const &     eos,
-  bool                                  gravity_enabled,
-  UniformGravityField<dim>              gravity_field)
+ComputeDtHydroFunctor<dim, device_t>::ComputeDtHydroFunctor(ConfigMap const &          config_map,
+                                                            orchard_key_view_t const & orchard_keys,
+                                                            int32_t               local_num_octants,
+                                                            HydroSettings const & hydro_settings,
+                                                            block_size_t<dim> const & block_sizes,
+                                                            DataArrayBlock_t const &  Udata,
+                                                            eos::EosWrapper<device_t> const & eos,
+                                                            bool gravity_enabled,
+                                                            UniformGravityField<dim> gravity_field)
   : m_orchard_keys(orchard_keys)
   , m_local_num_octants(local_num_octants)
   , m_hydro_settings(hydro_settings)
   , m_viscosity_params(config_map)
-  , m_fm(fm)
   , m_block_sizes(block_sizes)
   , m_nbCellsPerLeaf(Udata.num_cells())
   , m_scaling_factor(get_scaling_factor(config_map))
@@ -48,15 +45,14 @@ ComputeDtHydroFunctor<dim, device_t>::ComputeDtHydroFunctor(
 // ====================================================================
 template <size_t dim, typename device_t>
 void
-ComputeDtHydroFunctor<dim, device_t>::apply(ConfigMap const &                     config_map,
-                                            orchard_key_view_t const &            orchard_keys,
-                                            int32_t                               local_num_octants,
-                                            HydroSettings const &                 hydro_settings,
-                                            FieldMap<core::models::Hydro> const & fm,
-                                            block_size_t<dim> const &             block_sizes,
-                                            DataArrayBlock_t const &              Udata,
-                                            eos::EosWrapper<device_t> const &     eos,
-                                            real_t &                              invDt)
+ComputeDtHydroFunctor<dim, device_t>::apply(ConfigMap const &                 config_map,
+                                            orchard_key_view_t const &        orchard_keys,
+                                            int32_t                           local_num_octants,
+                                            HydroSettings const &             hydro_settings,
+                                            block_size_t<dim> const &         block_sizes,
+                                            DataArrayBlock_t const &          Udata,
+                                            eos::EosWrapper<device_t> const & eos,
+                                            real_t &                          invDt)
 {
   const auto gravity_enabled = config_map.getBool("gravity", "enabled", false);
   const auto gravity_field = get_uniform_gravity_vector<dim>(config_map);
@@ -65,7 +61,6 @@ ComputeDtHydroFunctor<dim, device_t>::apply(ConfigMap const &                   
                                 orchard_keys,
                                 local_num_octants,
                                 hydro_settings,
-                                fm,
                                 block_sizes,
                                 Udata,
                                 eos,
@@ -104,25 +99,25 @@ ComputeDtHydroFunctor<dim, device_t>::compute_cfl(int32_t const & iOct,
   const auto dx = compute_cell_length<dim>(level, m_block_sizes[IX]) * m_scaling_factor;
 
   // get conservative variable in current cell
-  uLoc[Hydro::ID] = m_Udata(cell_index, m_fm[Hydro::ID], iOct);
-  uLoc[Hydro::IP] = m_Udata(cell_index, m_fm[Hydro::IP], iOct);
-  uLoc[Hydro::IU] = m_Udata(cell_index, m_fm[Hydro::IU], iOct);
-  uLoc[Hydro::IV] = m_Udata(cell_index, m_fm[Hydro::IV], iOct);
+  uLoc[Hydro<dim>::ID] = m_Udata(cell_index, Hydro<dim>::ID, iOct);
+  uLoc[Hydro<dim>::IP] = m_Udata(cell_index, Hydro<dim>::IP, iOct);
+  uLoc[Hydro<dim>::IU] = m_Udata(cell_index, Hydro<dim>::IU, iOct);
+  uLoc[Hydro<dim>::IV] = m_Udata(cell_index, Hydro<dim>::IV, iOct);
   if constexpr (dim == 3)
-    uLoc[Hydro::IW] = m_Udata(cell_index, m_fm[Hydro::IW], iOct);
+    uLoc[Hydro<dim>::IW] = m_Udata(cell_index, Hydro<dim>::IW, iOct);
 
   // get primitive variables in current cell
   const auto qLoc =
     godunov_hydro::models::compute_primitives<dim, device_t>(uLoc, m_hydro_settings, m_eos);
 
   // get speed of sound
-  const auto c = m_eos.sound_speed(qLoc[Hydro::IP], qLoc[Hydro::ID]);
+  const auto c = m_eos.sound_speed(qLoc[Hydro<dim>::IP], qLoc[Hydro<dim>::ID]);
 
   // compute velocity
-  v[IX] = c + fabs(qLoc[Hydro::IU]);
-  v[IY] = c + fabs(qLoc[Hydro::IV]);
+  v[IX] = c + fabs(qLoc[Hydro<dim>::IU]);
+  v[IY] = c + fabs(qLoc[Hydro<dim>::IV]);
   if constexpr (dim == 3)
-    v[IZ] = c + fabs(qLoc[Hydro::IW]);
+    v[IZ] = c + fabs(qLoc[Hydro<dim>::IW]);
 
   // update cfl
   if constexpr (dim == 2)
@@ -133,7 +128,7 @@ ComputeDtHydroFunctor<dim, device_t>::compute_cfl(int32_t const & iOct,
 
   if (m_viscosity_params.enabled)
   {
-    const auto nu = m_viscosity_params.mu / uLoc[Hydro::ID];
+    const auto nu = m_viscosity_params.mu / uLoc[Hydro<dim>::ID];
     invDt = fmax(invDt, 4 * nu / (dx * dx));
   }
 
@@ -156,26 +151,26 @@ ComputeDtHydroFunctor<dim, device_t>::compute_cfl_with_gravity(int32_t const & i
   const auto dx = compute_cell_length<dim>(level, m_block_sizes[IX]) * m_scaling_factor;
 
   // get conservative variable in current cell
-  uLoc[Hydro::ID] = m_Udata(cell_index, m_fm[Hydro::ID], iOct);
-  uLoc[Hydro::IP] = m_Udata(cell_index, m_fm[Hydro::IP], iOct);
-  uLoc[Hydro::IU] = m_Udata(cell_index, m_fm[Hydro::IU], iOct);
-  uLoc[Hydro::IV] = m_Udata(cell_index, m_fm[Hydro::IV], iOct);
+  uLoc[Hydro<dim>::ID] = m_Udata(cell_index, Hydro<dim>::ID, iOct);
+  uLoc[Hydro<dim>::IP] = m_Udata(cell_index, Hydro<dim>::IP, iOct);
+  uLoc[Hydro<dim>::IU] = m_Udata(cell_index, Hydro<dim>::IU, iOct);
+  uLoc[Hydro<dim>::IV] = m_Udata(cell_index, Hydro<dim>::IV, iOct);
   if constexpr (dim == 3)
-    uLoc[Hydro::IW] = m_Udata(cell_index, m_fm[Hydro::IW], iOct);
+    uLoc[Hydro<dim>::IW] = m_Udata(cell_index, Hydro<dim>::IW, iOct);
 
   // get primitive variables in current cell
   const auto qLoc =
     godunov_hydro::models::compute_primitives<dim, device_t>(uLoc, m_hydro_settings, m_eos);
 
   // get speed of sound
-  const auto c = m_eos.sound_speed(qLoc[Hydro::IP], qLoc[Hydro::ID]);
+  const auto c = m_eos.sound_speed(qLoc[Hydro<dim>::IP], qLoc[Hydro<dim>::ID]);
 
   real_t velocity = ZERO_F;
-  velocity += c + fabs(qLoc[Hydro::IU]);
-  velocity += c + fabs(qLoc[Hydro::IV]);
+  velocity += c + fabs(qLoc[Hydro<dim>::IU]);
+  velocity += c + fabs(qLoc[Hydro<dim>::IV]);
   if constexpr (dim == 3)
   {
-    velocity += c + fabs(qLoc[Hydro::IW]);
+    velocity += c + fabs(qLoc[Hydro<dim>::IW]);
   }
 
   /* Due to the gravitational acceleration, the CFL condition
@@ -204,7 +199,7 @@ ComputeDtHydroFunctor<dim, device_t>::compute_cfl_with_gravity(int32_t const & i
 
   if (m_viscosity_params.enabled)
   {
-    const auto nu = m_viscosity_params.mu / uLoc[Hydro::ID];
+    const auto nu = m_viscosity_params.mu / uLoc[Hydro<dim>::ID];
     invDt = fmax(invDt, 4 * nu / (dx * dx));
   }
 

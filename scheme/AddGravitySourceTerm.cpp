@@ -18,17 +18,16 @@ namespace godunov_hydro
 // ====================================================================
 template <size_t dim, typename device_t>
 void
-AddGravitySourceTerm<dim, device_t>::apply(ConfigMap const &                     config_map,
-                                           DataArrayBlock_t const &              Uold,
-                                           DataArrayBlock_t const &              Unew,
-                                           FieldMap<core::models::Hydro> const & fm,
-                                           int32_t                               local_num_octants,
-                                           real_t                                dt)
+AddGravitySourceTerm<dim, device_t>::apply(ConfigMap const &        config_map,
+                                           DataArrayBlock_t const & Uold,
+                                           DataArrayBlock_t const & Unew,
+                                           int32_t                  local_num_octants,
+                                           real_t                   dt)
 {
 
   const auto gravity_field = get_uniform_gravity_vector<dim>(config_map);
 
-  AddGravitySourceTerm functor(gravity_field, Uold, Unew, fm, dt);
+  AddGravitySourceTerm functor(gravity_field, Uold, Unew, dt);
 
   // compute total number of cells
   const auto nbCellsPerLeaf = Uold.num_cells();
@@ -49,18 +48,18 @@ AddGravitySourceTerm<dim, device_t>::apply(ConfigMap const &                    
 //   // convert global index into
 //   // - octant id
 //   // - cell_index inside block (from 0 to nbCellsPerLeaf-1)
-//   const auto iOct = global_index / m_nbCellsPerLeaf;
-//   const auto cell_index = global_index - iOct * m_nbCellsPerLeaf;
+//   const auto i_oct = global_index / m_nbCellsPerLeaf;
+//   const auto cell_index = global_index - i_oct * m_nbCellsPerLeaf;
 
-//   const auto rho_old = m_Uold(cell_index, m_fm[Hydro::ID], iOct);
-//   const auto rho_new = m_Unew(cell_index, m_fm[Hydro::ID], iOct);
+//   const auto rho_old = m_Uold(cell_index, Hydro<dim>::ID, i_oct);
+//   const auto rho_new = m_Unew(cell_index, Hydro<dim>::ID, i_oct);
 
 //   real_t u = ZERO_F, v = ZERO_F, w = ZERO_F;
-//   u = m_Unew(cell_index, m_fm[Hydro::IU], iOct) / rho_new;
-//   v = m_Unew(cell_index, m_fm[Hydro::IV], iOct) / rho_new;
+//   u = m_Unew(cell_index, Hydro<dim>::IU, i_oct) / rho_new;
+//   v = m_Unew(cell_index, Hydro<dim>::IV, i_oct) / rho_new;
 //   if constexpr (dim == 3)
 //   {
-//     w = m_Unew(cell_index, m_fm[Hydro::IW], iOct) / rho_new;
+//     w = m_Unew(cell_index, Hydro<dim>::IW, i_oct) / rho_new;
 //   }
 
 //   // compute kinetic energy
@@ -76,7 +75,7 @@ AddGravitySourceTerm<dim, device_t>::apply(ConfigMap const &                    
 //   }();
 
 //   // retrieve internal energy, before correcting ekin
-//   auto eint = m_Unew(cell_index, m_fm[Hydro::IP], iOct) - ekin;
+//   auto eint = m_Unew(cell_index, Hydro<dim>::IP], i_oct) - ekin;
 
 //   // update velocity
 //   u += rho_old / rho_new * m_grav[IX] * m_dt;
@@ -93,11 +92,11 @@ AddGravitySourceTerm<dim, device_t>::apply(ConfigMap const &                    
 //   // }
 
 //   // update momentum
-//   m_Unew(cell_index, m_fm[Hydro::IU], iOct) = rho_new * u;
-//   m_Unew(cell_index, m_fm[Hydro::IV], iOct) = rho_new * v;
+//   m_Unew(cell_index, Hydro<dim>::IU, i_oct) = rho_new * u;
+//   m_Unew(cell_index, Hydro<dim>::IV, i_oct) = rho_new * v;
 //   if constexpr (dim == 3)
 //   {
-//     m_Unew(cell_index, m_fm[Hydro::IW], iOct) = rho_new * w;
+//     m_Unew(cell_index, Hydro<dim>::IW, i_oct) = rho_new * w;
 //   }
 
 //   // update kinetic energy
@@ -113,7 +112,7 @@ AddGravitySourceTerm<dim, device_t>::apply(ConfigMap const &                    
 //   }();
 
 //   // update total energy
-//   m_Unew(cell_index, m_fm[Hydro::IP], iOct) = eint + ekin;
+//   m_Unew(cell_index, Hydro<dim>::IP, i_oct) = eint + ekin;
 // } // operator()
 
 // ====================================================================
@@ -125,19 +124,19 @@ AddGravitySourceTerm<dim, device_t>::operator()(const index_t & global_index) co
   // convert global index into
   // - octant id
   // - cell_index inside block (from 0 to nbCellsPerLeaf-1)
-  const auto iOct = global_index / m_nbCellsPerLeaf;
-  const auto cell_index = global_index - iOct * m_nbCellsPerLeaf;
+  const auto i_oct = global_index / m_nbCellsPerLeaf;
+  const auto cell_index = global_index - i_oct * m_nbCellsPerLeaf;
 
-  const auto rho_old = m_Uold(cell_index, m_fm[Hydro::ID], iOct);
-  const auto rho_new = m_Unew(cell_index, m_fm[Hydro::ID], iOct);
+  const auto rho_old = m_Uold(cell_index, Hydro<dim>::ID, i_oct);
+  const auto rho_new = m_Unew(cell_index, Hydro<dim>::ID, i_oct);
 
   // read momentum before gravity update
-  auto rhou = m_Unew(cell_index, m_fm[Hydro::IU], iOct);
-  auto rhov = m_Unew(cell_index, m_fm[Hydro::IV], iOct);
+  auto rhou = m_Unew(cell_index, Hydro<dim>::IU, i_oct);
+  auto rhov = m_Unew(cell_index, Hydro<dim>::IV, i_oct);
   auto rhow = ZERO_F;
   if constexpr (dim == 3)
   {
-    rhow = m_Unew(cell_index, m_fm[Hydro::IW], iOct);
+    rhow = m_Unew(cell_index, Hydro<dim>::IW, i_oct);
   }
 
   // compute kinetic energy before updating momentum
@@ -155,11 +154,11 @@ AddGravitySourceTerm<dim, device_t>::operator()(const index_t & global_index) co
     rhow += m_dt * m_grav[IZ] * (rho_old + rho_new) / 2;
   }
 
-  m_Unew(cell_index, m_fm[Hydro::IU], iOct) = rhou;
-  m_Unew(cell_index, m_fm[Hydro::IV], iOct) = rhov;
+  m_Unew(cell_index, Hydro<dim>::IU, i_oct) = rhou;
+  m_Unew(cell_index, Hydro<dim>::IV, i_oct) = rhov;
   if constexpr (dim == 3)
   {
-    m_Unew(cell_index, m_fm[Hydro::IW], iOct) = rhow;
+    m_Unew(cell_index, Hydro<dim>::IW, i_oct) = rhow;
   }
 
   // compute kinetic energy after updating momentum
@@ -170,7 +169,7 @@ AddGravitySourceTerm<dim, device_t>::operator()(const index_t & global_index) co
   }
 
   // update total energy
-  m_Unew(cell_index, m_fm[Hydro::IP], iOct) += (ekin_new - ekin_old);
+  m_Unew(cell_index, Hydro<dim>::IP, i_oct) += (ekin_new - ekin_old);
 
 } // operator()
 

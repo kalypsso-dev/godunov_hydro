@@ -11,14 +11,15 @@
 #include <kalypsso/core/kalypsso_core_config.h>
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
-#include <kalypsso/core/FieldMap.h>
 #include <kalypsso/core/orchard_key_base.h>
 #include <kalypsso/utils/mpi/ParallelEnv.h>
 
 // hydro utils (conservative versus primitive variable, equation of state, ...)
-#include <kalypsso/core/models/HydroState.h>
-#include <kalypsso/core/models/utils_hydro.h>
+#include <godunov_hydro/models/HydroState.h>
+#include <godunov_hydro/models/utils_hydro.h>
 #include <kalypsso/core/utils_block.h>
+
+#include <godunov_hydro/models/Hydro.h>
 
 // other utilities
 #ifdef KALYPSSO_CORE_USE_CNPY
@@ -53,11 +54,11 @@ public:
   //! type alias for a (device) Kokkos view of orchard keys
   using orchard_key_view_t = typename orchard_key_base_t<device_t>::view_t;
 
+  //! Shorthand for the hydrodynamic model
+  using Hydro = models::Hydro<dim>;
+
   //! our kokkos execution space
   using exec_space = typename device_t::execution_space;
-
-  // makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
 
   //! global cell index
   using index_t = int32_t;
@@ -68,9 +69,6 @@ private:
 
   //! number of octants in the new mesh
   const int32_t m_local_num_octants;
-
-  //! field manager
-  const FieldMap<core::models::Hydro> m_fm;
 
   //! block sizes
   const block_size_t<dim> m_block_sizes;
@@ -104,17 +102,15 @@ public:
   Kokkos::View<real_t *, device_t, Kokkos::MemoryTraits<Kokkos::Atomic>> m_density_profile;
 
 public:
-  ComputeRadialProfileFunctor(ConfigMap const &             config_map,
-                              orchard_key_view_t            orchard_keys,
-                              int32_t                       local_num_octants,
-                              FieldMap<core::models::Hydro> fm,
-                              block_size_t<dim>             block_sizes,
-                              DataArrayBlock_t              Udata,
-                              real_t                        max_radial_distance,
-                              Kokkos::Array<real_t, dim>    box_center)
+  ComputeRadialProfileFunctor(ConfigMap const &          config_map,
+                              orchard_key_view_t         orchard_keys,
+                              int32_t                    local_num_octants,
+                              block_size_t<dim>          block_sizes,
+                              DataArrayBlock_t           Udata,
+                              real_t                     max_radial_distance,
+                              Kokkos::Array<real_t, dim> box_center)
     : m_orchard_keys(orchard_keys)
     , m_local_num_octants(local_num_octants)
-    , m_fm(fm)
     , m_block_sizes(block_sizes)
     , m_nbCellsPerLeaf(Udata.num_cells())
     , m_xyz_min(get_xyz_min<dim>(config_map))
@@ -137,7 +133,6 @@ public:
   //! \param[in] orchard_keys is a vector of all local (owned+ghost) octant orchard/morton keys
   //! \param[in] local_num_octants is the number of octants owned by current MPI process (ghost
   //!            excluded)
-  //! \param[in] fm is the field map (TODO refactor this)
   //! \param[in] block_sizes is an array the cartesian block sizes
   //! \param[in,out] invDt is the inverse of time step, the output of this functor
   //!
@@ -146,7 +141,6 @@ public:
         ConfigMap const &                    config_map,
         orchard_key_view_t                   orchard_keys,
         int32_t                              local_num_octants,
-        FieldMap<core::models::Hydro>        fm,
         block_size_t<dim>                    block_sizes,
         DataArrayBlock_t                     Udata)
   {
@@ -185,7 +179,6 @@ public:
     ComputeRadialProfileFunctor functor(config_map,
                                         orchard_keys,
                                         local_num_octants,
-                                        fm,
                                         block_sizes,
                                         Udata,
                                         max_radial_distance,
@@ -304,9 +297,7 @@ public:
     m_radial_distance_histo(bin) += 1;
 
     // update density profile
-    constexpr auto ID = core::models::Hydro::ID;
-
-    m_density_profile(bin) += m_Udata(cell_index, m_fm[ID], iOct);
+    m_density_profile(bin) += m_Udata(cell_index, Hydro::ID, iOct);
   } // operator()
 
 }; // ComputeRadialProfileFunctor

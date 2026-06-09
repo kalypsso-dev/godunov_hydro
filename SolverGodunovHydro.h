@@ -24,8 +24,6 @@
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/AMRmesh.h>
 #include <kalypsso/core/MeshMap.h>
-#include <kalypsso/core/FieldMap.h>
-#include <kalypsso/core/models/Hydro.h>
 #include <kalypsso/utils/mpi/ParallelEnv.h>
 #include <kalypsso/core/utils_block.h>
 #include <kalypsso/core/TimeIntegratorConfig.h>
@@ -217,12 +215,6 @@ public:
     return this->m_config_map;
   }
 
-  core::models::Hydro const &
-  hydro() const
-  {
-    return m_hydro;
-  }
-
   block_size_t<dim> const &
   block_sizes() const
   {
@@ -288,9 +280,6 @@ private:
 
   //! array of bool to tell if mesh is periodic or not
   Kokkos::Array<bool, dim> m_is_brick_periodic;
-
-  //! model
-  core::models::Hydro m_hydro;
 
   //! hydrodynamics parameters
   const HydroSettings m_hydro_settings;

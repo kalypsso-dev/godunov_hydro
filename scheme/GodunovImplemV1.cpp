@@ -148,10 +148,6 @@ GodunovImplemV1<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayB
 
   KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // compute primitive variables in owned mirror blocks (U must have MPI ghost up to date)
   ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_in_mirrors(
     this->m_config_map,
@@ -161,7 +157,6 @@ GodunovImplemV1<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayB
     this->m_mesh_map.get_amr_mesh_info(),
     U,
     m_Q_ghosted_mg,
-    fm,
     this->m_brick_sizes,
     this->m_is_brick_periodic,
     this->m_hydro_settings,
@@ -179,10 +174,6 @@ GodunovImplemV1<dim, device_t>::convert_to_primitives_in_group(DataArrayBlock_t 
 {
 
   KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
-
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
 
   const auto num_quads_owned_total =
     static_cast<int32_t>(this->m_mesh_map.get_amr_mesh_info().local_num_quadrants());
@@ -229,7 +220,6 @@ GodunovImplemV1<dim, device_t>::convert_to_primitives_in_group(DataArrayBlock_t 
       num_quads_owned,
       U,
       m_Q_ghosted_group,
-      fm,
       this->m_brick_sizes,
       this->m_is_brick_periodic,
       this->m_hydro_settings,
@@ -273,16 +263,11 @@ GodunovImplemV1<dim, device_t>::compute_limited_slopes_in_group(int32_t num_quad
 
   KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_SLOPES);
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // compute limited slopes in all quadrants of q_group
   ComputeLimitedSlopesFunctor<dim, device_t>::apply_on_group(m_Q_ghosted_group,
                                                              m_Slopes_x,
                                                              m_Slopes_y,
                                                              m_Slopes_z,
-                                                             fm,
                                                              num_quads_to_process,
                                                              this->m_hydro_settings);
 
@@ -299,10 +284,6 @@ GodunovImplemV1<dim, device_t>::compute_fluxes_and_store_in_group(real_t  dt,
 
   KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_COMPUTE_FLUXES);
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // compute fluxes and update all quadrant in a group of quadrants
   ComputeFluxesAndStoreFunctor<dim, device_t>::apply(this->m_config_map,
                                                      this->m_mesh_map.orchard_keys(),
@@ -312,7 +293,6 @@ GodunovImplemV1<dim, device_t>::compute_fluxes_and_store_in_group(real_t  dt,
                                                      m_Slopes_x,
                                                      m_Slopes_y,
                                                      m_Slopes_z,
-                                                     fm,
                                                      iOct_begin,
                                                      num_quadrants_in_group,
                                                      IX,
@@ -329,7 +309,6 @@ GodunovImplemV1<dim, device_t>::compute_fluxes_and_store_in_group(real_t  dt,
                                                      m_Slopes_x,
                                                      m_Slopes_y,
                                                      m_Slopes_z,
-                                                     fm,
                                                      iOct_begin,
                                                      num_quadrants_in_group,
                                                      IY,
@@ -348,7 +327,6 @@ GodunovImplemV1<dim, device_t>::compute_fluxes_and_store_in_group(real_t  dt,
                                                        m_Slopes_x,
                                                        m_Slopes_y,
                                                        m_Slopes_z,
-                                                       fm,
                                                        iOct_begin,
                                                        num_quadrants_in_group,
                                                        IZ,
@@ -369,10 +347,6 @@ GodunovImplemV1<dim, device_t>::read_fluxes_and_update_in_owned(DataArrayBlock_t
 
   KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_UPDATE);
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = this->m_hydro.get_fieldmap();
-
   // compute incoming fluxes in all ghost quadrants and perform conservative update only at
   // interface between ghost and owned quadrants (in case the owned quadrant is coarser than the
   // ghost quadrant)
@@ -383,7 +357,6 @@ GodunovImplemV1<dim, device_t>::read_fluxes_and_update_in_owned(DataArrayBlock_t
                                                                this->m_mesh_map.get_amr_mesh_info(),
                                                                u_out,
                                                                m_Fluxes_x,
-                                                               fm,
                                                                IX,
                                                                this->m_brick_sizes,
                                                                this->m_is_brick_periodic,
@@ -397,7 +370,6 @@ GodunovImplemV1<dim, device_t>::read_fluxes_and_update_in_owned(DataArrayBlock_t
                                                                this->m_mesh_map.get_amr_mesh_info(),
                                                                u_out,
                                                                m_Fluxes_y,
-                                                               fm,
                                                                IY,
                                                                this->m_brick_sizes,
                                                                this->m_is_brick_periodic,
@@ -414,7 +386,6 @@ GodunovImplemV1<dim, device_t>::read_fluxes_and_update_in_owned(DataArrayBlock_t
       this->m_mesh_map.get_amr_mesh_info(),
       u_out,
       m_Fluxes_z,
-      fm,
       IZ,
       this->m_brick_sizes,
       this->m_is_brick_periodic,

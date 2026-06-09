@@ -18,26 +18,25 @@ namespace godunov_hydro
 /*************************************************/
 template <size_t dim, typename device_t>
 ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::ComputeFluxesAndConservativeUpdateFunctor(
-  ConfigMap const &                     config_map,
-  StencilHelper_t const &               stencil_helper,
-  orchard_key_view_t const &            orchard_keys,
-  conformal_status_view_type const &    conformal_status,
-  AMRMeshInfo const &                   amr_mesh_info,
-  DataArrayBlock_t const &              u_in,
-  DataArrayBlock_t const &              u_out,
-  DataArrayGhostedBlock_t const &       q,
-  DataArrayGhostedBlock_t const &       slopes_x,
-  DataArrayGhostedBlock_t const &       slopes_y,
-  DataArrayGhostedBlock_t const &       slopes_z,
-  FieldMap<core::models::Hydro> const & fm,
-  int32_t                               iOct_begin,
-  int32_t                               num_octants,
-  HydroSettings const &                 hydro_settings,
-  eos::EosWrapper<device_t> const &     eos,
-  real_t                                dt,
-  bool                                  gravity_enabled,
-  UniformGravityField<dim> const &      gravity_field,
-  TimeIntegrator                        time_integrator)
+  ConfigMap const &                  config_map,
+  StencilHelper_t const &            stencil_helper,
+  orchard_key_view_t const &         orchard_keys,
+  conformal_status_view_type const & conformal_status,
+  AMRMeshInfo const &                amr_mesh_info,
+  DataArrayBlock_t const &           u_in,
+  DataArrayBlock_t const &           u_out,
+  DataArrayGhostedBlock_t const &    q,
+  DataArrayGhostedBlock_t const &    slopes_x,
+  DataArrayGhostedBlock_t const &    slopes_y,
+  DataArrayGhostedBlock_t const &    slopes_z,
+  int32_t                            iOct_begin,
+  int32_t                            num_octants,
+  HydroSettings const &              hydro_settings,
+  eos::EosWrapper<device_t> const &  eos,
+  real_t                             dt,
+  bool                               gravity_enabled,
+  UniformGravityField<dim> const &   gravity_field,
+  TimeIntegrator                     time_integrator)
   : m_stencil_helper(stencil_helper)
   , m_orchard_keys_device(orchard_keys)
   , m_conformal_status(conformal_status)
@@ -48,7 +47,6 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::ComputeFluxesAndConser
   , m_slopes_x(slopes_x)
   , m_slopes_y(slopes_y)
   , m_slopes_z(slopes_z)
-  , m_fm(fm)
   , m_iOct_begin(iOct_begin)
   , m_num_octants(num_octants)
   , m_block_sizes(slopes_x.block_size())
@@ -69,25 +67,24 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::ComputeFluxesAndConser
 template <size_t dim, typename device_t>
 void
 ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::apply_on_group(
-  ConfigMap const &                     config_map,
-  amr_hashmap_t const &                 amr_hashmap,
-  orchard_key_view_t const &            orchard_keys,
-  conformal_status_view_type const &    conformal_status,
-  AMRMeshInfo const &                   amr_mesh_info,
-  DataArrayBlock_t const &              Uin,
-  DataArrayBlock_t const &              Uout,
-  DataArrayGhostedBlock_t const &       q,
-  DataArrayGhostedBlock_t const &       slopes_x,
-  DataArrayGhostedBlock_t const &       slopes_y,
-  DataArrayGhostedBlock_t const &       slopes_z,
-  FieldMap<core::models::Hydro> const & fm,
-  int32_t                               iOct_begin,
-  int32_t                               num_octants,
-  brick_size_t<dim> const &             brick_sizes,
-  Kokkos::Array<bool, dim> const &      is_brick_periodic,
-  HydroSettings const &                 hydro_settings,
-  eos::EosWrapper<device_t> const &     eos,
-  real_t                                dt)
+  ConfigMap const &                  config_map,
+  amr_hashmap_t const &              amr_hashmap,
+  orchard_key_view_t const &         orchard_keys,
+  conformal_status_view_type const & conformal_status,
+  AMRMeshInfo const &                amr_mesh_info,
+  DataArrayBlock_t const &           Uin,
+  DataArrayBlock_t const &           Uout,
+  DataArrayGhostedBlock_t const &    q,
+  DataArrayGhostedBlock_t const &    slopes_x,
+  DataArrayGhostedBlock_t const &    slopes_y,
+  DataArrayGhostedBlock_t const &    slopes_z,
+  int32_t                            iOct_begin,
+  int32_t                            num_octants,
+  brick_size_t<dim> const &          brick_sizes,
+  Kokkos::Array<bool, dim> const &   is_brick_periodic,
+  HydroSettings const &              hydro_settings,
+  eos::EosWrapper<device_t> const &  eos,
+  real_t                             dt)
 {
 
   auto stencil_helper = StencilHelper_t(
@@ -108,7 +105,6 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::apply_on_group(
     slopes_x,
     slopes_y,
     slopes_z,
-    fm,
     iOct_begin,  // first index to process
     num_octants, // number of octants to process
     hydro_settings,
@@ -134,23 +130,22 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::apply_on_group(
 template <size_t dim, typename device_t>
 void
 ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::apply_on_ghosts(
-  ConfigMap const &                     config_map,
-  amr_hashmap_t const &                 amr_hashmap,
-  orchard_key_view_t const &            orchard_keys,
-  conformal_status_view_type const &    conformal_status,
-  AMRMeshInfo const &                   amr_mesh_info,
-  DataArrayBlock_t const &              Uin,
-  DataArrayBlock_t const &              Uout,
-  DataArrayGhostedBlock_t const &       q,
-  DataArrayGhostedBlock_t const &       slopes_x,
-  DataArrayGhostedBlock_t const &       slopes_y,
-  DataArrayGhostedBlock_t const &       slopes_z,
-  FieldMap<core::models::Hydro> const & fm,
-  brick_size_t<dim> const &             brick_sizes,
-  Kokkos::Array<bool, dim> const &      is_brick_periodic,
-  HydroSettings const &                 hydro_settings,
-  eos::EosWrapper<device_t> const &     eos,
-  real_t                                dt)
+  ConfigMap const &                  config_map,
+  amr_hashmap_t const &              amr_hashmap,
+  orchard_key_view_t const &         orchard_keys,
+  conformal_status_view_type const & conformal_status,
+  AMRMeshInfo const &                amr_mesh_info,
+  DataArrayBlock_t const &           Uin,
+  DataArrayBlock_t const &           Uout,
+  DataArrayGhostedBlock_t const &    q,
+  DataArrayGhostedBlock_t const &    slopes_x,
+  DataArrayGhostedBlock_t const &    slopes_y,
+  DataArrayGhostedBlock_t const &    slopes_z,
+  brick_size_t<dim> const &          brick_sizes,
+  Kokkos::Array<bool, dim> const &   is_brick_periodic,
+  HydroSettings const &              hydro_settings,
+  eos::EosWrapper<device_t> const &  eos,
+  real_t                             dt)
 {
 
   auto stencil_helper = StencilHelper_t(
@@ -171,7 +166,6 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::apply_on_ghosts(
     slopes_x,
     slopes_y,
     slopes_z,
-    fm,
     amr_mesh_info.local_num_mirrors(), // first ghost after all mirror quads
     amr_mesh_info.local_num_ghosts(),  // number of octants to process
     hydro_settings,
@@ -211,24 +205,24 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::reconstruct_state_2d(
   auto const & smallp = m_hydro_settings.smallp;
 
   // retrieve primitive variables in current quadrant
-  auto const & r = q[Hydro::ID];
-  auto const & p = q[Hydro::IP];
-  auto const & u = q[Hydro::IU];
-  auto const & v = q[Hydro::IV];
+  auto const & r = q[Hydro<dim>::ID];
+  auto const & p = q[Hydro<dim>::IP];
+  auto const & u = q[Hydro<dim>::IU];
+  auto const & v = q[Hydro<dim>::IV];
   // auto const w = 0.0;
 
   const auto c = m_eos.sound_speed(p, r);
 
-  auto const drx = m_slopes_x(is, js, m_fm[Hydro::ID], iOct_local);
-  auto const dpx = m_slopes_x(is, js, m_fm[Hydro::IP], iOct_local);
-  auto const dux = m_slopes_x(is, js, m_fm[Hydro::IU], iOct_local);
-  auto const dvx = m_slopes_x(is, js, m_fm[Hydro::IV], iOct_local);
+  auto const drx = m_slopes_x(is, js, Hydro<dim>::ID, iOct_local);
+  auto const dpx = m_slopes_x(is, js, Hydro<dim>::IP, iOct_local);
+  auto const dux = m_slopes_x(is, js, Hydro<dim>::IU, iOct_local);
+  auto const dvx = m_slopes_x(is, js, Hydro<dim>::IV, iOct_local);
   // auto const dwx = 0.0;
 
-  auto const dry = m_slopes_y(is, js, m_fm[Hydro::ID], iOct_local);
-  auto const dpy = m_slopes_y(is, js, m_fm[Hydro::IP], iOct_local);
-  auto const duy = m_slopes_y(is, js, m_fm[Hydro::IU], iOct_local);
-  auto const dvy = m_slopes_y(is, js, m_fm[Hydro::IV], iOct_local);
+  auto const dry = m_slopes_y(is, js, Hydro<dim>::ID, iOct_local);
+  auto const dpy = m_slopes_y(is, js, Hydro<dim>::IP, iOct_local);
+  auto const duy = m_slopes_y(is, js, Hydro<dim>::IU, iOct_local);
+  auto const dvy = m_slopes_y(is, js, Hydro<dim>::IV, iOct_local);
   // auto const dwy = 0.0;
 
   // reconstruct state on interface
@@ -245,28 +239,28 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::reconstruct_state_2d(
                      (-v * dpy - dvy * r * c * c) * dtdy;
     // clang-format on
 
-    qr[Hydro::ID] = r + HALF_F * sr0 + offsets[IX] * drx + offsets[IY] * dry;
-    qr[Hydro::IP] = p + HALF_F * sp0 + offsets[IX] * dpx + offsets[IY] * dpy;
-    qr[Hydro::IU] = u + HALF_F * su0 + offsets[IX] * dux + offsets[IY] * duy;
-    qr[Hydro::IV] = v + HALF_F * sv0 + offsets[IX] * dvx + offsets[IY] * dvy;
+    qr[Hydro<dim>::ID] = r + HALF_F * sr0 + offsets[IX] * drx + offsets[IY] * dry;
+    qr[Hydro<dim>::IP] = p + HALF_F * sp0 + offsets[IX] * dpx + offsets[IY] * dpy;
+    qr[Hydro<dim>::IU] = u + HALF_F * su0 + offsets[IX] * dux + offsets[IY] * duy;
+    qr[Hydro<dim>::IV] = v + HALF_F * sv0 + offsets[IX] * dvx + offsets[IY] * dvy;
 
     // add gravity predictor step
     if (m_gravity_enabled)
     {
-      qr[Hydro::IU] += m_gravity_field[IX] * HALF_F * m_dt;
-      qr[Hydro::IV] += m_gravity_field[IY] * HALF_F * m_dt;
+      qr[Hydro<dim>::IU] += m_gravity_field[IX] * HALF_F * m_dt;
+      qr[Hydro<dim>::IV] += m_gravity_field[IY] * HALF_F * m_dt;
     }
   }
   else
   {
-    qr[Hydro::ID] = r + offsets[IX] * drx + offsets[IY] * dry;
-    qr[Hydro::IP] = p + offsets[IX] * dpx + offsets[IY] * dpy;
-    qr[Hydro::IU] = u + offsets[IX] * dux + offsets[IY] * duy;
-    qr[Hydro::IV] = v + offsets[IX] * dvx + offsets[IY] * dvy;
+    qr[Hydro<dim>::ID] = r + offsets[IX] * drx + offsets[IY] * dry;
+    qr[Hydro<dim>::IP] = p + offsets[IX] * dpx + offsets[IY] * dpy;
+    qr[Hydro<dim>::IU] = u + offsets[IX] * dux + offsets[IY] * duy;
+    qr[Hydro<dim>::IV] = v + offsets[IX] * dvx + offsets[IY] * dvy;
   }
 
-  qr[Hydro::ID] = fmax(smallr, qr[Hydro::ID]);
-  qr[Hydro::IP] = fmax(smallp * qr[Hydro::ID], qr[Hydro::IP]);
+  qr[Hydro<dim>::ID] = fmax(smallr, qr[Hydro<dim>::ID]);
+  qr[Hydro<dim>::IP] = fmax(smallp * qr[Hydro<dim>::ID], qr[Hydro<dim>::IP]);
 
   return qr;
 
@@ -292,32 +286,32 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::reconstruct_state_3d(
   auto const & smallp = m_hydro_settings.smallp;
 
   // retrieve primitive variables in current quadrant
-  const real_t & r = q[Hydro::ID];
-  const real_t & p = q[Hydro::IP];
-  const real_t & u = q[Hydro::IU];
-  const real_t & v = q[Hydro::IV];
-  const real_t & w = q[Hydro::IW];
+  const real_t & r = q[Hydro<dim>::ID];
+  const real_t & p = q[Hydro<dim>::IP];
+  const real_t & u = q[Hydro<dim>::IU];
+  const real_t & v = q[Hydro<dim>::IV];
+  const real_t & w = q[Hydro<dim>::IW];
 
   const auto c = m_eos.sound_speed(p, r);
 
   // retrieve variations = dx * slopes
-  const real_t drx = m_slopes_x(is, js, ks, m_fm[Hydro::ID], iOct_local);
-  const real_t dpx = m_slopes_x(is, js, ks, m_fm[Hydro::IP], iOct_local);
-  const real_t dux = m_slopes_x(is, js, ks, m_fm[Hydro::IU], iOct_local);
-  const real_t dvx = m_slopes_x(is, js, ks, m_fm[Hydro::IV], iOct_local);
-  const real_t dwx = m_slopes_x(is, js, ks, m_fm[Hydro::IW], iOct_local);
+  const real_t drx = m_slopes_x(is, js, ks, Hydro<dim>::ID, iOct_local);
+  const real_t dpx = m_slopes_x(is, js, ks, Hydro<dim>::IP, iOct_local);
+  const real_t dux = m_slopes_x(is, js, ks, Hydro<dim>::IU, iOct_local);
+  const real_t dvx = m_slopes_x(is, js, ks, Hydro<dim>::IV, iOct_local);
+  const real_t dwx = m_slopes_x(is, js, ks, Hydro<dim>::IW, iOct_local);
 
-  const real_t dry = m_slopes_y(is, js, ks, m_fm[Hydro::ID], iOct_local);
-  const real_t dpy = m_slopes_y(is, js, ks, m_fm[Hydro::IP], iOct_local);
-  const real_t duy = m_slopes_y(is, js, ks, m_fm[Hydro::IU], iOct_local);
-  const real_t dvy = m_slopes_y(is, js, ks, m_fm[Hydro::IV], iOct_local);
-  const real_t dwy = m_slopes_y(is, js, ks, m_fm[Hydro::IW], iOct_local);
+  const real_t dry = m_slopes_y(is, js, ks, Hydro<dim>::ID, iOct_local);
+  const real_t dpy = m_slopes_y(is, js, ks, Hydro<dim>::IP, iOct_local);
+  const real_t duy = m_slopes_y(is, js, ks, Hydro<dim>::IU, iOct_local);
+  const real_t dvy = m_slopes_y(is, js, ks, Hydro<dim>::IV, iOct_local);
+  const real_t dwy = m_slopes_y(is, js, ks, Hydro<dim>::IW, iOct_local);
 
-  const real_t drz = m_slopes_z(is, js, ks, m_fm[Hydro::ID], iOct_local);
-  const real_t dpz = m_slopes_z(is, js, ks, m_fm[Hydro::IP], iOct_local);
-  const real_t duz = m_slopes_z(is, js, ks, m_fm[Hydro::IU], iOct_local);
-  const real_t dvz = m_slopes_z(is, js, ks, m_fm[Hydro::IV], iOct_local);
-  const real_t dwz = m_slopes_z(is, js, ks, m_fm[Hydro::IW], iOct_local);
+  const real_t drz = m_slopes_z(is, js, ks, Hydro<dim>::ID, iOct_local);
+  const real_t dpz = m_slopes_z(is, js, ks, Hydro<dim>::IP, iOct_local);
+  const real_t duz = m_slopes_z(is, js, ks, Hydro<dim>::IU, iOct_local);
+  const real_t dvz = m_slopes_z(is, js, ks, Hydro<dim>::IV, iOct_local);
+  const real_t dwz = m_slopes_z(is, js, ks, Hydro<dim>::IW, iOct_local);
 
   // reconstruct state on interface
   HydroState<3> qr;
@@ -343,31 +337,36 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::reconstruct_state_3d(
                        (-w * dpz - dwz * r * c * c) * dtdz;
     // clang-format on
 
-    qr[Hydro::ID] = r + HALF_F * sr0 + offsets[IX] * drx + offsets[IY] * dry + offsets[IZ] * drz;
-    qr[Hydro::IP] = p + HALF_F * sp0 + offsets[IX] * dpx + offsets[IY] * dpy + offsets[IZ] * dpz;
-    qr[Hydro::IU] = u + HALF_F * su0 + offsets[IX] * dux + offsets[IY] * duy + offsets[IZ] * duz;
-    qr[Hydro::IV] = v + HALF_F * sv0 + offsets[IX] * dvx + offsets[IY] * dvy + offsets[IZ] * dvz;
-    qr[Hydro::IW] = w + HALF_F * sw0 + offsets[IX] * dwx + offsets[IY] * dwy + offsets[IZ] * dwz;
+    qr[Hydro<dim>::ID] =
+      r + HALF_F * sr0 + offsets[IX] * drx + offsets[IY] * dry + offsets[IZ] * drz;
+    qr[Hydro<dim>::IP] =
+      p + HALF_F * sp0 + offsets[IX] * dpx + offsets[IY] * dpy + offsets[IZ] * dpz;
+    qr[Hydro<dim>::IU] =
+      u + HALF_F * su0 + offsets[IX] * dux + offsets[IY] * duy + offsets[IZ] * duz;
+    qr[Hydro<dim>::IV] =
+      v + HALF_F * sv0 + offsets[IX] * dvx + offsets[IY] * dvy + offsets[IZ] * dvz;
+    qr[Hydro<dim>::IW] =
+      w + HALF_F * sw0 + offsets[IX] * dwx + offsets[IY] * dwy + offsets[IZ] * dwz;
 
     // add gravity predictor step
     if (m_gravity_enabled)
     {
-      qr[Hydro::IU] += m_gravity_field[IX] * HALF_F * m_dt;
-      qr[Hydro::IV] += m_gravity_field[IY] * HALF_F * m_dt;
-      qr[Hydro::IW] += m_gravity_field[IZ] * HALF_F * m_dt;
+      qr[Hydro<dim>::IU] += m_gravity_field[IX] * HALF_F * m_dt;
+      qr[Hydro<dim>::IV] += m_gravity_field[IY] * HALF_F * m_dt;
+      qr[Hydro<dim>::IW] += m_gravity_field[IZ] * HALF_F * m_dt;
     }
   }
   else
   {
-    qr[Hydro::ID] = r + offsets[IX] * drx + offsets[IY] * dry + offsets[IZ] * drz;
-    qr[Hydro::IP] = p + offsets[IX] * dpx + offsets[IY] * dpy + offsets[IZ] * dpz;
-    qr[Hydro::IU] = u + offsets[IX] * dux + offsets[IY] * duy + offsets[IZ] * duz;
-    qr[Hydro::IV] = v + offsets[IX] * dvx + offsets[IY] * dvy + offsets[IZ] * dvz;
-    qr[Hydro::IW] = w + offsets[IX] * dwx + offsets[IY] * dwy + offsets[IZ] * dwz;
+    qr[Hydro<dim>::ID] = r + offsets[IX] * drx + offsets[IY] * dry + offsets[IZ] * drz;
+    qr[Hydro<dim>::IP] = p + offsets[IX] * dpx + offsets[IY] * dpy + offsets[IZ] * dpz;
+    qr[Hydro<dim>::IU] = u + offsets[IX] * dux + offsets[IY] * duy + offsets[IZ] * duz;
+    qr[Hydro<dim>::IV] = v + offsets[IX] * dvx + offsets[IY] * dvy + offsets[IZ] * dvz;
+    qr[Hydro<dim>::IW] = w + offsets[IX] * dwx + offsets[IY] * dwy + offsets[IZ] * dwz;
   }
 
-  qr[Hydro::ID] = fmax(smallr, qr[Hydro::ID]);
-  qr[Hydro::IP] = fmax(smallp * qr[Hydro::ID], qr[Hydro::IP]);
+  qr[Hydro<dim>::ID] = fmax(smallr, qr[Hydro<dim>::ID]);
+  qr[Hydro<dim>::IP] = fmax(smallp * qr[Hydro<dim>::ID], qr[Hydro<dim>::IP]);
 
   return qr;
 
@@ -545,13 +544,13 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::compute_fluxes_and_upd
       reconstruct_state_2d(qprim, is, js, iOct_local, offsets, dtdS_over_dV_cur, dtdS_over_dV_cur);
 
     // swap IU / IV
-    my_swap(qL[Hydro::IU], qL[Hydro::IV]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IV]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IV]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IV]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<2>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IV]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IV]);
 
     // step 4 : accumulate flux in current cell
     const auto flux_cur = flux * dtdS_over_dV_cur;
@@ -825,13 +824,13 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::compute_fluxes_and_upd
         reconstruct_state_2d(qprim, is, js, iGhost, offsets, dtdS_over_dV_cur, dtdS_over_dV_cur);
 
       // swap IU / IV
-      my_swap(qL[Hydro::IU], qL[Hydro::IV]);
-      my_swap(qR[Hydro::IU], qR[Hydro::IV]);
+      my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IV]);
+      my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IV]);
 
       // step 3 : compute flux (Riemann solver)
       auto flux = riemann_hydro<2>(qL, qR, m_hydro_settings, m_eos);
 
-      my_swap(flux[Hydro::IU], flux[Hydro::IV]);
+      my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IV]);
 
       const auto flux_neigh = flux * dtdS_over_dV_neigh;
 
@@ -879,13 +878,13 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::compute_fluxes_and_upd
         reconstruct_state_2d(qprim, is, js, iGhost, offsets, dtdS_over_dV_cur, dtdS_over_dV_cur);
 
       // swap IU / IV
-      my_swap(qL[Hydro::IU], qL[Hydro::IV]);
-      my_swap(qR[Hydro::IU], qR[Hydro::IV]);
+      my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IV]);
+      my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IV]);
 
       // step 3 : compute flux (Riemann solver)
       auto flux = riemann_hydro<2>(qL, qR, m_hydro_settings, m_eos);
 
-      my_swap(flux[Hydro::IU], flux[Hydro::IV]);
+      my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IV]);
 
       const auto flux_neigh = flux * dtdS_over_dV_neigh;
 
@@ -1082,13 +1081,13 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::compute_fluxes_and_upd
       qprim, is, js, ks, iOct_local, offsets, dtdS_over_dV_cur, dtdS_over_dV_cur, dtdS_over_dV_cur);
 
     // swap IU / IV
-    my_swap(qL[Hydro::IU], qL[Hydro::IV]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IV]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IV]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IV]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<3>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IV]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IV]);
 
     // step 4 : accumulate flux in current cell
     const auto flux_cur = flux * dtdS_over_dV_cur;
@@ -1202,13 +1201,13 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::compute_fluxes_and_upd
       qprim, is, js, ks, iOct_local, offsets, dtdS_over_dV_cur, dtdS_over_dV_cur, dtdS_over_dV_cur);
 
     // swap IU / IW
-    my_swap(qL[Hydro::IU], qL[Hydro::IW]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IW]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IW]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IW]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<3>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IW]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IW]);
 
     // step 4 : accumulate flux in current cell
     const auto flux_cur = flux * dtdS_over_dV_cur;
@@ -1508,13 +1507,13 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::compute_fluxes_and_upd
         qprim, is, js, ks, iGhost, offsets, dtdS_over_dV_cur, dtdS_over_dV_cur, dtdS_over_dV_cur);
 
       // swap IU / IV
-      my_swap(qL[Hydro::IU], qL[Hydro::IV]);
-      my_swap(qR[Hydro::IU], qR[Hydro::IV]);
+      my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IV]);
+      my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IV]);
 
       // step 3 : compute flux (Riemann solver)
       auto flux = riemann_hydro<3>(qL, qR, m_hydro_settings, m_eos);
 
-      my_swap(flux[Hydro::IU], flux[Hydro::IV]);
+      my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IV]);
 
       const auto flux_neigh = flux * dtdS_over_dV_neigh;
 
@@ -1575,13 +1574,13 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::compute_fluxes_and_upd
                                      dtdS_over_dV_cur,
                                      dtdS_over_dV_cur,
                                      dtdS_over_dV_cur); // swap IU / IV
-      my_swap(qL[Hydro::IU], qL[Hydro::IV]);
-      my_swap(qR[Hydro::IU], qR[Hydro::IV]);
+      my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IV]);
+      my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IV]);
 
       // step 3 : compute flux (Riemann solver)
       auto flux = riemann_hydro<3>(qL, qR, m_hydro_settings, m_eos);
 
-      my_swap(flux[Hydro::IU], flux[Hydro::IV]);
+      my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IV]);
 
       const auto flux_neigh = flux * dtdS_over_dV_neigh;
 
@@ -1635,13 +1634,13 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::compute_fluxes_and_upd
         qprim, is, js, ks, iGhost, offsets, dtdS_over_dV_cur, dtdS_over_dV_cur, dtdS_over_dV_cur);
 
       // swap IU / IW
-      my_swap(qL[Hydro::IU], qL[Hydro::IW]);
-      my_swap(qR[Hydro::IU], qR[Hydro::IW]);
+      my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IW]);
+      my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IW]);
 
       // step 3 : compute flux (Riemann solver)
       auto flux = riemann_hydro<3>(qL, qR, m_hydro_settings, m_eos);
 
-      my_swap(flux[Hydro::IU], flux[Hydro::IW]);
+      my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IW]);
 
       const auto flux_neigh = flux * dtdS_over_dV_neigh;
 
@@ -1697,13 +1696,13 @@ ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::compute_fluxes_and_upd
         qprim, is, js, ks, iGhost, offsets, dtdS_over_dV_cur, dtdS_over_dV_cur, dtdS_over_dV_cur);
 
       // swap IU / IW
-      my_swap(qL[Hydro::IU], qL[Hydro::IW]);
-      my_swap(qR[Hydro::IU], qR[Hydro::IW]);
+      my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IW]);
+      my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IW]);
 
       // step 3 : compute flux (Riemann solver)
       auto flux = riemann_hydro<3>(qL, qR, m_hydro_settings, m_eos);
 
-      my_swap(flux[Hydro::IU], flux[Hydro::IW]);
+      my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IW]);
 
       const auto flux_neigh = flux * dtdS_over_dV_neigh;
 

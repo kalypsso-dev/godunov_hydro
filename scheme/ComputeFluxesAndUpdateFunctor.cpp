@@ -20,25 +20,24 @@ namespace godunov_hydro
 // ====================================================================
 template <size_t dim, typename device_t>
 ComputeFluxesAndUpdateFunctor<dim, device_t>::ComputeFluxesAndUpdateFunctor(
-  ConfigMap const &                     config_map,
-  amr_hashmap_t const &                 amr_hashmap,
-  orchard_key_view_t const &            orchard_keys,
-  DataArrayBlock_t const &              u,
-  DataArrayGhostedBlock_t const &       q,
-  DataArrayGhostedBlock_t const &       slopes_x,
-  DataArrayGhostedBlock_t const &       slopes_y,
-  DataArrayGhostedBlock_t const &       slopes_z,
-  FieldMap<core::models::Hydro> const & fm,
-  int32_t                               iOct_begin,
-  int32_t                               num_octants,
-  Kokkos::Array<uint8_t, dim> const &   brick_sizes,
-  Kokkos::Array<bool, dim> const &      is_brick_periodic,
-  HydroSettings const &                 hydro_settings,
-  eos::EosWrapper<device_t> const &     eos,
-  real_t                                dt,
-  bool                                  gravity_enabled,
-  UniformGravityField<dim> const &      gravity_field,
-  bool                                  use_flux_oriented_computation)
+  ConfigMap const &                   config_map,
+  amr_hashmap_t const &               amr_hashmap,
+  orchard_key_view_t const &          orchard_keys,
+  DataArrayBlock_t const &            u,
+  DataArrayGhostedBlock_t const &     q,
+  DataArrayGhostedBlock_t const &     slopes_x,
+  DataArrayGhostedBlock_t const &     slopes_y,
+  DataArrayGhostedBlock_t const &     slopes_z,
+  int32_t                             iOct_begin,
+  int32_t                             num_octants,
+  Kokkos::Array<uint8_t, dim> const & brick_sizes,
+  Kokkos::Array<bool, dim> const &    is_brick_periodic,
+  HydroSettings const &               hydro_settings,
+  eos::EosWrapper<device_t> const &   eos,
+  real_t                              dt,
+  bool                                gravity_enabled,
+  UniformGravityField<dim> const &    gravity_field,
+  bool                                use_flux_oriented_computation)
   : m_amr_hashmap_device(amr_hashmap)
   , m_orchard_keys_device(orchard_keys)
   , m_mirror_orchard_keys_device()
@@ -47,7 +46,6 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::ComputeFluxesAndUpdateFunctor(
   , m_slopes_x(slopes_x)
   , m_slopes_y(slopes_y)
   , m_slopes_z(slopes_z)
-  , m_fm(fm)
   , m_iOct_begin(iOct_begin)
   , m_num_octants(num_octants)
   , m_block_sizes(slopes_x.block_size())
@@ -73,23 +71,22 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::ComputeFluxesAndUpdateFunctor(
 template <size_t dim, typename device_t>
 void
 ComputeFluxesAndUpdateFunctor<dim, device_t>::apply_on_group(
-  ConfigMap const &                     config_map,
-  amr_hashmap_t const &                 amr_hashmap,
-  orchard_key_view_t const &            orchard_keys,
-  DataArrayBlock_t const &              U,
-  DataArrayGhostedBlock_t const &       q,
-  DataArrayGhostedBlock_t const &       slopes_x,
-  DataArrayGhostedBlock_t const &       slopes_y,
-  DataArrayGhostedBlock_t const &       slopes_z,
-  FieldMap<core::models::Hydro> const & fm,
-  int32_t                               iOct_begin,
-  int32_t                               num_octants,
-  Kokkos::Array<uint8_t, dim> const &   brick_sizes,
-  Kokkos::Array<bool, dim> const &      is_brick_periodic,
-  HydroSettings const &                 hydro_settings,
-  eos::EosWrapper<device_t> const &     eos,
-  real_t                                dt,
-  bool                                  use_flux_oriented_computation)
+  ConfigMap const &                   config_map,
+  amr_hashmap_t const &               amr_hashmap,
+  orchard_key_view_t const &          orchard_keys,
+  DataArrayBlock_t const &            U,
+  DataArrayGhostedBlock_t const &     q,
+  DataArrayGhostedBlock_t const &     slopes_x,
+  DataArrayGhostedBlock_t const &     slopes_y,
+  DataArrayGhostedBlock_t const &     slopes_z,
+  int32_t                             iOct_begin,
+  int32_t                             num_octants,
+  Kokkos::Array<uint8_t, dim> const & brick_sizes,
+  Kokkos::Array<bool, dim> const &    is_brick_periodic,
+  HydroSettings const &               hydro_settings,
+  eos::EosWrapper<device_t> const &   eos,
+  real_t                              dt,
+  bool                                use_flux_oriented_computation)
 {
 
   const auto gravity_enabled = config_map.getBool("gravity", "enabled", false);
@@ -103,7 +100,6 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::apply_on_group(
                                                        slopes_x,
                                                        slopes_y,
                                                        slopes_z,
-                                                       fm,
                                                        iOct_begin,  // first index to process
                                                        num_octants, // number of octants to process
                                                        brick_sizes,
@@ -140,10 +136,10 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::get_cons_variables(int32_t i,
 
   HydroState<2> u;
 
-  u[Hydro::ID] = m_U(i, j, m_fm[Hydro::ID], iOct_global);
-  u[Hydro::IP] = m_U(i, j, m_fm[Hydro::IP], iOct_global);
-  u[Hydro::IU] = m_U(i, j, m_fm[Hydro::IU], iOct_global);
-  u[Hydro::IV] = m_U(i, j, m_fm[Hydro::IV], iOct_global);
+  u[Hydro<dim>::ID] = m_U(i, j, Hydro<dim>::ID, iOct_global);
+  u[Hydro<dim>::IP] = m_U(i, j, Hydro<dim>::IP, iOct_global);
+  u[Hydro<dim>::IU] = m_U(i, j, Hydro<dim>::IU, iOct_global);
+  u[Hydro<dim>::IV] = m_U(i, j, Hydro<dim>::IV, iOct_global);
 
   return u;
 
@@ -169,11 +165,11 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::get_cons_variables(int32_t i,
 
   HydroState<3> u;
 
-  u[Hydro::ID] = m_U(i, j, k, m_fm[Hydro::ID], iOct_global);
-  u[Hydro::IP] = m_U(i, j, k, m_fm[Hydro::IP], iOct_global);
-  u[Hydro::IU] = m_U(i, j, k, m_fm[Hydro::IU], iOct_global);
-  u[Hydro::IV] = m_U(i, j, k, m_fm[Hydro::IV], iOct_global);
-  u[Hydro::IW] = m_U(i, j, k, m_fm[Hydro::IW], iOct_global);
+  u[Hydro<dim>::ID] = m_U(i, j, k, Hydro<dim>::ID, iOct_global);
+  u[Hydro<dim>::IP] = m_U(i, j, k, Hydro<dim>::IP, iOct_global);
+  u[Hydro<dim>::IU] = m_U(i, j, k, Hydro<dim>::IU, iOct_global);
+  u[Hydro<dim>::IV] = m_U(i, j, k, Hydro<dim>::IV, iOct_global);
+  u[Hydro<dim>::IW] = m_U(i, j, k, Hydro<dim>::IW, iOct_global);
 
   return u;
 
@@ -191,10 +187,10 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::get_prim_variables(int32_t i,
 
   HydroState<2> q;
 
-  q[Hydro::ID] = m_q(i, j, m_fm[Hydro::ID], iOct_local);
-  q[Hydro::IP] = m_q(i, j, m_fm[Hydro::IP], iOct_local);
-  q[Hydro::IU] = m_q(i, j, m_fm[Hydro::IU], iOct_local);
-  q[Hydro::IV] = m_q(i, j, m_fm[Hydro::IV], iOct_local);
+  q[Hydro<dim>::ID] = m_q(i, j, Hydro<dim>::ID, iOct_local);
+  q[Hydro<dim>::IP] = m_q(i, j, Hydro<dim>::IP, iOct_local);
+  q[Hydro<dim>::IU] = m_q(i, j, Hydro<dim>::IU, iOct_local);
+  q[Hydro<dim>::IV] = m_q(i, j, Hydro<dim>::IV, iOct_local);
 
   return q;
 
@@ -213,11 +209,11 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::get_prim_variables(int32_t i,
 
   HydroState<3> q;
 
-  q[Hydro::ID] = m_q(i, j, k, m_fm[Hydro::ID], iOct_local);
-  q[Hydro::IP] = m_q(i, j, k, m_fm[Hydro::IP], iOct_local);
-  q[Hydro::IU] = m_q(i, j, k, m_fm[Hydro::IU], iOct_local);
-  q[Hydro::IV] = m_q(i, j, k, m_fm[Hydro::IV], iOct_local);
-  q[Hydro::IW] = m_q(i, j, k, m_fm[Hydro::IW], iOct_local);
+  q[Hydro<dim>::ID] = m_q(i, j, k, Hydro<dim>::ID, iOct_local);
+  q[Hydro<dim>::IP] = m_q(i, j, k, Hydro<dim>::IP, iOct_local);
+  q[Hydro<dim>::IU] = m_q(i, j, k, Hydro<dim>::IU, iOct_local);
+  q[Hydro<dim>::IV] = m_q(i, j, k, Hydro<dim>::IV, iOct_local);
+  q[Hydro<dim>::IW] = m_q(i, j, k, Hydro<dim>::IW, iOct_local);
 
   return q;
 
@@ -240,24 +236,24 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::reconstruct_state_2d(const HydroSt
   auto const & smallp = m_hydro_settings.smallp;
 
   // retrieve primitive variables in current quadrant
-  auto const & r = q[Hydro::ID];
-  auto const & p = q[Hydro::IP];
-  auto const & u = q[Hydro::IU];
-  auto const & v = q[Hydro::IV];
+  auto const & r = q[Hydro<dim>::ID];
+  auto const & p = q[Hydro<dim>::IP];
+  auto const & u = q[Hydro<dim>::IU];
+  auto const & v = q[Hydro<dim>::IV];
   // auto const w = 0.0;
 
   const auto c = m_eos.sound_speed(p, r);
 
-  auto const drx = m_slopes_x(is, js, m_fm[Hydro::ID], iOct_local);
-  auto const dpx = m_slopes_x(is, js, m_fm[Hydro::IP], iOct_local);
-  auto const dux = m_slopes_x(is, js, m_fm[Hydro::IU], iOct_local);
-  auto const dvx = m_slopes_x(is, js, m_fm[Hydro::IV], iOct_local);
+  auto const drx = m_slopes_x(is, js, Hydro<dim>::ID, iOct_local);
+  auto const dpx = m_slopes_x(is, js, Hydro<dim>::IP, iOct_local);
+  auto const dux = m_slopes_x(is, js, Hydro<dim>::IU, iOct_local);
+  auto const dvx = m_slopes_x(is, js, Hydro<dim>::IV, iOct_local);
   // auto const dwx = 0.0;
 
-  auto const dry = m_slopes_y(is, js, m_fm[Hydro::ID], iOct_local);
-  auto const dpy = m_slopes_y(is, js, m_fm[Hydro::IP], iOct_local);
-  auto const duy = m_slopes_y(is, js, m_fm[Hydro::IU], iOct_local);
-  auto const dvy = m_slopes_y(is, js, m_fm[Hydro::IV], iOct_local);
+  auto const dry = m_slopes_y(is, js, Hydro<dim>::ID, iOct_local);
+  auto const dpy = m_slopes_y(is, js, Hydro<dim>::IP, iOct_local);
+  auto const duy = m_slopes_y(is, js, Hydro<dim>::IU, iOct_local);
+  auto const dvy = m_slopes_y(is, js, Hydro<dim>::IV, iOct_local);
   // auto const dwy = 0.0;
 
   // MUSCL-Hancock half time-step
@@ -272,19 +268,19 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::reconstruct_state_2d(const HydroSt
   // reconstruct state on interface
   HydroState<2> qr;
 
-  qr[Hydro::ID] = r + HALF_F * sr0 + offsets[IX] * drx + offsets[IY] * dry;
-  qr[Hydro::IP] = p + HALF_F * sp0 + offsets[IX] * dpx + offsets[IY] * dpy;
-  qr[Hydro::IU] = u + HALF_F * su0 + offsets[IX] * dux + offsets[IY] * duy;
-  qr[Hydro::IV] = v + HALF_F * sv0 + offsets[IX] * dvx + offsets[IY] * dvy;
+  qr[Hydro<dim>::ID] = r + HALF_F * sr0 + offsets[IX] * drx + offsets[IY] * dry;
+  qr[Hydro<dim>::IP] = p + HALF_F * sp0 + offsets[IX] * dpx + offsets[IY] * dpy;
+  qr[Hydro<dim>::IU] = u + HALF_F * su0 + offsets[IX] * dux + offsets[IY] * duy;
+  qr[Hydro<dim>::IV] = v + HALF_F * sv0 + offsets[IX] * dvx + offsets[IY] * dvy;
 
-  qr[Hydro::ID] = fmax(smallr, qr[Hydro::ID]);
-  qr[Hydro::IP] = fmax(smallp * qr[Hydro::ID], qr[Hydro::IP]);
+  qr[Hydro<dim>::ID] = fmax(smallr, qr[Hydro<dim>::ID]);
+  qr[Hydro<dim>::IP] = fmax(smallp * qr[Hydro<dim>::ID], qr[Hydro<dim>::IP]);
 
   // add gravity predictor step
   if (m_gravity_enabled)
   {
-    qr[Hydro::IU] += m_gravity_field[IX] * HALF_F * m_dt;
-    qr[Hydro::IV] += m_gravity_field[IY] * HALF_F * m_dt;
+    qr[Hydro<dim>::IU] += m_gravity_field[IX] * HALF_F * m_dt;
+    qr[Hydro<dim>::IV] += m_gravity_field[IY] * HALF_F * m_dt;
   }
 
   return qr;
@@ -310,32 +306,32 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::reconstruct_state_3d(const HydroSt
   auto const & smallp = m_hydro_settings.smallp;
 
   // retrieve primitive variables in current quadrant
-  const real_t & r = q[Hydro::ID];
-  const real_t & p = q[Hydro::IP];
-  const real_t & u = q[Hydro::IU];
-  const real_t & v = q[Hydro::IV];
-  const real_t & w = q[Hydro::IW];
+  const real_t & r = q[Hydro<dim>::ID];
+  const real_t & p = q[Hydro<dim>::IP];
+  const real_t & u = q[Hydro<dim>::IU];
+  const real_t & v = q[Hydro<dim>::IV];
+  const real_t & w = q[Hydro<dim>::IW];
 
   const auto c = m_eos.sound_speed(p, r);
 
   // retrieve variations = dx * slopes
-  const real_t drx = m_slopes_x(is, js, ks, m_fm[Hydro::ID], iOct_local);
-  const real_t dpx = m_slopes_x(is, js, ks, m_fm[Hydro::IP], iOct_local);
-  const real_t dux = m_slopes_x(is, js, ks, m_fm[Hydro::IU], iOct_local);
-  const real_t dvx = m_slopes_x(is, js, ks, m_fm[Hydro::IV], iOct_local);
-  const real_t dwx = m_slopes_x(is, js, ks, m_fm[Hydro::IW], iOct_local);
+  const real_t drx = m_slopes_x(is, js, ks, Hydro<dim>::ID, iOct_local);
+  const real_t dpx = m_slopes_x(is, js, ks, Hydro<dim>::IP, iOct_local);
+  const real_t dux = m_slopes_x(is, js, ks, Hydro<dim>::IU, iOct_local);
+  const real_t dvx = m_slopes_x(is, js, ks, Hydro<dim>::IV, iOct_local);
+  const real_t dwx = m_slopes_x(is, js, ks, Hydro<dim>::IW, iOct_local);
 
-  const real_t dry = m_slopes_y(is, js, ks, m_fm[Hydro::ID], iOct_local);
-  const real_t dpy = m_slopes_y(is, js, ks, m_fm[Hydro::IP], iOct_local);
-  const real_t duy = m_slopes_y(is, js, ks, m_fm[Hydro::IU], iOct_local);
-  const real_t dvy = m_slopes_y(is, js, ks, m_fm[Hydro::IV], iOct_local);
-  const real_t dwy = m_slopes_y(is, js, ks, m_fm[Hydro::IW], iOct_local);
+  const real_t dry = m_slopes_y(is, js, ks, Hydro<dim>::ID, iOct_local);
+  const real_t dpy = m_slopes_y(is, js, ks, Hydro<dim>::IP, iOct_local);
+  const real_t duy = m_slopes_y(is, js, ks, Hydro<dim>::IU, iOct_local);
+  const real_t dvy = m_slopes_y(is, js, ks, Hydro<dim>::IV, iOct_local);
+  const real_t dwy = m_slopes_y(is, js, ks, Hydro<dim>::IW, iOct_local);
 
-  const real_t drz = m_slopes_z(is, js, ks, m_fm[Hydro::ID], iOct_local);
-  const real_t dpz = m_slopes_z(is, js, ks, m_fm[Hydro::IP], iOct_local);
-  const real_t duz = m_slopes_z(is, js, ks, m_fm[Hydro::IU], iOct_local);
-  const real_t dvz = m_slopes_z(is, js, ks, m_fm[Hydro::IV], iOct_local);
-  const real_t dwz = m_slopes_z(is, js, ks, m_fm[Hydro::IW], iOct_local);
+  const real_t drz = m_slopes_z(is, js, ks, Hydro<dim>::ID, iOct_local);
+  const real_t dpz = m_slopes_z(is, js, ks, Hydro<dim>::IP, iOct_local);
+  const real_t duz = m_slopes_z(is, js, ks, Hydro<dim>::IU, iOct_local);
+  const real_t dvz = m_slopes_z(is, js, ks, Hydro<dim>::IV, iOct_local);
+  const real_t dwz = m_slopes_z(is, js, ks, Hydro<dim>::IW, iOct_local);
 
   // MUSCL-Hancock half time-step
   // clang-format off
@@ -359,21 +355,21 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::reconstruct_state_3d(const HydroSt
   // reconstruct state on interface
   HydroState<3> qr;
 
-  qr[Hydro::ID] = r + HALF_F * sr0 + offsets[IX] * drx + offsets[IY] * dry + offsets[IZ] * drz;
-  qr[Hydro::IP] = p + HALF_F * sp0 + offsets[IX] * dpx + offsets[IY] * dpy + offsets[IZ] * dpz;
-  qr[Hydro::IU] = u + HALF_F * su0 + offsets[IX] * dux + offsets[IY] * duy + offsets[IZ] * duz;
-  qr[Hydro::IV] = v + HALF_F * sv0 + offsets[IX] * dvx + offsets[IY] * dvy + offsets[IZ] * dvz;
-  qr[Hydro::IW] = w + HALF_F * sw0 + offsets[IX] * dwx + offsets[IY] * dwy + offsets[IZ] * dwz;
+  qr[Hydro<dim>::ID] = r + HALF_F * sr0 + offsets[IX] * drx + offsets[IY] * dry + offsets[IZ] * drz;
+  qr[Hydro<dim>::IP] = p + HALF_F * sp0 + offsets[IX] * dpx + offsets[IY] * dpy + offsets[IZ] * dpz;
+  qr[Hydro<dim>::IU] = u + HALF_F * su0 + offsets[IX] * dux + offsets[IY] * duy + offsets[IZ] * duz;
+  qr[Hydro<dim>::IV] = v + HALF_F * sv0 + offsets[IX] * dvx + offsets[IY] * dvy + offsets[IZ] * dvz;
+  qr[Hydro<dim>::IW] = w + HALF_F * sw0 + offsets[IX] * dwx + offsets[IY] * dwy + offsets[IZ] * dwz;
 
-  qr[Hydro::ID] = fmax(smallr, qr[Hydro::ID]);
-  qr[Hydro::IP] = fmax(smallp * qr[Hydro::ID], qr[Hydro::IP]);
+  qr[Hydro<dim>::ID] = fmax(smallr, qr[Hydro<dim>::ID]);
+  qr[Hydro<dim>::IP] = fmax(smallp * qr[Hydro<dim>::ID], qr[Hydro<dim>::IP]);
 
   // add gravity predictor step
   if (m_gravity_enabled)
   {
-    qr[Hydro::IU] += m_gravity_field[IX] * HALF_F * m_dt;
-    qr[Hydro::IV] += m_gravity_field[IY] * HALF_F * m_dt;
-    qr[Hydro::IW] += m_gravity_field[IZ] * HALF_F * m_dt;
+    qr[Hydro<dim>::IU] += m_gravity_field[IX] * HALF_F * m_dt;
+    qr[Hydro<dim>::IV] += m_gravity_field[IY] * HALF_F * m_dt;
+    qr[Hydro<dim>::IW] += m_gravity_field[IZ] * HALF_F * m_dt;
   }
 
   return qr;
@@ -488,13 +484,13 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::compute_fluxes_and_update_2d(
     auto qR = reconstruct_state_2d(qprim, i, j, iOct_local, offsets, dtdx, dtdy);
 
     // swap IU / IV
-    my_swap(qL[Hydro::IU], qL[Hydro::IV]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IV]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IV]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IV]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<2>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IV]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IV]);
 
     // step 4 : accumulate flux in current cell
     qcons += flux * dtdy;
@@ -519,22 +515,22 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::compute_fluxes_and_update_2d(
     auto qL = reconstruct_state_2d(qprim, i, j, iOct_local, offsets, dtdx, dtdy);
 
     // swap IU / IV
-    my_swap(qL[Hydro::IU], qL[Hydro::IV]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IV]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IV]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IV]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<2>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IV]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IV]);
 
     // step 4 : accumulate flux in current cell
     qcons -= flux * dtdy;
   }
 
-  m_U(i, j, m_fm[Hydro::ID], iOct_global) = qcons[Hydro::ID];
-  m_U(i, j, m_fm[Hydro::IP], iOct_global) = qcons[Hydro::IP];
-  m_U(i, j, m_fm[Hydro::IU], iOct_global) = qcons[Hydro::IU];
-  m_U(i, j, m_fm[Hydro::IV], iOct_global) = qcons[Hydro::IV];
+  m_U(i, j, Hydro<dim>::ID, iOct_global) = qcons[Hydro<dim>::ID];
+  m_U(i, j, Hydro<dim>::IP, iOct_global) = qcons[Hydro<dim>::IP];
+  m_U(i, j, Hydro<dim>::IU, iOct_global) = qcons[Hydro<dim>::IU];
+  m_U(i, j, Hydro<dim>::IV, iOct_global) = qcons[Hydro<dim>::IV];
 
 } // compute_fluxes_and_update_2d
 
@@ -599,17 +595,17 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::compute_fluxes_and_update_2d_atomi
 
     if (i < m_block_sizes[IX] and j < m_block_sizes[IY])
     {
-      Kokkos::atomic_add(&m_U(i, j, m_fm[Hydro::ID], iOct_global), flux_accum[Hydro::ID]);
-      Kokkos::atomic_add(&m_U(i, j, m_fm[Hydro::IP], iOct_global), flux_accum[Hydro::IP]);
-      Kokkos::atomic_add(&m_U(i, j, m_fm[Hydro::IU], iOct_global), flux_accum[Hydro::IU]);
-      Kokkos::atomic_add(&m_U(i, j, m_fm[Hydro::IV], iOct_global), flux_accum[Hydro::IV]);
+      Kokkos::atomic_add(&m_U(i, j, Hydro<dim>::ID, iOct_global), flux_accum[Hydro<dim>::ID]);
+      Kokkos::atomic_add(&m_U(i, j, Hydro<dim>::IP, iOct_global), flux_accum[Hydro<dim>::IP]);
+      Kokkos::atomic_add(&m_U(i, j, Hydro<dim>::IU, iOct_global), flux_accum[Hydro<dim>::IU]);
+      Kokkos::atomic_add(&m_U(i, j, Hydro<dim>::IV, iOct_global), flux_accum[Hydro<dim>::IV]);
     }
     if (i > 0 and j < m_block_sizes[IY])
     {
-      Kokkos::atomic_sub(&m_U(i - 1, j, m_fm[Hydro::ID], iOct_global), flux_accum[Hydro::ID]);
-      Kokkos::atomic_sub(&m_U(i - 1, j, m_fm[Hydro::IP], iOct_global), flux_accum[Hydro::IP]);
-      Kokkos::atomic_sub(&m_U(i - 1, j, m_fm[Hydro::IU], iOct_global), flux_accum[Hydro::IU]);
-      Kokkos::atomic_sub(&m_U(i - 1, j, m_fm[Hydro::IV], iOct_global), flux_accum[Hydro::IV]);
+      Kokkos::atomic_sub(&m_U(i - 1, j, Hydro<dim>::ID, iOct_global), flux_accum[Hydro<dim>::ID]);
+      Kokkos::atomic_sub(&m_U(i - 1, j, Hydro<dim>::IP, iOct_global), flux_accum[Hydro<dim>::IP]);
+      Kokkos::atomic_sub(&m_U(i - 1, j, Hydro<dim>::IU, iOct_global), flux_accum[Hydro<dim>::IU]);
+      Kokkos::atomic_sub(&m_U(i - 1, j, Hydro<dim>::IV, iOct_global), flux_accum[Hydro<dim>::IV]);
     }
   }
 
@@ -632,30 +628,30 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::compute_fluxes_and_update_2d_atomi
     auto qR = reconstruct_state_2d(qprim, i, j, iOct_local, offsets, dtdx, dtdy);
 
     // swap IU / IV
-    my_swap(qL[Hydro::IU], qL[Hydro::IV]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IV]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IV]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IV]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<2>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IV]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IV]);
 
     // step 4 : accumulate flux in current cell
     const auto flux_accum = flux * dtdy;
 
     if (i < m_block_sizes[IX] and j < m_block_sizes[IY])
     {
-      Kokkos::atomic_add(&m_U(i, j, m_fm[Hydro::ID], iOct_global), flux_accum[Hydro::ID]);
-      Kokkos::atomic_add(&m_U(i, j, m_fm[Hydro::IP], iOct_global), flux_accum[Hydro::IP]);
-      Kokkos::atomic_add(&m_U(i, j, m_fm[Hydro::IU], iOct_global), flux_accum[Hydro::IU]);
-      Kokkos::atomic_add(&m_U(i, j, m_fm[Hydro::IV], iOct_global), flux_accum[Hydro::IV]);
+      Kokkos::atomic_add(&m_U(i, j, Hydro<dim>::ID, iOct_global), flux_accum[Hydro<dim>::ID]);
+      Kokkos::atomic_add(&m_U(i, j, Hydro<dim>::IP, iOct_global), flux_accum[Hydro<dim>::IP]);
+      Kokkos::atomic_add(&m_U(i, j, Hydro<dim>::IU, iOct_global), flux_accum[Hydro<dim>::IU]);
+      Kokkos::atomic_add(&m_U(i, j, Hydro<dim>::IV, iOct_global), flux_accum[Hydro<dim>::IV]);
     }
     if (i < m_block_sizes[IX] and j > 0)
     {
-      Kokkos::atomic_sub(&m_U(i, j - 1, m_fm[Hydro::ID], iOct_global), flux_accum[Hydro::ID]);
-      Kokkos::atomic_sub(&m_U(i, j - 1, m_fm[Hydro::IP], iOct_global), flux_accum[Hydro::IP]);
-      Kokkos::atomic_sub(&m_U(i, j - 1, m_fm[Hydro::IU], iOct_global), flux_accum[Hydro::IU]);
-      Kokkos::atomic_sub(&m_U(i, j - 1, m_fm[Hydro::IV], iOct_global), flux_accum[Hydro::IV]);
+      Kokkos::atomic_sub(&m_U(i, j - 1, Hydro<dim>::ID, iOct_global), flux_accum[Hydro<dim>::ID]);
+      Kokkos::atomic_sub(&m_U(i, j - 1, Hydro<dim>::IP, iOct_global), flux_accum[Hydro<dim>::IP]);
+      Kokkos::atomic_sub(&m_U(i, j - 1, Hydro<dim>::IU, iOct_global), flux_accum[Hydro<dim>::IU]);
+      Kokkos::atomic_sub(&m_U(i, j - 1, Hydro<dim>::IV, iOct_global), flux_accum[Hydro<dim>::IV]);
     }
   }
 
@@ -770,13 +766,13 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::compute_fluxes_and_update_3d(
     auto qR = reconstruct_state_3d(qprim, i, j, k, iOct_local, offsets, dtdx, dtdy, dtdz);
 
     // swap IU / IV
-    my_swap(qL[Hydro::IU], qL[Hydro::IV]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IV]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IV]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IV]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<3>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IV]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IV]);
 
     // step 4 : accumulate flux in current cell
     qcons += flux * dtdy;
@@ -801,13 +797,13 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::compute_fluxes_and_update_3d(
     auto qL = reconstruct_state_3d(qprim, i, j, k, iOct_local, offsets, dtdx, dtdy, dtdz);
 
     // swap IU / IV
-    my_swap(qL[Hydro::IU], qL[Hydro::IV]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IV]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IV]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IV]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<3>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IV]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IV]);
 
     // step 4 : accumulate flux in current cell
     qcons -= flux * dtdy;
@@ -831,13 +827,13 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::compute_fluxes_and_update_3d(
     auto qR = reconstruct_state_3d(qprim, i, j, k, iOct_local, offsets, dtdx, dtdy, dtdz);
 
     // swap IU / IW
-    my_swap(qL[Hydro::IU], qL[Hydro::IW]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IW]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IW]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IW]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<3>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IW]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IW]);
 
     // step 4 : accumulate flux in current cell
     qcons += flux * dtdz;
@@ -862,23 +858,23 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::compute_fluxes_and_update_3d(
     auto qL = reconstruct_state_3d(qprim, i, j, k, iOct_local, offsets, dtdx, dtdy, dtdz);
 
     // swap IU / IW
-    my_swap(qL[Hydro::IU], qL[Hydro::IW]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IW]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IW]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IW]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<3>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IW]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IW]);
 
     // step 4 : accumulate flux in current cell
     qcons -= flux * dtdz;
   }
 
-  m_U(i, j, k, m_fm[Hydro::ID], iOct_global) = qcons[Hydro::ID];
-  m_U(i, j, k, m_fm[Hydro::IP], iOct_global) = qcons[Hydro::IP];
-  m_U(i, j, k, m_fm[Hydro::IU], iOct_global) = qcons[Hydro::IU];
-  m_U(i, j, k, m_fm[Hydro::IV], iOct_global) = qcons[Hydro::IV];
-  m_U(i, j, k, m_fm[Hydro::IW], iOct_global) = qcons[Hydro::IW];
+  m_U(i, j, k, Hydro<dim>::ID, iOct_global) = qcons[Hydro<dim>::ID];
+  m_U(i, j, k, Hydro<dim>::IP, iOct_global) = qcons[Hydro<dim>::IP];
+  m_U(i, j, k, Hydro<dim>::IU, iOct_global) = qcons[Hydro<dim>::IU];
+  m_U(i, j, k, Hydro<dim>::IV, iOct_global) = qcons[Hydro<dim>::IV];
+  m_U(i, j, k, Hydro<dim>::IW, iOct_global) = qcons[Hydro<dim>::IW];
 
 } // compute_fluxes_and_update_3d
 
@@ -945,19 +941,24 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::compute_fluxes_and_update_3d_atomi
 
     if (i < m_block_sizes[IX] and j < m_block_sizes[IY] and k < m_block_sizes[IZ])
     {
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::ID], iOct_global), flux_accum[Hydro::ID]);
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::IP], iOct_global), flux_accum[Hydro::IP]);
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::IU], iOct_global), flux_accum[Hydro::IU]);
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::IV], iOct_global), flux_accum[Hydro::IV]);
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::IW], iOct_global), flux_accum[Hydro::IW]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::ID, iOct_global), flux_accum[Hydro<dim>::ID]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::IP, iOct_global), flux_accum[Hydro<dim>::IP]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::IU, iOct_global), flux_accum[Hydro<dim>::IU]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::IV, iOct_global), flux_accum[Hydro<dim>::IV]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::IW, iOct_global), flux_accum[Hydro<dim>::IW]);
     }
     if (i > 0 and j < m_block_sizes[IY] and k < m_block_sizes[IZ])
     {
-      Kokkos::atomic_sub(&m_U(i - 1, j, k, m_fm[Hydro::ID], iOct_global), flux_accum[Hydro::ID]);
-      Kokkos::atomic_sub(&m_U(i - 1, j, k, m_fm[Hydro::IP], iOct_global), flux_accum[Hydro::IP]);
-      Kokkos::atomic_sub(&m_U(i - 1, j, k, m_fm[Hydro::IU], iOct_global), flux_accum[Hydro::IU]);
-      Kokkos::atomic_sub(&m_U(i - 1, j, k, m_fm[Hydro::IV], iOct_global), flux_accum[Hydro::IV]);
-      Kokkos::atomic_sub(&m_U(i - 1, j, k, m_fm[Hydro::IW], iOct_global), flux_accum[Hydro::IW]);
+      Kokkos::atomic_sub(&m_U(i - 1, j, k, Hydro<dim>::ID, iOct_global),
+                         flux_accum[Hydro<dim>::ID]);
+      Kokkos::atomic_sub(&m_U(i - 1, j, k, Hydro<dim>::IP, iOct_global),
+                         flux_accum[Hydro<dim>::IP]);
+      Kokkos::atomic_sub(&m_U(i - 1, j, k, Hydro<dim>::IU, iOct_global),
+                         flux_accum[Hydro<dim>::IU]);
+      Kokkos::atomic_sub(&m_U(i - 1, j, k, Hydro<dim>::IV, iOct_global),
+                         flux_accum[Hydro<dim>::IV]);
+      Kokkos::atomic_sub(&m_U(i - 1, j, k, Hydro<dim>::IW, iOct_global),
+                         flux_accum[Hydro<dim>::IW]);
     }
   }
 
@@ -979,32 +980,37 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::compute_fluxes_and_update_3d_atomi
     auto qR = reconstruct_state_3d(qprim, i, j, k, iOct_local, offsets, dtdx, dtdy, dtdz);
 
     // swap IU / IV
-    my_swap(qL[Hydro::IU], qL[Hydro::IV]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IV]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IV]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IV]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<3>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IV]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IV]);
 
     // step 4 : accumulate flux in current cell
     const auto flux_accum = flux * dtdy;
 
     if (i < m_block_sizes[IX] and j < m_block_sizes[IY] and k < m_block_sizes[IZ])
     {
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::ID], iOct_global), flux_accum[Hydro::ID]);
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::IP], iOct_global), flux_accum[Hydro::IP]);
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::IU], iOct_global), flux_accum[Hydro::IU]);
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::IV], iOct_global), flux_accum[Hydro::IV]);
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::IW], iOct_global), flux_accum[Hydro::IW]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::ID, iOct_global), flux_accum[Hydro<dim>::ID]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::IP, iOct_global), flux_accum[Hydro<dim>::IP]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::IU, iOct_global), flux_accum[Hydro<dim>::IU]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::IV, iOct_global), flux_accum[Hydro<dim>::IV]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::IW, iOct_global), flux_accum[Hydro<dim>::IW]);
     }
     if (i < m_block_sizes[IX] and j > 0 and k < m_block_sizes[IZ])
     {
-      Kokkos::atomic_sub(&m_U(i, j - 1, k, m_fm[Hydro::ID], iOct_global), flux_accum[Hydro::ID]);
-      Kokkos::atomic_sub(&m_U(i, j - 1, k, m_fm[Hydro::IP], iOct_global), flux_accum[Hydro::IP]);
-      Kokkos::atomic_sub(&m_U(i, j - 1, k, m_fm[Hydro::IU], iOct_global), flux_accum[Hydro::IU]);
-      Kokkos::atomic_sub(&m_U(i, j - 1, k, m_fm[Hydro::IV], iOct_global), flux_accum[Hydro::IV]);
-      Kokkos::atomic_sub(&m_U(i, j - 1, k, m_fm[Hydro::IW], iOct_global), flux_accum[Hydro::IW]);
+      Kokkos::atomic_sub(&m_U(i, j - 1, k, Hydro<dim>::ID, iOct_global),
+                         flux_accum[Hydro<dim>::ID]);
+      Kokkos::atomic_sub(&m_U(i, j - 1, k, Hydro<dim>::IP, iOct_global),
+                         flux_accum[Hydro<dim>::IP]);
+      Kokkos::atomic_sub(&m_U(i, j - 1, k, Hydro<dim>::IU, iOct_global),
+                         flux_accum[Hydro<dim>::IU]);
+      Kokkos::atomic_sub(&m_U(i, j - 1, k, Hydro<dim>::IV, iOct_global),
+                         flux_accum[Hydro<dim>::IV]);
+      Kokkos::atomic_sub(&m_U(i, j - 1, k, Hydro<dim>::IW, iOct_global),
+                         flux_accum[Hydro<dim>::IW]);
     }
   }
 
@@ -1026,32 +1032,37 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::compute_fluxes_and_update_3d_atomi
     auto qR = reconstruct_state_3d(qprim, i, j, k, iOct_local, offsets, dtdx, dtdy, dtdz);
 
     // swap IU / IW
-    my_swap(qL[Hydro::IU], qL[Hydro::IW]);
-    my_swap(qR[Hydro::IU], qR[Hydro::IW]);
+    my_swap(qL[Hydro<dim>::IU], qL[Hydro<dim>::IW]);
+    my_swap(qR[Hydro<dim>::IU], qR[Hydro<dim>::IW]);
 
     // step 3 : compute flux (Riemann solver)
     auto flux = riemann_hydro<3>(qL, qR, m_hydro_settings, m_eos);
 
-    my_swap(flux[Hydro::IU], flux[Hydro::IW]);
+    my_swap(flux[Hydro<dim>::IU], flux[Hydro<dim>::IW]);
 
     // step 4 : accumulate flux in current cell
     const auto flux_accum = flux * dtdz;
 
     if (i < m_block_sizes[IX] and j < m_block_sizes[IY] and k < m_block_sizes[IZ])
     {
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::ID], iOct_global), flux_accum[Hydro::ID]);
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::IP], iOct_global), flux_accum[Hydro::IP]);
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::IU], iOct_global), flux_accum[Hydro::IU]);
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::IV], iOct_global), flux_accum[Hydro::IV]);
-      Kokkos::atomic_add(&m_U(i, j, k, m_fm[Hydro::IW], iOct_global), flux_accum[Hydro::IW]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::ID, iOct_global), flux_accum[Hydro<dim>::ID]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::IP, iOct_global), flux_accum[Hydro<dim>::IP]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::IU, iOct_global), flux_accum[Hydro<dim>::IU]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::IV, iOct_global), flux_accum[Hydro<dim>::IV]);
+      Kokkos::atomic_add(&m_U(i, j, k, Hydro<dim>::IW, iOct_global), flux_accum[Hydro<dim>::IW]);
     }
     if (i < m_block_sizes[IX] and j < m_block_sizes[IY] and k > 0)
     {
-      Kokkos::atomic_sub(&m_U(i, j, k - 1, m_fm[Hydro::ID], iOct_global), flux_accum[Hydro::ID]);
-      Kokkos::atomic_sub(&m_U(i, j, k - 1, m_fm[Hydro::IP], iOct_global), flux_accum[Hydro::IP]);
-      Kokkos::atomic_sub(&m_U(i, j, k - 1, m_fm[Hydro::IU], iOct_global), flux_accum[Hydro::IU]);
-      Kokkos::atomic_sub(&m_U(i, j, k - 1, m_fm[Hydro::IV], iOct_global), flux_accum[Hydro::IV]);
-      Kokkos::atomic_sub(&m_U(i, j, k - 1, m_fm[Hydro::IW], iOct_global), flux_accum[Hydro::IW]);
+      Kokkos::atomic_sub(&m_U(i, j, k - 1, Hydro<dim>::ID, iOct_global),
+                         flux_accum[Hydro<dim>::ID]);
+      Kokkos::atomic_sub(&m_U(i, j, k - 1, Hydro<dim>::IP, iOct_global),
+                         flux_accum[Hydro<dim>::IP]);
+      Kokkos::atomic_sub(&m_U(i, j, k - 1, Hydro<dim>::IU, iOct_global),
+                         flux_accum[Hydro<dim>::IU]);
+      Kokkos::atomic_sub(&m_U(i, j, k - 1, Hydro<dim>::IV, iOct_global),
+                         flux_accum[Hydro<dim>::IV]);
+      Kokkos::atomic_sub(&m_U(i, j, k - 1, Hydro<dim>::IW, iOct_global),
+                         flux_accum[Hydro<dim>::IW]);
     }
   }
 

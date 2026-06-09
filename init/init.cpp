@@ -194,23 +194,17 @@ init_restart([[maybe_unused]] SolverGodunovHydro<dim, device_t> & solver)
 
     // write user data (all enabled field)
 
-    // retrieve available / allowed names: fieldManager, and field map (fm)
-    const auto & fm = solver.hydro().get_fieldmap();
+    const auto nb_var = models::Hydro<dim>::nbvar();
 
-    // a map containing ID and name of the variable to write
-    const auto id2names = solver.hydro().get_id2names_map();
-
-    for (auto & iter : id2names)
+    for (size_t ivar = 0; ivar < nb_var; ++ivar)
     {
-      auto varId = static_cast<typename core::models::Hydro::VarId>(iter.first);
-
       // get variables string name
-      const auto varName = id2names.at(varId);
+      const auto varName = models::Hydro<dim>::name(ivar);
 
       total_num_bytes += reader.read_quadrant_attribute(
-        solver.Uhost(), fm[varId], varName, 0, solver.Uhost().num_quadrants());
+        solver.Uhost(), static_cast<int32_t>(ivar), varName, 0, solver.Uhost().num_quadrants());
 
-    } // end for iter
+    } // end for ivar
 
     reader.close();
 

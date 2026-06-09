@@ -8,25 +8,22 @@
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_FLUXES_AND_CONSERVATIVE_UPDATE_FUNCTOR_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_FLUXES_AND_CONSERVATIVE_UPDATE_FUNCTOR_H_
 
+#include <godunov_hydro/common.h>
+
 #include <kalypsso/core/kalypsso_core_base.h> // for assertm
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
 #include <kalypsso/core/orchard_key_base.h>
 #include <kalypsso/core/amr_hashmap.h>
-#include <kalypsso/core/FieldMap.h>
-#include <kalypsso/core/models/HydroState.h>
-#include <kalypsso/core/models/RiemannSolvers.h>
 #include <kalypsso/core/ConformalFaceStatus.h>
 #include <kalypsso/core/StencilHelper.h>
 #include <kalypsso/core/AMRMeshInfo.h>
 #include <kalypsso/core/GravityField.h>
 #include <kalypsso/core/TimeIntegratorConfig.h>
 
-// utils hydro
-#include <kalypsso/core/models/utils_hydro.h>
-
 // equation of state wrapper
 #include <godunov_hydro/eos/EosWrapper.h>
+#include <godunov_hydro/models/RiemannSolvers.h>
 
 #include <type_traits>
 
@@ -74,9 +71,6 @@ public:
   using DataArrayBlock_t = DataArrayBlock<dim, real_t, device_t>;
   using DataArrayGhostedBlock_t = DataArrayGhostedBlock<dim, real_t, device_t>;
 
-  // makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
-
   template <size_t _dim>
   using offsets_t = coord_t<_dim, real_t>;
 
@@ -113,9 +107,6 @@ private:
 
   //! ghosted block data arrays (ghost width is 1) - slopes along Z - only used when dim=3
   DataArrayGhostedBlock_t m_slopes_z;
-
-  //! field manager
-  FieldMap<core::models::Hydro> m_fm;
 
   //! starting octant id
   const int32_t m_iOct_begin;
@@ -174,26 +165,25 @@ public:
    * \param[in]  time step (as computed by CFL condition)
    *
    */
-  ComputeFluxesAndConservativeUpdateFunctor(ConfigMap const &                     config_map,
-                                            StencilHelper_t const &               stencil_helper,
-                                            orchard_key_view_t const &            orchard_keys,
-                                            conformal_status_view_type const &    conformal_status,
-                                            AMRMeshInfo const &                   amr_mesh_info,
-                                            DataArrayBlock_t const &              u_in,
-                                            DataArrayBlock_t const &              u_out,
-                                            DataArrayGhostedBlock_t const &       q,
-                                            DataArrayGhostedBlock_t const &       slopes_x,
-                                            DataArrayGhostedBlock_t const &       slopes_y,
-                                            DataArrayGhostedBlock_t const &       slopes_z,
-                                            FieldMap<core::models::Hydro> const & fm,
-                                            int32_t                               iOct_begin,
-                                            int32_t                               num_octants,
-                                            HydroSettings const &                 hydro_settings,
-                                            eos::EosWrapper<device_t> const &     eos,
-                                            real_t                                dt,
-                                            bool                                  gravity_enabled,
-                                            UniformGravityField<dim> const &      gravity_field,
-                                            TimeIntegrator                        time_integrator);
+  ComputeFluxesAndConservativeUpdateFunctor(ConfigMap const &                  config_map,
+                                            StencilHelper_t const &            stencil_helper,
+                                            orchard_key_view_t const &         orchard_keys,
+                                            conformal_status_view_type const & conformal_status,
+                                            AMRMeshInfo const &                amr_mesh_info,
+                                            DataArrayBlock_t const &           u_in,
+                                            DataArrayBlock_t const &           u_out,
+                                            DataArrayGhostedBlock_t const &    q,
+                                            DataArrayGhostedBlock_t const &    slopes_x,
+                                            DataArrayGhostedBlock_t const &    slopes_y,
+                                            DataArrayGhostedBlock_t const &    slopes_z,
+                                            int32_t                            iOct_begin,
+                                            int32_t                            num_octants,
+                                            HydroSettings const &              hydro_settings,
+                                            eos::EosWrapper<device_t> const &  eos,
+                                            real_t                             dt,
+                                            bool                               gravity_enabled,
+                                            UniformGravityField<dim> const &   gravity_field,
+                                            TimeIntegrator                     time_integrator);
 
   // ==============================================================
   // ==============================================================
@@ -201,25 +191,24 @@ public:
   //!
   //! Use this member when computing primitive in a group of octant
   static void
-  apply_on_group(ConfigMap const &                     config_map,
-                 amr_hashmap_t const &                 amr_hashmap,
-                 orchard_key_view_t const &            orchard_keys,
-                 conformal_status_view_type const &    conformal_status,
-                 AMRMeshInfo const &                   amr_mesh_info,
-                 DataArrayBlock_t const &              Uin,
-                 DataArrayBlock_t const &              Uout,
-                 DataArrayGhostedBlock_t const &       q,
-                 DataArrayGhostedBlock_t const &       slopes_x,
-                 DataArrayGhostedBlock_t const &       slopes_y,
-                 DataArrayGhostedBlock_t const &       slopes_z,
-                 FieldMap<core::models::Hydro> const & fm,
-                 int32_t                               iOct_begin,
-                 int32_t                               num_octants,
-                 brick_size_t<dim> const &             brick_sizes,
-                 Kokkos::Array<bool, dim> const &      is_brick_periodic,
-                 HydroSettings const &                 hydro_settings,
-                 eos::EosWrapper<device_t> const &     eos,
-                 real_t                                dt);
+  apply_on_group(ConfigMap const &                  config_map,
+                 amr_hashmap_t const &              amr_hashmap,
+                 orchard_key_view_t const &         orchard_keys,
+                 conformal_status_view_type const & conformal_status,
+                 AMRMeshInfo const &                amr_mesh_info,
+                 DataArrayBlock_t const &           Uin,
+                 DataArrayBlock_t const &           Uout,
+                 DataArrayGhostedBlock_t const &    q,
+                 DataArrayGhostedBlock_t const &    slopes_x,
+                 DataArrayGhostedBlock_t const &    slopes_y,
+                 DataArrayGhostedBlock_t const &    slopes_z,
+                 int32_t                            iOct_begin,
+                 int32_t                            num_octants,
+                 brick_size_t<dim> const &          brick_sizes,
+                 Kokkos::Array<bool, dim> const &   is_brick_periodic,
+                 HydroSettings const &              hydro_settings,
+                 eos::EosWrapper<device_t> const &  eos,
+                 real_t                             dt);
 
   // ==============================================================
   // ==============================================================
@@ -227,23 +216,22 @@ public:
   //!
   //! Use this member when computing primitive in ghosts octant
   static void
-  apply_on_ghosts(ConfigMap const &                     config_map,
-                  amr_hashmap_t const &                 amr_hashmap,
-                  orchard_key_view_t const &            orchard_keys,
-                  conformal_status_view_type const &    conformal_status,
-                  AMRMeshInfo const &                   amr_mesh_info,
-                  DataArrayBlock_t const &              Uin,
-                  DataArrayBlock_t const &              Uout,
-                  DataArrayGhostedBlock_t const &       q,
-                  DataArrayGhostedBlock_t const &       slopes_x,
-                  DataArrayGhostedBlock_t const &       slopes_y,
-                  DataArrayGhostedBlock_t const &       slopes_z,
-                  FieldMap<core::models::Hydro> const & fm,
-                  brick_size_t<dim> const &             brick_sizes,
-                  Kokkos::Array<bool, dim> const &      is_brick_periodic,
-                  HydroSettings const &                 hydro_settings,
-                  eos::EosWrapper<device_t> const &     eos,
-                  real_t                                dt);
+  apply_on_ghosts(ConfigMap const &                  config_map,
+                  amr_hashmap_t const &              amr_hashmap,
+                  orchard_key_view_t const &         orchard_keys,
+                  conformal_status_view_type const & conformal_status,
+                  AMRMeshInfo const &                amr_mesh_info,
+                  DataArrayBlock_t const &           Uin,
+                  DataArrayBlock_t const &           Uout,
+                  DataArrayGhostedBlock_t const &    q,
+                  DataArrayGhostedBlock_t const &    slopes_x,
+                  DataArrayGhostedBlock_t const &    slopes_y,
+                  DataArrayGhostedBlock_t const &    slopes_z,
+                  brick_size_t<dim> const &          brick_sizes,
+                  Kokkos::Array<bool, dim> const &   is_brick_periodic,
+                  HydroSettings const &              hydro_settings,
+                  eos::EosWrapper<device_t> const &  eos,
+                  real_t                             dt);
 
   // ====================================================================
   // ====================================================================
@@ -272,10 +260,10 @@ public:
 
     HydroState<2> u;
 
-    u[Hydro::ID] = m_Uin(i, j, m_fm[Hydro::ID], iOct_global);
-    u[Hydro::IP] = m_Uin(i, j, m_fm[Hydro::IP], iOct_global);
-    u[Hydro::IU] = m_Uin(i, j, m_fm[Hydro::IU], iOct_global);
-    u[Hydro::IV] = m_Uin(i, j, m_fm[Hydro::IV], iOct_global);
+    u[Hydro<dim>::ID] = m_Uin(i, j, Hydro<dim>::ID, iOct_global);
+    u[Hydro<dim>::IP] = m_Uin(i, j, Hydro<dim>::IP, iOct_global);
+    u[Hydro<dim>::IU] = m_Uin(i, j, Hydro<dim>::IU, iOct_global);
+    u[Hydro<dim>::IV] = m_Uin(i, j, Hydro<dim>::IV, iOct_global);
 
     return u;
 
@@ -297,11 +285,11 @@ public:
 
     HydroState<3> u;
 
-    u[Hydro::ID] = m_Uin(i, j, k, m_fm[Hydro::ID], iOct_global);
-    u[Hydro::IP] = m_Uin(i, j, k, m_fm[Hydro::IP], iOct_global);
-    u[Hydro::IU] = m_Uin(i, j, k, m_fm[Hydro::IU], iOct_global);
-    u[Hydro::IV] = m_Uin(i, j, k, m_fm[Hydro::IV], iOct_global);
-    u[Hydro::IW] = m_Uin(i, j, k, m_fm[Hydro::IW], iOct_global);
+    u[Hydro<dim>::ID] = m_Uin(i, j, k, Hydro<dim>::ID, iOct_global);
+    u[Hydro<dim>::IP] = m_Uin(i, j, k, Hydro<dim>::IP, iOct_global);
+    u[Hydro<dim>::IU] = m_Uin(i, j, k, Hydro<dim>::IU, iOct_global);
+    u[Hydro<dim>::IV] = m_Uin(i, j, k, Hydro<dim>::IV, iOct_global);
+    u[Hydro<dim>::IW] = m_Uin(i, j, k, Hydro<dim>::IW, iOct_global);
 
     return u;
 
@@ -323,10 +311,10 @@ public:
 
     HydroState<2> q;
 
-    q[Hydro::ID] = m_q(i, j, m_fm[Hydro::ID], iOct_local);
-    q[Hydro::IP] = m_q(i, j, m_fm[Hydro::IP], iOct_local);
-    q[Hydro::IU] = m_q(i, j, m_fm[Hydro::IU], iOct_local);
-    q[Hydro::IV] = m_q(i, j, m_fm[Hydro::IV], iOct_local);
+    q[Hydro<dim>::ID] = m_q(i, j, Hydro<dim>::ID, iOct_local);
+    q[Hydro<dim>::IP] = m_q(i, j, Hydro<dim>::IP, iOct_local);
+    q[Hydro<dim>::IU] = m_q(i, j, Hydro<dim>::IU, iOct_local);
+    q[Hydro<dim>::IV] = m_q(i, j, Hydro<dim>::IV, iOct_local);
 
     return q;
 
@@ -348,11 +336,11 @@ public:
 
     HydroState<3> q;
 
-    q[Hydro::ID] = m_q(i, j, k, m_fm[Hydro::ID], iOct_local);
-    q[Hydro::IP] = m_q(i, j, k, m_fm[Hydro::IP], iOct_local);
-    q[Hydro::IU] = m_q(i, j, k, m_fm[Hydro::IU], iOct_local);
-    q[Hydro::IV] = m_q(i, j, k, m_fm[Hydro::IV], iOct_local);
-    q[Hydro::IW] = m_q(i, j, k, m_fm[Hydro::IW], iOct_local);
+    q[Hydro<dim>::ID] = m_q(i, j, k, Hydro<dim>::ID, iOct_local);
+    q[Hydro<dim>::IP] = m_q(i, j, k, Hydro<dim>::IP, iOct_local);
+    q[Hydro<dim>::IU] = m_q(i, j, k, Hydro<dim>::IU, iOct_local);
+    q[Hydro<dim>::IV] = m_q(i, j, k, Hydro<dim>::IV, iOct_local);
+    q[Hydro<dim>::IW] = m_q(i, j, k, Hydro<dim>::IW, iOct_local);
 
     return q;
 
@@ -378,10 +366,10 @@ public:
             HydroState<2> const &    q) const
   {
 
-    Kokkos::atomic_add(&data(i, j, m_fm[Hydro::ID], iOct), q[Hydro::ID]);
-    Kokkos::atomic_add(&data(i, j, m_fm[Hydro::IP], iOct), q[Hydro::IP]);
-    Kokkos::atomic_add(&data(i, j, m_fm[Hydro::IU], iOct), q[Hydro::IU]);
-    Kokkos::atomic_add(&data(i, j, m_fm[Hydro::IV], iOct), q[Hydro::IV]);
+    Kokkos::atomic_add(&data(i, j, Hydro<dim>::ID, iOct), q[Hydro<dim>::ID]);
+    Kokkos::atomic_add(&data(i, j, Hydro<dim>::IP, iOct), q[Hydro<dim>::IP]);
+    Kokkos::atomic_add(&data(i, j, Hydro<dim>::IU, iOct), q[Hydro<dim>::IU]);
+    Kokkos::atomic_add(&data(i, j, Hydro<dim>::IV, iOct), q[Hydro<dim>::IV]);
 
   } // state_add - 2d
 
@@ -407,11 +395,11 @@ public:
             HydroState<3> const &    q) const
   {
 
-    Kokkos::atomic_add(&data(i, j, k, m_fm[Hydro::ID], iOct), q[Hydro::ID]);
-    Kokkos::atomic_add(&data(i, j, k, m_fm[Hydro::IP], iOct), q[Hydro::IP]);
-    Kokkos::atomic_add(&data(i, j, k, m_fm[Hydro::IU], iOct), q[Hydro::IU]);
-    Kokkos::atomic_add(&data(i, j, k, m_fm[Hydro::IV], iOct), q[Hydro::IV]);
-    Kokkos::atomic_add(&data(i, j, k, m_fm[Hydro::IW], iOct), q[Hydro::IW]);
+    Kokkos::atomic_add(&data(i, j, k, Hydro<dim>::ID, iOct), q[Hydro<dim>::ID]);
+    Kokkos::atomic_add(&data(i, j, k, Hydro<dim>::IP, iOct), q[Hydro<dim>::IP]);
+    Kokkos::atomic_add(&data(i, j, k, Hydro<dim>::IU, iOct), q[Hydro<dim>::IU]);
+    Kokkos::atomic_add(&data(i, j, k, Hydro<dim>::IV, iOct), q[Hydro<dim>::IV]);
+    Kokkos::atomic_add(&data(i, j, k, Hydro<dim>::IW, iOct), q[Hydro<dim>::IW]);
 
   } // state_add - 3d
 
@@ -435,10 +423,10 @@ public:
             HydroState<2> const &    q) const
   {
 
-    Kokkos::atomic_sub(&data(i, j, m_fm[Hydro::ID], iOct), q[Hydro::ID]);
-    Kokkos::atomic_sub(&data(i, j, m_fm[Hydro::IP], iOct), q[Hydro::IP]);
-    Kokkos::atomic_sub(&data(i, j, m_fm[Hydro::IU], iOct), q[Hydro::IU]);
-    Kokkos::atomic_sub(&data(i, j, m_fm[Hydro::IV], iOct), q[Hydro::IV]);
+    Kokkos::atomic_sub(&data(i, j, Hydro<dim>::ID, iOct), q[Hydro<dim>::ID]);
+    Kokkos::atomic_sub(&data(i, j, Hydro<dim>::IP, iOct), q[Hydro<dim>::IP]);
+    Kokkos::atomic_sub(&data(i, j, Hydro<dim>::IU, iOct), q[Hydro<dim>::IU]);
+    Kokkos::atomic_sub(&data(i, j, Hydro<dim>::IV, iOct), q[Hydro<dim>::IV]);
 
   } // state_sub
 
@@ -464,11 +452,11 @@ public:
             HydroState<3> const &    q) const
   {
 
-    Kokkos::atomic_sub(&data(i, j, k, m_fm[Hydro::ID], iOct), q[Hydro::ID]);
-    Kokkos::atomic_sub(&data(i, j, k, m_fm[Hydro::IP], iOct), q[Hydro::IP]);
-    Kokkos::atomic_sub(&data(i, j, k, m_fm[Hydro::IU], iOct), q[Hydro::IU]);
-    Kokkos::atomic_sub(&data(i, j, k, m_fm[Hydro::IV], iOct), q[Hydro::IV]);
-    Kokkos::atomic_sub(&data(i, j, k, m_fm[Hydro::IW], iOct), q[Hydro::IW]);
+    Kokkos::atomic_sub(&data(i, j, k, Hydro<dim>::ID, iOct), q[Hydro<dim>::ID]);
+    Kokkos::atomic_sub(&data(i, j, k, Hydro<dim>::IP, iOct), q[Hydro<dim>::IP]);
+    Kokkos::atomic_sub(&data(i, j, k, Hydro<dim>::IU, iOct), q[Hydro<dim>::IU]);
+    Kokkos::atomic_sub(&data(i, j, k, Hydro<dim>::IV, iOct), q[Hydro<dim>::IV]);
+    Kokkos::atomic_sub(&data(i, j, k, Hydro<dim>::IW, iOct), q[Hydro<dim>::IW]);
 
   } // state_sub
 

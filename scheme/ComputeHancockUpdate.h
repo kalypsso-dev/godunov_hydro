@@ -41,8 +41,7 @@
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTEHANCOCKUPDATE_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTEHANCOCKUPDATE_H_
 
-#include <kalypsso/core/models/Hydro.h>
-#include <kalypsso/core/models/HydroState.h>
+#include <godunov_hydro/models/HydroState.h>
 
 namespace kalypsso
 {

@@ -22,7 +22,6 @@ namespace godunov_hydro
 template <size_t dim, typename device_t>
 void
 InitShuOsherDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &             Udata,
-                                              FieldMap<core::models::Hydro>        fm,
                                               orchard_key_view_t<device_t> const & orchard_keys,
                                               int32_t               local_num_octants,
                                               HydroSettings const & settings,
@@ -32,7 +31,7 @@ InitShuOsherDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &          
 
   // data init functor
   InitShuOsherDataFunctor functor(
-    Udata, fm, orchard_keys, local_num_octants, settings, shParams, config_map);
+    Udata, orchard_keys, local_num_octants, settings, shParams, config_map);
 
   // compute total number of cells
   const auto nbCellsPerLeaf = Udata.num_cells();
@@ -59,12 +58,6 @@ InitShuOsherDataFunctor<dim, device_t>::operator()(const int32_t & global_index)
 
   const auto block_sizes = m_Udata.block_size();
 
-  constexpr auto ID = core::models::Hydro::ID;
-  constexpr auto IE = core::models::Hydro::IE;
-  constexpr auto IU = core::models::Hydro::IU;
-  constexpr auto IV = core::models::Hydro::IV;
-  constexpr auto IW = core::models::Hydro::IW;
-
   // compute ix,iy,iz of local cell inside
   // block from index
   auto iCoord = cellindex_to_coord<dim>(cell_index, block_sizes);
@@ -80,26 +73,26 @@ InitShuOsherDataFunctor<dim, device_t>::operator()(const int32_t & global_index)
   // initialize shock and density sine wave
   if (xyz[IX] < m_shParams.x0)
   {
-    m_Udata(cell_index, m_fm[ID], iOct) = m_shParams.rhoL;
-    m_Udata(cell_index, m_fm[IU], iOct) = m_shParams.rhoL * m_shParams.uL;
-    m_Udata(cell_index, m_fm[IE], iOct) =
+    m_Udata(cell_index, Hydro<dim>::ID, iOct) = m_shParams.rhoL;
+    m_Udata(cell_index, Hydro<dim>::IU, iOct) = m_shParams.rhoL * m_shParams.uL;
+    m_Udata(cell_index, Hydro<dim>::IE, iOct) =
       m_eos_wrapper.volumic_eint_from_pressure(m_shParams.pL, m_shParams.rhoL) +
       HALF_F * m_shParams.rhoL * m_shParams.uL * m_shParams.uL;
   }
   else
   {
     const auto rho = m_shParams.rhoR + m_shParams.A * sin(m_shParams.k * xyz[IX]);
-    m_Udata(cell_index, m_fm[ID], iOct) = rho;
-    m_Udata(cell_index, m_fm[IU], iOct) = rho * m_shParams.uR;
-    m_Udata(cell_index, m_fm[IE], iOct) =
+    m_Udata(cell_index, Hydro<dim>::ID, iOct) = rho;
+    m_Udata(cell_index, Hydro<dim>::IU, iOct) = rho * m_shParams.uR;
+    m_Udata(cell_index, Hydro<dim>::IE, iOct) =
       m_eos_wrapper.volumic_eint_from_pressure(m_shParams.pR, rho) +
       HALF_F * rho * m_shParams.uR * m_shParams.uR;
   }
 
-  m_Udata(cell_index, m_fm[IV], iOct) = ZERO_F;
+  m_Udata(cell_index, Hydro<dim>::IV, iOct) = ZERO_F;
 
   if constexpr (dim == 3)
-    m_Udata(cell_index, m_fm[IW], iOct) = ZERO_F;
+    m_Udata(cell_index, Hydro<dim>::IW, iOct) = ZERO_F;
 
 } // end InitShuOsherDataFunctor::operator ()
 
@@ -111,7 +104,6 @@ template class InitShuOsherDataFunctor<3, kalypsso::DefaultDevice>;
 template <size_t dim, typename device_t>
 void
 InitShuOsherRefineFunctor<dim, device_t>::apply(DataArrayBlock_t const &             Udata,
-                                                FieldMap<core::models::Hydro>        fm,
                                                 orchard_key_view_t<device_t> const & orchard_keys,
                                                 amrflags_view_t const &              amrflags,
                                                 int32_t               local_num_octants,
@@ -122,15 +114,8 @@ InitShuOsherRefineFunctor<dim, device_t>::apply(DataArrayBlock_t const &        
   auto shParams = ShuOsherParams(config_map);
 
   // iterate functor for refinement
-  InitShuOsherRefineFunctor functor(Udata,
-                                    fm,
-                                    orchard_keys,
-                                    amrflags,
-                                    local_num_octants,
-                                    settings,
-                                    shParams,
-                                    level_refine,
-                                    config_map);
+  InitShuOsherRefineFunctor functor(
+    Udata, orchard_keys, amrflags, local_num_octants, settings, shParams, level_refine, config_map);
 
   const auto refine_type = core::get_init_indicator(config_map);
 
@@ -231,7 +216,6 @@ InitShuOsher<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
 
   // first init of Udata
   InitShuOsherDataFunctor<dim, device_t>::apply(solver.U(),
-                                                solver.hydro().get_fieldmap(),
                                                 solver.mesh_map()->orchard_keys(),
                                                 solver.amr_mesh()->local_num_quadrants(),
                                                 settings,
@@ -255,7 +239,6 @@ InitShuOsher<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
       // 2. update Udata
       //
       InitShuOsherDataFunctor<dim, device_t>::apply(solver.U(),
-                                                    solver.hydro().get_fieldmap(),
                                                     solver.mesh_map()->orchard_keys(),
                                                     solver.amr_mesh()->local_num_quadrants(),
                                                     settings,
@@ -283,7 +266,6 @@ InitShuOsher<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
       // 2. compute refine/coarsen flags
       //
       InitShuOsherRefineFunctor<dim, device_t>::apply(solver.U(),
-                                                      solver.hydro().get_fieldmap(),
                                                       solver.mesh_map()->orchard_keys(),
                                                       flags_d,
                                                       solver.amr_mesh()->local_num_quadrants(),
@@ -317,7 +299,6 @@ InitShuOsher<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
       // 6. update Udata
       //
       InitShuOsherDataFunctor<dim, device_t>::apply(solver.U(),
-                                                    solver.hydro().get_fieldmap(),
                                                     solver.mesh_map()->orchard_keys(),
                                                     solver.amr_mesh()->local_num_quadrants(),
                                                     settings,

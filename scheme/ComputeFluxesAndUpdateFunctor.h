@@ -10,22 +10,19 @@
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_FLUXES_AND_UPDATE_FUNCTOR_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_FLUXES_AND_UPDATE_FUNCTOR_H_
 
+#include <godunov_hydro/common.h>
+
 #include <kalypsso/core/kalypsso_core_base.h> // for assertm
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
 #include <kalypsso/core/orchard_key_base.h>
 #include <kalypsso/core/amr_hashmap.h>
-#include <kalypsso/core/FieldMap.h>
-#include <kalypsso/core/models/HydroState.h>
 #include <kalypsso/core/Kokkos_Array_extensions.h>
-#include <kalypsso/core/models/RiemannSolvers.h>
 #include <kalypsso/core/GravityField.h>
-
-// utils hydro
-#include <kalypsso/core/models/utils_hydro.h>
 
 // equation of state wrapper
 #include <godunov_hydro/eos/EosWrapper.h>
+#include <godunov_hydro/models/RiemannSolvers.h>
 
 #include <type_traits>
 
@@ -71,9 +68,6 @@ public:
   using DataArrayBlock_t = DataArrayBlock<dim, real_t, device_t>;
   using DataArrayGhostedBlock_t = DataArrayGhostedBlock<dim, real_t, device_t>;
 
-  // makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
-
   template <size_t _dim>
   using offsets_t = coord_t<_dim, real_t>;
 
@@ -103,9 +97,6 @@ private:
 
   //! ghosted block data arrays (ghost width is 1) - slopes along Z - only used when dim=3
   DataArrayGhostedBlock_t m_slopes_z;
-
-  //! field manager
-  FieldMap<core::models::Hydro> m_fm;
 
   //! starting octant id
   const int32_t m_iOct_begin;
@@ -176,25 +167,24 @@ public:
    * \param[in]  time step (as cmputed by CFL condition)
    *
    */
-  ComputeFluxesAndUpdateFunctor(ConfigMap const &                     config_map,
-                                amr_hashmap_t const &                 amr_hashmap,
-                                orchard_key_view_t const &            orchard_keys,
-                                DataArrayBlock_t const &              u,
-                                DataArrayGhostedBlock_t const &       q,
-                                DataArrayGhostedBlock_t const &       slopes_x,
-                                DataArrayGhostedBlock_t const &       slopes_y,
-                                DataArrayGhostedBlock_t const &       slopes_z,
-                                FieldMap<core::models::Hydro> const & fm,
-                                int32_t                               iOct_begin,
-                                int32_t                               num_octants,
-                                Kokkos::Array<uint8_t, dim> const &   brick_sizes,
-                                Kokkos::Array<bool, dim> const &      is_brick_periodic,
-                                HydroSettings const &                 hydro_settings,
-                                eos::EosWrapper<device_t> const &     eos,
-                                real_t                                dt,
-                                bool                                  gravity_enabled,
-                                UniformGravityField<dim> const &      gravity_field,
-                                bool use_flux_oriented_computation);
+  ComputeFluxesAndUpdateFunctor(ConfigMap const &                   config_map,
+                                amr_hashmap_t const &               amr_hashmap,
+                                orchard_key_view_t const &          orchard_keys,
+                                DataArrayBlock_t const &            u,
+                                DataArrayGhostedBlock_t const &     q,
+                                DataArrayGhostedBlock_t const &     slopes_x,
+                                DataArrayGhostedBlock_t const &     slopes_y,
+                                DataArrayGhostedBlock_t const &     slopes_z,
+                                int32_t                             iOct_begin,
+                                int32_t                             num_octants,
+                                Kokkos::Array<uint8_t, dim> const & brick_sizes,
+                                Kokkos::Array<bool, dim> const &    is_brick_periodic,
+                                HydroSettings const &               hydro_settings,
+                                eos::EosWrapper<device_t> const &   eos,
+                                real_t                              dt,
+                                bool                                gravity_enabled,
+                                UniformGravityField<dim> const &    gravity_field,
+                                bool                                use_flux_oriented_computation);
 
   // ==============================================================
   // ==============================================================
@@ -202,23 +192,22 @@ public:
   //!
   //! Use this member when computing primitive in a group of octant
   static void
-  apply_on_group(ConfigMap const &                     config_map,
-                 amr_hashmap_t const &                 amr_hashmap,
-                 orchard_key_view_t const &            orchard_keys,
-                 DataArrayBlock_t const &              U,
-                 DataArrayGhostedBlock_t const &       q,
-                 DataArrayGhostedBlock_t const &       slopes_x,
-                 DataArrayGhostedBlock_t const &       slopes_y,
-                 DataArrayGhostedBlock_t const &       slopes_z,
-                 FieldMap<core::models::Hydro> const & fm,
-                 int32_t                               iOct_begin,
-                 int32_t                               num_octants,
-                 Kokkos::Array<uint8_t, dim> const &   brick_sizes,
-                 Kokkos::Array<bool, dim> const &      is_brick_periodic,
-                 HydroSettings const &                 hydro_settings,
-                 eos::EosWrapper<device_t> const &     eos,
-                 real_t                                dt,
-                 bool                                  use_flux_oriented_computation);
+  apply_on_group(ConfigMap const &                   config_map,
+                 amr_hashmap_t const &               amr_hashmap,
+                 orchard_key_view_t const &          orchard_keys,
+                 DataArrayBlock_t const &            U,
+                 DataArrayGhostedBlock_t const &     q,
+                 DataArrayGhostedBlock_t const &     slopes_x,
+                 DataArrayGhostedBlock_t const &     slopes_y,
+                 DataArrayGhostedBlock_t const &     slopes_z,
+                 int32_t                             iOct_begin,
+                 int32_t                             num_octants,
+                 Kokkos::Array<uint8_t, dim> const & brick_sizes,
+                 Kokkos::Array<bool, dim> const &    is_brick_periodic,
+                 HydroSettings const &               hydro_settings,
+                 eos::EosWrapper<device_t> const &   eos,
+                 real_t                              dt,
+                 bool                                use_flux_oriented_computation);
 
   // ====================================================================
   // ====================================================================

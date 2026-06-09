@@ -12,9 +12,9 @@
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
 
-#include <kalypsso/core/FieldMap.h>
-#include <kalypsso/core/models/HydroState.h>
+#include <godunov_hydro/models/HydroState.h>
 #include <godunov_hydro/models/utils_hydro.h> // for primitive/conservative variables conversion
+#include <godunov_hydro/models/Hydro.h>
 
 #include <kalypsso/utils/mpi/ParallelEnv.h>
 
@@ -63,8 +63,8 @@ struct ComputeDerivedQuantities
   //! our kokkos execution space
   using ExecutionSpace = typename device_t::execution_space;
 
-  //! makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
+  //! Shorthand for the hydrodynamic model
+  using Hydro = models::Hydro<dim>;
 
   // ==========================================================================
   // ==========================================================================
@@ -88,14 +88,13 @@ struct ComputeDerivedQuantities
   // ==========================================================================
   // ==========================================================================
   static DataArrayBlock_t
-  run(DataArrayBlock_t              Udata,
-      FieldMap<core::models::Hydro> fm,
-      DERIVED_QUANTITY              quantity,
-      HydroSettings                 hydro_settings,
-      eos::EosWrapper<device_t>     eos,
-      int64_t                       iOct_begin,
-      int64_t                       num_octs,
-      ParallelEnv const &           par_env)
+  run(DataArrayBlock_t          Udata,
+      DERIVED_QUANTITY          quantity,
+      HydroSettings             hydro_settings,
+      eos::EosWrapper<device_t> eos,
+      int64_t                   iOct_begin,
+      int64_t                   num_octs,
+      ParallelEnv const &       par_env)
   {
     check_args_validity(Udata, iOct_begin, num_octs);
 
@@ -122,12 +121,12 @@ struct ComputeDerivedQuantities
         HydroState<dim> uLoc; // cell-centered conservative variables in current cell
 
         // get conservative variable in current cell
-        uLoc[Hydro::ID] = Udata(cell_index, fm[Hydro::ID], iOct);
-        uLoc[Hydro::IP] = Udata(cell_index, fm[Hydro::IP], iOct);
-        uLoc[Hydro::IU] = Udata(cell_index, fm[Hydro::IU], iOct);
-        uLoc[Hydro::IV] = Udata(cell_index, fm[Hydro::IV], iOct);
+        uLoc[Hydro::ID] = Udata(cell_index, Hydro::ID, iOct);
+        uLoc[Hydro::IP] = Udata(cell_index, Hydro::IP, iOct);
+        uLoc[Hydro::IU] = Udata(cell_index, Hydro::IU, iOct);
+        uLoc[Hydro::IV] = Udata(cell_index, Hydro::IV, iOct);
         if constexpr (dim == 3)
-          uLoc[Hydro::IW] = Udata(cell_index, fm[Hydro::IW], iOct);
+          uLoc[Hydro::IW] = Udata(cell_index, Hydro::IW, iOct);
 
         // compute primitive variables and speed of sound in current cell
         bool       valid = true;
@@ -175,19 +174,17 @@ struct ComputeDerivedQuantities
   // ==========================================================================
   // ==========================================================================
   static DataArrayBlock_t
-  run(DataArrayBlock_t              Udata,
-      FieldMap<core::models::Hydro> fm,
-      std::string                   quantity,
-      HydroSettings                 hydro_settings,
-      eos::EosWrapper<device_t>     eos,
-      int64_t                       iOct_begin,
-      int64_t                       num_octs,
-      ParallelEnv const &           par_env)
+  run(DataArrayBlock_t          Udata,
+      std::string               quantity,
+      HydroSettings             hydro_settings,
+      eos::EosWrapper<device_t> eos,
+      int64_t                   iOct_begin,
+      int64_t                   num_octs,
+      ParallelEnv const &       par_env)
   {
     if (quantity == "thermal_pressure")
     {
       return run(Udata,
-                 fm,
                  DERIVED_QUANTITY::THERMAL_PRESSURE,
                  hydro_settings,
                  eos,
@@ -198,7 +195,6 @@ struct ComputeDerivedQuantities
     else if (quantity == "speed_of_sound")
     {
       return run(Udata,
-                 fm,
                  DERIVED_QUANTITY::SPEED_OF_SOUND,
                  hydro_settings,
                  eos,
@@ -210,7 +206,6 @@ struct ComputeDerivedQuantities
     {
       // clang-format off
       return run(Udata,
-                 fm,
                  DERIVED_QUANTITY::SPECIFIC_EKIN,
                  hydro_settings,eos,
                  iOct_begin,
@@ -221,7 +216,6 @@ struct ComputeDerivedQuantities
     else if (quantity == "local_mach_number")
     {
       return run(Udata,
-                 fm,
                  DERIVED_QUANTITY::LOCAL_MACH_NUMBER,
                  hydro_settings,
                  eos,
@@ -235,7 +229,6 @@ struct ComputeDerivedQuantities
         "ComputeDerivedQuantity: unknow quantity (check your input parameter file) - use "
         "thermal pressure instead.");
       return run(Udata,
-                 fm,
                  DERIVED_QUANTITY::THERMAL_PRESSURE,
                  hydro_settings,
                  eos,

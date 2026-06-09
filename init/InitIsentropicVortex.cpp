@@ -23,7 +23,6 @@ template <size_t dim, typename device_t>
 void
 InitIsentropicVortexDataFunctor<dim, device_t>::apply(
   DataArrayBlock_t const &             Udata,
-  FieldMap<core::models::Hydro>        fm,
   orchard_key_view_t<device_t> const & orchard_keys,
   int32_t                              local_num_octants,
   HydroSettings const &                settings,
@@ -33,7 +32,7 @@ InitIsentropicVortexDataFunctor<dim, device_t>::apply(
 
   // data init functor
   InitIsentropicVortexDataFunctor functor(
-    Udata, fm, orchard_keys, local_num_octants, settings, ivParams, config_map);
+    Udata, orchard_keys, local_num_octants, settings, ivParams, config_map);
 
   // compute total number of cells
   const auto nbCellsPerLeaf = Udata.num_cells();
@@ -59,12 +58,6 @@ InitIsentropicVortexDataFunctor<dim, device_t>::operator()(const int32_t & globa
   const auto cell_index = global_index - iOct * m_Udata.num_cells();
 
   const auto block_sizes = m_Udata.block_size();
-
-  constexpr auto ID = core::models::Hydro::ID;
-  constexpr auto IP = core::models::Hydro::IP;
-  constexpr auto IU = core::models::Hydro::IU;
-  constexpr auto IV = core::models::Hydro::IV;
-  constexpr auto IW = core::models::Hydro::IW;
 
   //
   // isentropic vortex problem parameters
@@ -105,15 +98,15 @@ InitIsentropicVortexDataFunctor<dim, device_t>::operator()(const int32_t & globa
     T_a - (m_gamma - ONE_F) * beta * beta / (8 * m_gamma * PI_F * PI_F) * exp(ONE_F - r * r);
   const auto rho = rho_a * pow(T / T_a, ONE_F / (m_gamma - 1));
 
-  m_Udata(cell_index, m_fm[ID], iOct) = rho;
-  m_Udata(cell_index, m_fm[IU], iOct) = rho * (u_a + du);
-  m_Udata(cell_index, m_fm[IV], iOct) = rho * (v_a + dv);
-  m_Udata(cell_index, m_fm[IP], iOct) = rho * T / (m_gamma - ONE_F) +
-                                        HALF_F * rho * (u_a + du) * (u_a + du) +
-                                        HALF_F * rho * (v_a + dv) * (v_a + dv);
+  m_Udata(cell_index, Hydro<dim>::ID, iOct) = rho;
+  m_Udata(cell_index, Hydro<dim>::IU, iOct) = rho * (u_a + du);
+  m_Udata(cell_index, Hydro<dim>::IV, iOct) = rho * (v_a + dv);
+  m_Udata(cell_index, Hydro<dim>::IP, iOct) = rho * T / (m_gamma - ONE_F) +
+                                              HALF_F * rho * (u_a + du) * (u_a + du) +
+                                              HALF_F * rho * (v_a + dv) * (v_a + dv);
 
   if constexpr (dim == 3)
-    m_Udata(cell_index, m_fm[IW], iOct) = 0.0;
+    m_Udata(cell_index, Hydro<dim>::IW, iOct) = 0.0;
 
 } // end InitIsentropicVortexDataFunctor::operator ()
 
@@ -134,8 +127,6 @@ InitIsentropicVortex<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & s
   const int         level_max = solver.hydro_params().level_max;
 
   // IsentropicVortexParams blastParams = IsentropicVortexParams(config_map);
-  //  field manager index array
-  //  auto fm = solver.hydro().get_fieldmap();
 
   constexpr bool do_reset_ghosts = true;
   solver.update_mesh(do_reset_ghosts);
@@ -145,7 +136,6 @@ InitIsentropicVortex<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & s
 
   // first init of Udata
   InitIsentropicVortexDataFunctor<dim, device_t>::apply(solver.U(),
-                                                        solver.hydro().get_fieldmap(),
                                                         solver.mesh_map()->orchard_keys(),
                                                         solver.amr_mesh()->local_num_quadrants(),
                                                         settings,
@@ -165,7 +155,6 @@ InitIsentropicVortex<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & s
     // 2. update Udata
     //
     InitIsentropicVortexDataFunctor<dim, device_t>::apply(solver.U(),
-                                                          solver.hydro().get_fieldmap(),
                                                           solver.mesh_map()->orchard_keys(),
                                                           solver.amr_mesh()->local_num_quadrants(),
                                                           settings,

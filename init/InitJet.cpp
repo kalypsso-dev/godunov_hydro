@@ -21,7 +21,6 @@ namespace godunov_hydro
 template <size_t dim, typename device_t>
 void
 InitJetDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &             Udata,
-                                         FieldMap<core::models::Hydro>        fm,
                                          orchard_key_view_t<device_t> const & orchard_keys,
                                          int32_t                              local_num_octants,
                                          HydroSettings const &                settings,
@@ -29,12 +28,12 @@ InitJetDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &             Ud
 {
   // read primitive variables
   HydroState<dim> q;
-  q[Hydro::ID] = config_map.getReal("jet", "rho_inside", KALYPSSO_NUM(1.0));
-  q[Hydro::IP] = config_map.getReal("jet", "pressure_inside", KALYPSSO_NUM(1.0));
-  q[Hydro::IU] = config_map.getReal("jet", "u_inside", KALYPSSO_NUM(0.0));
-  q[Hydro::IV] = config_map.getReal("jet", "v_inside", KALYPSSO_NUM(0.0));
+  q[Hydro<dim>::ID] = config_map.getReal("jet", "rho_inside", KALYPSSO_NUM(1.0));
+  q[Hydro<dim>::IP] = config_map.getReal("jet", "pressure_inside", KALYPSSO_NUM(1.0));
+  q[Hydro<dim>::IU] = config_map.getReal("jet", "u_inside", KALYPSSO_NUM(0.0));
+  q[Hydro<dim>::IV] = config_map.getReal("jet", "v_inside", KALYPSSO_NUM(0.0));
   if constexpr (dim == 3)
-    q[Hydro::IW] = config_map.getReal("jet", "w_inside", KALYPSSO_NUM(0.0));
+    q[Hydro<dim>::IW] = config_map.getReal("jet", "w_inside", KALYPSSO_NUM(0.0));
 
   // Equation of state wrapper
   const auto            eos = eos::EosWrapper<HostDevice>(config_map);
@@ -44,8 +43,7 @@ InitJetDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &             Ud
     models::compute_conservative_variables<dim, HostDevice>(q, settings, eos, valid);
 
   // data init functor
-  InitJetDataFunctor functor(
-    Udata, fm, orchard_keys, local_num_octants, settings, U_jet, config_map);
+  InitJetDataFunctor functor(Udata, orchard_keys, local_num_octants, settings, U_jet, config_map);
 
   // compute total number of cells
   const auto nbCellsPerLeaf = Udata.num_cells();
@@ -71,13 +69,13 @@ InitJetDataFunctor<dim, device_t>::operator()(const int32_t & global_index) cons
   const auto cell_index = global_index - iOct * m_Udata.num_cells();
 
   // initialize
-  m_Udata(cell_index, m_fm[Hydro::ID], iOct) = m_U_jet[Hydro::ID];
-  m_Udata(cell_index, m_fm[Hydro::IE], iOct) = m_U_jet[Hydro::IE];
-  m_Udata(cell_index, m_fm[Hydro::IU], iOct) = m_U_jet[Hydro::IU];
-  m_Udata(cell_index, m_fm[Hydro::IV], iOct) = m_U_jet[Hydro::IV];
+  m_Udata(cell_index, Hydro<dim>::ID, iOct) = m_U_jet[Hydro<dim>::ID];
+  m_Udata(cell_index, Hydro<dim>::IE, iOct) = m_U_jet[Hydro<dim>::IE];
+  m_Udata(cell_index, Hydro<dim>::IU, iOct) = m_U_jet[Hydro<dim>::IU];
+  m_Udata(cell_index, Hydro<dim>::IV, iOct) = m_U_jet[Hydro<dim>::IV];
 
   if constexpr (dim == 3)
-    m_Udata(cell_index, m_fm[Hydro::IW], iOct) = m_U_jet[Hydro::IW];
+    m_Udata(cell_index, Hydro<dim>::IW, iOct) = m_U_jet[Hydro<dim>::IW];
 
 } // end InitJetDataFunctor::operator ()
 
@@ -103,7 +101,6 @@ InitJet<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
 
   // first init of Udata
   InitJetDataFunctor<dim, device_t>::apply(solver.U(),
-                                           solver.hydro().get_fieldmap(),
                                            solver.mesh_map()->orchard_keys(),
                                            solver.amr_mesh()->local_num_quadrants(),
                                            settings,

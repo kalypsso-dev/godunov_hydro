@@ -23,17 +23,16 @@ template <size_t dim, typename device_t>
 void
 InitBreakingWaveDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &             Udata,
                                                   orchard_key_view_t<device_t> const & orchard_keys,
-                                                  int32_t                       local_num_octants,
-                                                  HydroSettings const &         settings,
-                                                  FieldMap<core::models::Hydro> fm,
-                                                  real_t                        t_eval,
-                                                  ConfigMap const &             config_map)
+                                                  int32_t               local_num_octants,
+                                                  HydroSettings const & settings,
+                                                  real_t                t_eval,
+                                                  ConfigMap const &     config_map)
 {
   BreakingWaveParams breakingWaveParams = BreakingWaveParams(config_map);
 
   // data init functor
   InitBreakingWaveDataFunctor functor(
-    Udata, orchard_keys, local_num_octants, settings, breakingWaveParams, fm, t_eval, config_map);
+    Udata, orchard_keys, local_num_octants, settings, breakingWaveParams, t_eval, config_map);
 
   // compute total number of cells
   const auto nbCellsPerLeaf = Udata.num_cells();
@@ -59,12 +58,6 @@ InitBreakingWaveDataFunctor<dim, device_t>::operator()(const int32_t & global_in
   const auto cell_index = global_index - iOct * m_Udata.num_cells();
 
   const auto block_sizes = m_Udata.block_size();
-
-  constexpr auto ID = core::models::Hydro::ID;
-  constexpr auto IP = core::models::Hydro::IP;
-  constexpr auto IU = core::models::Hydro::IU;
-  constexpr auto IV = core::models::Hydro::IV;
-  constexpr auto IW = core::models::Hydro::IW;
 
   // breaking wave problem parameters
   const auto gamma = m_bwParams.gamma;
@@ -93,17 +86,17 @@ InitBreakingWaveDataFunctor<dim, device_t>::operator()(const int32_t & global_in
     // we need first to evaluate u-c at x,t_eval
     // and to do that we need speed of sound and velocity
     HydroState<dim> hydro_state;
-    hydro_state[ID] = m_Udata(cell_index, m_fm[ID], iOct);
-    hydro_state[IP] = m_Udata(cell_index, m_fm[IP], iOct);
-    hydro_state[IU] = m_Udata(cell_index, m_fm[IU], iOct);
-    hydro_state[IV] = m_Udata(cell_index, m_fm[IV], iOct);
+    hydro_state[Hydro<dim>::ID] = m_Udata(cell_index, Hydro<dim>::ID, iOct);
+    hydro_state[Hydro<dim>::IP] = m_Udata(cell_index, Hydro<dim>::IP, iOct);
+    hydro_state[Hydro<dim>::IU] = m_Udata(cell_index, Hydro<dim>::IU, iOct);
+    hydro_state[Hydro<dim>::IV] = m_Udata(cell_index, Hydro<dim>::IV, iOct);
     if constexpr (dim == 3)
     {
-      hydro_state[IW] = m_Udata(cell_index, m_fm[IW], iOct);
+      hydro_state[Hydro<dim>::IW] = m_Udata(cell_index, Hydro<dim>::IW, iOct);
     }
     real_t pf, cf;
     core::models::compute_Pressure_and_SpeedOfSound(hydro_state, pf, cf, m_settings);
-    const real_t uf = hydro_state[IU] / hydro_state[ID];
+    const real_t uf = hydro_state[Hydro<dim>::IU] / hydro_state[Hydro<dim>::ID];
     // get preimage by advection at speed u-c
     x0 = xyz[IX] - (uf - cf) * m_t_eval;
   }
@@ -121,13 +114,13 @@ InitBreakingWaveDataFunctor<dim, device_t>::operator()(const int32_t & global_in
     HALF_F * rho * (u * u + v * v + w * w);
   // clang-format on
 
-  m_Udata(cell_index, m_fm[ID], iOct) = rho;
-  m_Udata(cell_index, m_fm[IP], iOct) = p / (gamma - ONE_F) + ekin;
-  m_Udata(cell_index, m_fm[IU], iOct) = rho * u;
-  m_Udata(cell_index, m_fm[IV], iOct) = rho * v;
+  m_Udata(cell_index, Hydro<dim>::ID, iOct) = rho;
+  m_Udata(cell_index, Hydro<dim>::IP, iOct) = p / (gamma - ONE_F) + ekin;
+  m_Udata(cell_index, Hydro<dim>::IU, iOct) = rho * u;
+  m_Udata(cell_index, Hydro<dim>::IV, iOct) = rho * v;
 
   if constexpr (dim == 3)
-    m_Udata(cell_index, m_fm[IW], iOct) = rho * w;
+    m_Udata(cell_index, Hydro<dim>::IW, iOct) = rho * w;
 
 } // end InitBreakingWaveDataFunctor<dim, device_t>::operator ()
 
@@ -163,7 +156,6 @@ InitBreakingWave<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solve
                                                     solver.mesh_map()->orchard_keys(),
                                                     solver.amr_mesh()->local_num_quadrants(),
                                                     settings,
-                                                    solver.hydro().get_fieldmap(),
                                                     t_init,
                                                     config_map);
 
@@ -188,7 +180,6 @@ InitBreakingWave<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solve
                                                         solver.mesh_map()->orchard_keys(),
                                                         solver.amr_mesh()->local_num_quadrants(),
                                                         settings,
-                                                        solver.hydro().get_fieldmap(),
                                                         t_init,
                                                         config_map);
 
@@ -245,7 +236,6 @@ InitBreakingWave<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solve
                                                         solver.mesh_map()->orchard_keys(),
                                                         solver.amr_mesh()->local_num_quadrants(),
                                                         settings,
-                                                        solver.hydro().get_fieldmap(),
                                                         t_init,
                                                         config_map);
 

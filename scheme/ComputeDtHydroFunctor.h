@@ -8,14 +8,11 @@
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_DT_HYDRO_FUNCTOR_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_DT_HYDRO_FUNCTOR_H_
 
+#include <godunov_hydro/common.h>
+
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
-#include <kalypsso/core/FieldMap.h>
 #include <kalypsso/core/orchard_key_base.h>
-
-// hydro utils (conservative versus primitive variable, equation of state, ...)
-#include <kalypsso/core/models/HydroState.h>
-#include <kalypsso/core/models/utils_hydro.h>
 #include <kalypsso/core/utils_block.h>
 #include <kalypsso/core/GravityField.h>
 #include <kalypsso/core/ViscosityParams.h>
@@ -54,9 +51,6 @@ public:
   //! our kokkos execution space
   using exec_space = typename device_t::execution_space;
 
-  // makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
-
   //! global cell index
   using index_t = int32_t;
 
@@ -72,9 +66,6 @@ private:
 
   //! Viscosity parameters
   ViscosityParams m_viscosity_params;
-
-  //! field manager
-  FieldMap<core::models::Hydro> m_fm;
 
   //! block sizes
   block_size_t<dim> m_block_sizes;
@@ -97,16 +88,15 @@ private:
   //! uniform gravity field
   const UniformGravityField<dim> m_gravity_field;
 
-  ComputeDtHydroFunctor(ConfigMap const &                     config_map,
-                        orchard_key_view_t const &            orchard_keys,
-                        int32_t                               local_num_octants,
-                        HydroSettings const &                 hydro_settings,
-                        FieldMap<core::models::Hydro> const & fm,
-                        block_size_t<dim> const &             block_sizes,
-                        DataArrayBlock_t const &              Udata,
-                        eos::EosWrapper<device_t> const &     eos,
-                        bool                                  gravity_enabled,
-                        UniformGravityField<dim>              gravity_field);
+  ComputeDtHydroFunctor(ConfigMap const &                 config_map,
+                        orchard_key_view_t const &        orchard_keys,
+                        int32_t                           local_num_octants,
+                        HydroSettings const &             hydro_settings,
+                        block_size_t<dim> const &         block_sizes,
+                        DataArrayBlock_t const &          Udata,
+                        eos::EosWrapper<device_t> const & eos,
+                        bool                              gravity_enabled,
+                        UniformGravityField<dim>          gravity_field);
 
 public:
   // ====================================================================
@@ -119,20 +109,18 @@ public:
   //! \param[in] hydro_settings contains hydrodynamics parameter used to perform conservative to
   //! primitive
   //!            variable conversion (equation of state)
-  //! \param[in] fm is the field map (TODO refactor this)
   //! \param[in] block_sizes is an array the cartesian block sizes
   //! \param[in,out] invDt is the inverse of time step, the output of this functor
   //!
   static void
-  apply(ConfigMap const &                     config_map,
-        orchard_key_view_t const &            orchard_keys,
-        int32_t                               local_num_octants,
-        HydroSettings const &                 hydro_settings,
-        FieldMap<core::models::Hydro> const & fm,
-        block_size_t<dim> const &             block_sizes,
-        DataArrayBlock_t const &              Udata,
-        eos::EosWrapper<device_t> const &     eos,
-        real_t &                              invDt);
+  apply(ConfigMap const &                 config_map,
+        orchard_key_view_t const &        orchard_keys,
+        int32_t                           local_num_octants,
+        HydroSettings const &             hydro_settings,
+        block_size_t<dim> const &         block_sizes,
+        DataArrayBlock_t const &          Udata,
+        eos::EosWrapper<device_t> const & eos,
+        real_t &                          invDt);
 
   // ====================================================================
   // ====================================================================

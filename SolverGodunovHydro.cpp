@@ -65,7 +65,6 @@ SolverGodunovHydro<dim, device_t>::SolverGodunovHydro(ParallelEnv const & par_en
   , m_block_sizes(get_block_sizes<dim>(config_map))
   , m_brick_sizes(get_brick_sizes<dim>(config_map))
   , m_is_brick_periodic(get_brick_periodicity<dim>(config_map))
-  , m_hydro(params.dimType)
   , m_hydro_settings(config_map)
   , m_amr_mesh(std::make_shared<AMRmesh<dim>>(par_env, config_map))
   , m_mesh_map(std::make_shared<MeshMap<dim, device_t>>(config_map, par_env))
@@ -385,16 +384,11 @@ SolverGodunovHydro<dim, device_t>::compute_dt_local()
   real_t dt;
   real_t invDt = ZERO_F;
 
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  // necessary to access user data
-  const auto & fm = m_hydro.get_fieldmap();
-
   // call device functor - compute invDt
   ComputeDtHydroFunctor<dim, device_t>::apply(m_config_map,
                                               m_mesh_map->orchard_keys(),
                                               m_mesh_map->get_amr_mesh_info().local_num_quadrants(),
                                               m_hydro_settings,
-                                              fm,
                                               m_block_sizes,
                                               m_U,
                                               m_godunov_implem->m_eos,
@@ -622,7 +616,7 @@ SolverGodunovHydro<dim, device_t>::register_volume_integrals(bool is_reference)
                                         0,
                                         num_octants,
                                         m_mesh_map->orchard_keys(),
-                                        m_hydro.get_fieldmap()[core::models::Hydro::ID],
+                                        models::Hydro<dim>::ID,
                                         "density",
                                         m_config_map,
                                         m_par_env,
@@ -632,7 +626,7 @@ SolverGodunovHydro<dim, device_t>::register_volume_integrals(bool is_reference)
                                         0,
                                         num_octants,
                                         m_mesh_map->orchard_keys(),
-                                        m_hydro.get_fieldmap()[core::models::Hydro::IE],
+                                        models::Hydro<dim>::IE,
                                         "total_energy",
                                         m_config_map,
                                         m_par_env,
@@ -642,7 +636,7 @@ SolverGodunovHydro<dim, device_t>::register_volume_integrals(bool is_reference)
                                         0,
                                         num_octants,
                                         m_mesh_map->orchard_keys(),
-                                        m_hydro.get_fieldmap()[core::models::Hydro::IU],
+                                        models::Hydro<dim>::IU,
                                         "rho_u",
                                         m_config_map,
                                         m_par_env,
@@ -652,7 +646,7 @@ SolverGodunovHydro<dim, device_t>::register_volume_integrals(bool is_reference)
                                         0,
                                         num_octants,
                                         m_mesh_map->orchard_keys(),
-                                        m_hydro.get_fieldmap()[core::models::Hydro::IV],
+                                        models::Hydro<dim>::IV,
                                         "rho_v",
                                         m_config_map,
                                         m_par_env,
@@ -664,7 +658,7 @@ SolverGodunovHydro<dim, device_t>::register_volume_integrals(bool is_reference)
                                           0,
                                           num_octants,
                                           m_mesh_map->orchard_keys(),
-                                          m_hydro.get_fieldmap()[core::models::Hydro::IW],
+                                          models::Hydro<dim>::IW,
                                           "rho_w",
                                           m_config_map,
                                           m_par_env,
@@ -718,12 +712,10 @@ auto
 SolverGodunovHydro<dim, device_t>::get_derived_quantity(DERIVED_QUANTITY derived_quantity)
   -> DataArrayBlock_t
 {
-  const auto & fm = m_hydro.get_fieldmap();
-  const auto   local_num_quadrants =
+  const auto local_num_quadrants =
     static_cast<int64_t>(m_mesh_map->get_amr_mesh_info().local_num_quadrants());
 
   return ComputeDerivedQuantities<dim, device_t>::run(m_U,
-                                                      fm,
                                                       derived_quantity,
                                                       m_hydro_settings,
                                                       m_godunov_implem->m_eos,
@@ -755,12 +747,6 @@ SolverGodunovHydro<dim, device_t>::save_solution_hdf5([[maybe_unused]] bool pure
 {
 
 #ifdef KALYPSSO_CORE_USE_HDF5
-
-  // retrieve available / allowed names: fieldManager, and field map (fm)
-  const auto & fm = m_hydro.get_fieldmap();
-
-  // a map containing ID and name of the variable to write
-  const auto id2names = m_hydro.get_id2names_map();
 
   // get list of variables to write ?
   const auto write_variables =
@@ -796,20 +782,19 @@ SolverGodunovHydro<dim, device_t>::save_solution_hdf5([[maybe_unused]] bool pure
     m_hdf5_writer->write_scalar_attribute("run", "iteration", m_iteration);
 
     // write user data (all enabled field)
-    for (auto & iter : id2names)
+    const auto nbvar_hydro = static_cast<int32_t>(models::Hydro<dim>::HYDRO_VARID_COUNT);
+    for (int32_t i_var = 0; i_var < nbvar_hydro; ++i_var)
     {
-      auto varId = static_cast<typename core::models::Hydro::VarId>(iter.first);
-
       // get variables string name
-      const auto varName = id2names.at(varId);
+      const auto varName = models::Hydro<dim>::name(i_var);
 
       if (is_present(write_variables, varName) or should_do_checkpoint())
       {
-        total_num_bytes += m_hdf5_writer->write_quadrant_attribute(
-          m_Uhost, fm[varId], varName, 0, local_num_quadrants);
+        total_num_bytes +=
+          m_hdf5_writer->write_quadrant_attribute(m_Uhost, i_var, varName, 0, local_num_quadrants);
       }
 
-    } // end for iter
+    } // end for i_var
 
     if (!pure_checkpoint)
     {
@@ -968,7 +953,6 @@ SolverGodunovHydro<dim, device_t>::fill_outside_quadrants(DataArrayBlock_t data)
                                                m_mesh_map->get_amr_mesh_info(),
                                                m_mesh_map->orchard_keys(),
                                                m_mesh_map->hashmap(),
-                                               m_hydro.get_fieldmap(),
                                                m_config_map,
                                                m_par_env);
 
@@ -1044,21 +1028,12 @@ SolverGodunovHydro<dim, device_t>::mark_cells()
                                          ivar_to_refine,
                                          epsilon_lohner };
 
-      const auto & fm = m_hydro.get_fieldmap();
-
       // compute derived quantity
       const auto local_num_quadrants =
         static_cast<int64_t>(m_mesh_map->get_amr_mesh_info().local_num_quadrants());
 
-      const auto derived_quantity =
-        ComputeDerivedQuantities<dim, device_t>::run(m_U,
-                                                     fm,
-                                                     name,
-                                                     m_hydro_settings,
-                                                     m_godunov_implem->m_eos,
-                                                     0,
-                                                     local_num_quadrants,
-                                                     m_par_env);
+      const auto derived_quantity = ComputeDerivedQuantities<dim, device_t>::run(
+        m_U, name, m_hydro_settings, m_godunov_implem->m_eos, 0, local_num_quadrants, m_par_env);
 
       ComputeRefineFlags<dim, device_t>::run(m_mesh_map->hashmap(),
                                              m_mesh_map->orchard_keys(),
@@ -1072,18 +1047,15 @@ SolverGodunovHydro<dim, device_t>::mark_cells()
     else
     {
       // retrieve which variable is used to compute refine criterion
-      int const ivar_to_refine = [this, name]() {
-        // a map containing ID and name of each variable of the model (rho, ...)
-        auto const id2names = m_hydro.get_id2names_map();
-        for (auto & iter : id2names)
+      int const ivar_to_refine = [name]() {
+        for (int32_t i_var = 0; i_var < static_cast<int32_t>(models::Hydro<dim>::nbvar()); ++i_var)
         {
-          auto const varId = static_cast<typename core::models::Hydro::VarId>(iter.first);
-          auto const varName = id2names.at(varId);
+          auto const varName = models::Hydro<dim>::name(i_var);
           if (varName == name)
-            return varId;
+            return i_var;
         }
         // default value (density, aka rho)
-        return ::kalypsso::core::models::Hydro::ID;
+        return static_cast<typename models::Hydro<dim>::Id_t>(models::Hydro<dim>::ID);
       }();
 
       RefineIndicatorData refine_params{ static_cast<int>(m_params.level_min),

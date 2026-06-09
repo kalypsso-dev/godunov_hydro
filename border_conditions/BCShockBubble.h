@@ -27,7 +27,6 @@
 
 #include <kalypsso/core/problems/ShockBubbleParams.h>
 
-#include <kalypsso/core/models/Hydro.h>
 #include <godunov_hydro/eos/EosWrapper.h>
 #include <godunov_hydro/common.h>
 
@@ -123,9 +122,6 @@ public:
   using orchard_key_view_t = typename orchard_key_base_t<device_t>::view_t;
 
   using DataArrayBlock_t = DataArrayBlock<dim, real_t, device_t>;
-
-  // makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
 
   // ==============================================================
   // ==============================================================

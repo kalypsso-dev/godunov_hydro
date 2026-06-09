@@ -26,7 +26,6 @@ namespace godunov_hydro
 template <size_t dim, typename device_t>
 InitBlastDataFunctor<dim, device_t>::InitBlastDataFunctor(
   DataArrayBlock_t const &             Udata,
-  FieldMap<core::models::Hydro>        fm,
   orchard_key_view_t<device_t> const & orchard_keys,
   int32_t                              local_num_octants,
   HydroSettings const &                settings,
@@ -36,7 +35,6 @@ InitBlastDataFunctor<dim, device_t>::InitBlastDataFunctor(
   real_t                               total_volume_inside,
   ConfigMap const &                    config_map)
   : m_Udata(Udata)
-  , m_fm(fm)
   , m_orchard_keys(orchard_keys)
   , m_local_num_octants(local_num_octants)
   , m_settings(settings)
@@ -52,7 +50,6 @@ InitBlastDataFunctor<dim, device_t>::InitBlastDataFunctor(
 template <size_t dim, typename device_t>
 auto
 InitBlastDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &             Udata,
-                                           FieldMap<core::models::Hydro>        fm,
                                            orchard_key_view_t<device_t> const & orchard_keys,
                                            int32_t                              local_num_octants,
                                            HydroSettings const &                settings,
@@ -65,7 +62,6 @@ InitBlastDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &             
 
   // data init functor
   InitBlastDataFunctor functor(Udata,
-                               fm,
                                orchard_keys,
                                local_num_octants,
                                settings,
@@ -104,7 +100,6 @@ template <size_t dim, typename device_t>
 void
 InitBlastDataFunctor<dim, device_t>::rescale_energy(
   DataArrayBlock_t const &             Udata,
-  FieldMap<core::models::Hydro>        fm,
   orchard_key_view_t<device_t> const & orchard_keys,
   int32_t                              local_num_octants,
   HydroSettings const &                settings,
@@ -118,7 +113,6 @@ InitBlastDataFunctor<dim, device_t>::rescale_energy(
 
   // data init functor
   InitBlastDataFunctor functor(Udata,
-                               fm,
                                orchard_keys,
                                local_num_octants,
                                settings,
@@ -198,13 +192,13 @@ InitBlastDataFunctor<dim, device_t>::operator()(TagInitData const &,
   {
     const auto region = corner_regions[0];
 
-    m_Udata(cell_index, m_fm[Hydro::ID], iOct) = m_initial_states(region)[Hydro::ID];
-    m_Udata(cell_index, m_fm[Hydro::IE], iOct) = m_initial_states(region)[Hydro::IE];
-    m_Udata(cell_index, m_fm[Hydro::IU], iOct) = m_initial_states(region)[Hydro::IU];
-    m_Udata(cell_index, m_fm[Hydro::IV], iOct) = m_initial_states(region)[Hydro::IV];
+    m_Udata(cell_index, Hydro<dim>::ID, iOct) = m_initial_states(region)[Hydro<dim>::ID];
+    m_Udata(cell_index, Hydro<dim>::IE, iOct) = m_initial_states(region)[Hydro<dim>::IE];
+    m_Udata(cell_index, Hydro<dim>::IU, iOct) = m_initial_states(region)[Hydro<dim>::IU];
+    m_Udata(cell_index, Hydro<dim>::IV, iOct) = m_initial_states(region)[Hydro<dim>::IV];
     if constexpr (dim == 3)
     {
-      m_Udata(cell_index, m_fm[Hydro::IW], iOct) = m_initial_states(region)[Hydro::IW];
+      m_Udata(cell_index, Hydro<dim>::IW, iOct) = m_initial_states(region)[Hydro<dim>::IW];
     }
 
     // if cell is fully inside, reduce its volume
@@ -239,13 +233,13 @@ InitBlastDataFunctor<dim, device_t>::operator()(TagInitData const &,
     const auto u_mixed = compute_mixed_state<dim, device_t>(
       m_initial_states, 0, blast_vol_frac, 1, ONE_F - blast_vol_frac);
 
-    m_Udata(cell_index, m_fm[Hydro::ID], iOct) = u_mixed[Hydro::ID];
-    m_Udata(cell_index, m_fm[Hydro::IE], iOct) = u_mixed[Hydro::IE];
-    m_Udata(cell_index, m_fm[Hydro::IU], iOct) = u_mixed[Hydro::IU];
-    m_Udata(cell_index, m_fm[Hydro::IV], iOct) = u_mixed[Hydro::IV];
+    m_Udata(cell_index, Hydro<dim>::ID, iOct) = u_mixed[Hydro<dim>::ID];
+    m_Udata(cell_index, Hydro<dim>::IE, iOct) = u_mixed[Hydro<dim>::IE];
+    m_Udata(cell_index, Hydro<dim>::IU, iOct) = u_mixed[Hydro<dim>::IU];
+    m_Udata(cell_index, Hydro<dim>::IV, iOct) = u_mixed[Hydro<dim>::IV];
     if constexpr (dim == 3)
     {
-      m_Udata(cell_index, m_fm[Hydro::IW], iOct) = u_mixed[Hydro::IW];
+      m_Udata(cell_index, Hydro<dim>::IW, iOct) = u_mixed[Hydro<dim>::IW];
     }
 
     volume += dvol * blast_vol_frac;
@@ -322,20 +316,20 @@ InitBlastDataFunctor<dim, device_t>::operator()(TagRescaleEnergy const &,
   {
     if (cell_fully_inside)
     {
-      m_Udata(cell_index, m_fm[Hydro::IE], iOct) =
+      m_Udata(cell_index, Hydro<dim>::IE, iOct) =
         m_bParams.total_energy_inside / m_total_volume_inside;
     }
     else
     {
       auto U_in = m_initial_states(0);
-      U_in[Hydro::IE] = m_bParams.total_energy_inside / m_total_volume_inside;
+      U_in[Hydro<dim>::IE] = m_bParams.total_energy_inside / m_total_volume_inside;
 
       const auto U_out = m_initial_states(1);
 
       const auto U_mix =
         compute_mixed_state<dim, device_t>(U_in, blast_vol_frac, U_out, ONE_F - blast_vol_frac);
 
-      m_Udata(cell_index, m_fm[Hydro::IE], iOct) = U_mix[Hydro::IE];
+      m_Udata(cell_index, Hydro<dim>::IE, iOct) = U_mix[Hydro<dim>::IE];
     }
   }
 
@@ -349,7 +343,6 @@ template class InitBlastDataFunctor<3, kalypsso::DefaultDevice>;
 template <size_t dim, typename device_t>
 InitBlastRefineFunctor<dim, device_t>::InitBlastRefineFunctor(
   DataArrayBlock_t const &             Udata,
-  FieldMap<core::models::Hydro>        fm,
   orchard_key_view_t<device_t> const & orchard_keys,
   amrflags_view_t const &              amrflags,
   int32_t                              local_num_octants,
@@ -359,7 +352,6 @@ InitBlastRefineFunctor<dim, device_t>::InitBlastRefineFunctor(
   bool                                 replicated_init_cond,
   ConfigMap const &                    config_map)
   : m_Udata(Udata)
-  , m_fm(fm)
   , m_orchard_keys(orchard_keys)
   , m_amrflags(amrflags)
   , m_local_num_octants(local_num_octants)
@@ -375,7 +367,6 @@ InitBlastRefineFunctor<dim, device_t>::InitBlastRefineFunctor(
 template <size_t dim, typename device_t>
 void
 InitBlastRefineFunctor<dim, device_t>::apply(DataArrayBlock_t const &             Udata,
-                                             FieldMap<core::models::Hydro>        fm,
                                              orchard_key_view_t<device_t> const & orchard_keys,
                                              amrflags_view_t const &              amrflags,
                                              int32_t                              local_num_octants,
@@ -388,7 +379,6 @@ InitBlastRefineFunctor<dim, device_t>::apply(DataArrayBlock_t const &           
 
   // iterate functor for refinement
   InitBlastRefineFunctor functor(Udata,
-                                 fm,
                                  orchard_keys,
                                  amrflags,
                                  local_num_octants,
@@ -526,7 +516,6 @@ InitBlast<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
   // first init of Udata
   total_volume_inside =
     InitBlastDataFunctor<dim, device_t>::apply(solver.U(),
-                                               solver.hydro().get_fieldmap(),
                                                solver.mesh_map()->orchard_keys(),
                                                solver.amr_mesh()->local_num_quadrants(),
                                                settings,
@@ -555,7 +544,6 @@ InitBlast<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
       //
       total_volume_inside =
         InitBlastDataFunctor<dim, device_t>::apply(solver.U(),
-                                                   solver.hydro().get_fieldmap(),
                                                    solver.mesh_map()->orchard_keys(),
                                                    solver.amr_mesh()->local_num_quadrants(),
                                                    settings,
@@ -586,7 +574,6 @@ InitBlast<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
       // 2. compute refine/coarsen flags
       //
       InitBlastRefineFunctor<dim, device_t>::apply(solver.U(),
-                                                   solver.hydro().get_fieldmap(),
                                                    solver.mesh_map()->orchard_keys(),
                                                    flags_d,
                                                    solver.amr_mesh()->local_num_quadrants(),
@@ -622,7 +609,6 @@ InitBlast<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
       //
       total_volume_inside =
         InitBlastDataFunctor<dim, device_t>::apply(solver.U(),
-                                                   solver.hydro().get_fieldmap(),
                                                    solver.mesh_map()->orchard_keys(),
                                                    solver.amr_mesh()->local_num_quadrants(),
                                                    settings,
@@ -649,7 +635,6 @@ InitBlast<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
   if (blastParams.total_energy_inside > 0)
   {
     InitBlastDataFunctor<dim, device_t>::rescale_energy(solver.U(),
-                                                        solver.hydro().get_fieldmap(),
                                                         solver.mesh_map()->orchard_keys(),
                                                         solver.amr_mesh()->local_num_quadrants(),
                                                         settings,

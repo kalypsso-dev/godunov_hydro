@@ -8,14 +8,13 @@
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_FLUXES_AND_STORE_FUNCTOR_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_FLUXES_AND_STORE_FUNCTOR_H_
 
+#include <godunov_hydro/common.h>
+
 #include <kalypsso/core/kalypsso_core_base.h> // for assertm
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
 #include <kalypsso/core/orchard_key_base.h>
 #include <kalypsso/core/amr_hashmap.h>
-#include <kalypsso/core/FieldMap.h>
-#include <kalypsso/core/models/HydroState.h>
-#include <kalypsso/core/models/RiemannSolvers.h>
 #include <kalypsso/core/ConformalFaceStatus.h>
 #include <kalypsso/core/StencilHelper.h>
 #include <kalypsso/core/AMRMeshInfo.h>
@@ -23,11 +22,9 @@
 #include <kalypsso/core/ViscosityParams.h>
 #include <kalypsso/core/TimeIntegratorConfig.h>
 
-// utils hydro
-#include <kalypsso/core/models/utils_hydro.h>
-
 // equation of state wrapper
 #include <godunov_hydro/eos/EosWrapper.h>
+#include <godunov_hydro/models/RiemannSolvers.h>
 
 #include <type_traits>
 
@@ -70,9 +67,6 @@ public:
   using DataArrayBlock_t = DataArrayBlock<dim, real_t, device_t>;
   using DataArrayGhostedBlock_t = DataArrayGhostedBlock<dim, real_t, device_t>;
 
-  // makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
-
   // access quadrant <-> orchard key (hence AMR level and quadrant size)
   using orchard_key_view_t = typename orchard_key_base_t<device_t>::view_t;
 
@@ -103,9 +97,6 @@ private:
 
   //! ghosted block data arrays (ghost width is 1) - slopes along Z - only used when dim=3
   DataArrayGhostedBlock_t m_slopes_z;
-
-  //! field manager
-  FieldMap<core::models::Hydro> m_fm;
 
   //! offset to first octant in flux array where to write
   const int32_t m_iOct_flux_offset;
@@ -153,47 +144,45 @@ public:
    * \param[in]  time step (as computed by CFL condition)
    *
    */
-  ComputeFluxesAndStoreFunctor(orchard_key_view_t const &            orchard_keys,
-                               AMRMeshInfo const &                   amr_mesh_info,
-                               DataArrayBlock_t const &              fluxes,
-                               DataArrayGhostedBlock_t const &       q_ghosted,
-                               DataArrayGhostedBlock_t const &       slopes_x,
-                               DataArrayGhostedBlock_t const &       slopes_y,
-                               DataArrayGhostedBlock_t const &       slopes_z,
-                               FieldMap<core::models::Hydro> const & fm,
-                               int32_t                               iOct_flux_offset,
-                               int32_t                               num_quads,
-                               int                                   direction,
-                               HydroSettings const &                 hydro_settings,
-                               eos::EosWrapper<device_t> const &     eos,
-                               real_t                                dt,
-                               real_t                                scaling_factor,
-                               bool                                  gravity_enabled,
-                               UniformGravityField<dim> const &      gravity_field,
-                               ViscosityParams const &               viscosity,
-                               TimeIntegrator                        time_integrator);
+  ComputeFluxesAndStoreFunctor(orchard_key_view_t const &        orchard_keys,
+                               AMRMeshInfo const &               amr_mesh_info,
+                               DataArrayBlock_t const &          fluxes,
+                               DataArrayGhostedBlock_t const &   q_ghosted,
+                               DataArrayGhostedBlock_t const &   slopes_x,
+                               DataArrayGhostedBlock_t const &   slopes_y,
+                               DataArrayGhostedBlock_t const &   slopes_z,
+                               int32_t                           iOct_flux_offset,
+                               int32_t                           num_quads,
+                               int                               direction,
+                               HydroSettings const &             hydro_settings,
+                               eos::EosWrapper<device_t> const & eos,
+                               real_t                            dt,
+                               real_t                            scaling_factor,
+                               bool                              gravity_enabled,
+                               UniformGravityField<dim> const &  gravity_field,
+                               ViscosityParams const &           viscosity,
+                               TimeIntegrator                    time_integrator);
 
   // ==============================================================
   // ==============================================================
   //! static method which does it all: create and execute functor with range policy
   //!
   static void
-  apply(ConfigMap const &                     config_map,
-        orchard_key_view_t const &            orchard_keys,
-        AMRMeshInfo const &                   amr_mesh_info,
-        DataArrayBlock_t const &              fluxes,
-        DataArrayGhostedBlock_t const &       q_ghosted,
-        DataArrayGhostedBlock_t const &       slopes_x,
-        DataArrayGhostedBlock_t const &       slopes_y,
-        DataArrayGhostedBlock_t const &       slopes_z,
-        FieldMap<core::models::Hydro> const & fm,
-        int32_t                               iOct_flux_offset,
-        int32_t                               num_quads,
-        int                                   direction,
-        HydroSettings const &                 hydro_settings,
-        eos::EosWrapper<device_t> const &     eos,
-        ViscosityParams const &               viscosity,
-        real_t                                dt);
+  apply(ConfigMap const &                 config_map,
+        orchard_key_view_t const &        orchard_keys,
+        AMRMeshInfo const &               amr_mesh_info,
+        DataArrayBlock_t const &          fluxes,
+        DataArrayGhostedBlock_t const &   q_ghosted,
+        DataArrayGhostedBlock_t const &   slopes_x,
+        DataArrayGhostedBlock_t const &   slopes_y,
+        DataArrayGhostedBlock_t const &   slopes_z,
+        int32_t                           iOct_flux_offset,
+        int32_t                           num_quads,
+        int                               direction,
+        HydroSettings const &             hydro_settings,
+        eos::EosWrapper<device_t> const & eos,
+        ViscosityParams const &           viscosity,
+        real_t                            dt);
 
   // ====================================================================
   // ====================================================================
@@ -210,10 +199,10 @@ public:
 
     HydroState<2> q;
 
-    q[Hydro::ID] = m_q(i, j, m_fm[Hydro::ID], iOct_local);
-    q[Hydro::IP] = m_q(i, j, m_fm[Hydro::IP], iOct_local);
-    q[Hydro::IU] = m_q(i, j, m_fm[Hydro::IU], iOct_local);
-    q[Hydro::IV] = m_q(i, j, m_fm[Hydro::IV], iOct_local);
+    q[Hydro<dim>::ID] = m_q(i, j, Hydro<dim>::ID, iOct_local);
+    q[Hydro<dim>::IP] = m_q(i, j, Hydro<dim>::IP, iOct_local);
+    q[Hydro<dim>::IU] = m_q(i, j, Hydro<dim>::IU, iOct_local);
+    q[Hydro<dim>::IV] = m_q(i, j, Hydro<dim>::IV, iOct_local);
 
     return q;
 
@@ -234,11 +223,11 @@ public:
 
     HydroState<3> q;
 
-    q[Hydro::ID] = m_q(i, j, k, m_fm[Hydro::ID], iOct_local);
-    q[Hydro::IP] = m_q(i, j, k, m_fm[Hydro::IP], iOct_local);
-    q[Hydro::IU] = m_q(i, j, k, m_fm[Hydro::IU], iOct_local);
-    q[Hydro::IV] = m_q(i, j, k, m_fm[Hydro::IV], iOct_local);
-    q[Hydro::IW] = m_q(i, j, k, m_fm[Hydro::IW], iOct_local);
+    q[Hydro<dim>::ID] = m_q(i, j, k, Hydro<dim>::ID, iOct_local);
+    q[Hydro<dim>::IP] = m_q(i, j, k, Hydro<dim>::IP, iOct_local);
+    q[Hydro<dim>::IU] = m_q(i, j, k, Hydro<dim>::IU, iOct_local);
+    q[Hydro<dim>::IV] = m_q(i, j, k, Hydro<dim>::IV, iOct_local);
+    q[Hydro<dim>::IW] = m_q(i, j, k, Hydro<dim>::IW, iOct_local);
 
     return q;
 
@@ -260,10 +249,10 @@ public:
   {
     iOct += m_iOct_flux_offset;
 
-    m_Fluxes(i, j, m_fm[Hydro::ID], iOct) = flux[Hydro::ID];
-    m_Fluxes(i, j, m_fm[Hydro::IP], iOct) = flux[Hydro::IP];
-    m_Fluxes(i, j, m_fm[Hydro::IU], iOct) = flux[Hydro::IU];
-    m_Fluxes(i, j, m_fm[Hydro::IV], iOct) = flux[Hydro::IV];
+    m_Fluxes(i, j, Hydro<dim>::ID, iOct) = flux[Hydro<dim>::ID];
+    m_Fluxes(i, j, Hydro<dim>::IP, iOct) = flux[Hydro<dim>::IP];
+    m_Fluxes(i, j, Hydro<dim>::IU, iOct) = flux[Hydro<dim>::IU];
+    m_Fluxes(i, j, Hydro<dim>::IV, iOct) = flux[Hydro<dim>::IV];
 
   } // set_flux - 2d
 
@@ -285,11 +274,11 @@ public:
   {
     iOct += m_iOct_flux_offset;
 
-    m_Fluxes(i, j, k, m_fm[Hydro::ID], iOct) = flux[Hydro::ID];
-    m_Fluxes(i, j, k, m_fm[Hydro::IP], iOct) = flux[Hydro::IP];
-    m_Fluxes(i, j, k, m_fm[Hydro::IU], iOct) = flux[Hydro::IU];
-    m_Fluxes(i, j, k, m_fm[Hydro::IV], iOct) = flux[Hydro::IV];
-    m_Fluxes(i, j, k, m_fm[Hydro::IW], iOct) = flux[Hydro::IW];
+    m_Fluxes(i, j, k, Hydro<dim>::ID, iOct) = flux[Hydro<dim>::ID];
+    m_Fluxes(i, j, k, Hydro<dim>::IP, iOct) = flux[Hydro<dim>::IP];
+    m_Fluxes(i, j, k, Hydro<dim>::IU, iOct) = flux[Hydro<dim>::IU];
+    m_Fluxes(i, j, k, Hydro<dim>::IV, iOct) = flux[Hydro<dim>::IV];
+    m_Fluxes(i, j, k, Hydro<dim>::IW, iOct) = flux[Hydro<dim>::IW];
 
   } // set_flux - 3d
 

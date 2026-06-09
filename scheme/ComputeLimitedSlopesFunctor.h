@@ -8,14 +8,12 @@
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_LIMITED_SLOPES_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_LIMITED_SLOPES_H_
 
+#include <godunov_hydro/common.h>
+
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
-#include <kalypsso/core/FieldMap.h>
 
 // hydro utils (conservative versus primitive variable, equation of state, ...)
-#include <kalypsso/core/models/Hydro.h>
-#include <kalypsso/core/models/HydroState.h>
-#include <kalypsso/core/models/utils_hydro.h>
 #include <kalypsso/core/utils_block.h>
 
 namespace kalypsso
@@ -58,7 +56,7 @@ public:
   using DataArrayGhostedBlock_t = DataArrayGhostedBlock<dim, real_t, device_t>;
 
   // makes enum Hydro::VarId available
-  using Hydro = kalypsso::core::models::Hydro;
+  using Hydro = models::Hydro<dim>;
 
 private:
   //! a ghosted block array of primitive variables (ghost width is 2)
@@ -72,9 +70,6 @@ private:
 
   //! ghosted block data arrays (ghost width is 1) - slopes along Z - only used when dim=3
   DataArrayGhostedBlock_t m_slopes_z;
-
-  //! field manager
-  FieldMap<core::models::Hydro> m_fm;
 
   //! starting octant id
   const int32_t m_iOct_begin;
@@ -114,14 +109,13 @@ public:
    *
    *
    */
-  ComputeLimitedSlopesFunctor(DataArrayGhostedBlock_t const &       prim_var,
-                              DataArrayGhostedBlock_t const &       slopes_x,
-                              DataArrayGhostedBlock_t const &       slopes_y,
-                              DataArrayGhostedBlock_t const &       slopes_z,
-                              FieldMap<core::models::Hydro> const & fm,
-                              int32_t                               iOct_begin,
-                              int32_t                               num_octants,
-                              HydroSettings const &                 hydro_settings);
+  ComputeLimitedSlopesFunctor(DataArrayGhostedBlock_t const & prim_var,
+                              DataArrayGhostedBlock_t const & slopes_x,
+                              DataArrayGhostedBlock_t const & slopes_y,
+                              DataArrayGhostedBlock_t const & slopes_z,
+                              int32_t                         iOct_begin,
+                              int32_t                         num_octants,
+                              HydroSettings const &           hydro_settings);
 
   // ====================================================================
   // ====================================================================
@@ -129,13 +123,12 @@ public:
   //!
   //! Use this member when computing slopes in a group of octant
   static void
-  apply_on_group(DataArrayGhostedBlock_t const &       primitive_vars,
-                 DataArrayGhostedBlock_t const &       slopes_x,
-                 DataArrayGhostedBlock_t const &       slopes_y,
-                 DataArrayGhostedBlock_t const &       slopes_z,
-                 FieldMap<core::models::Hydro> const & fm,
-                 int32_t                               num_octants,
-                 HydroSettings const &                 hydro_settings);
+  apply_on_group(DataArrayGhostedBlock_t const & primitive_vars,
+                 DataArrayGhostedBlock_t const & slopes_x,
+                 DataArrayGhostedBlock_t const & slopes_y,
+                 DataArrayGhostedBlock_t const & slopes_z,
+                 int32_t                         num_octants,
+                 HydroSettings const &           hydro_settings);
 
   // ====================================================================
   // ====================================================================
@@ -156,14 +149,13 @@ public:
   //!
   //! Use this member when computing slopes in ghost quadrants.
   static void
-  apply_on_ghosts(DataArrayGhostedBlock_t const &       primitive_vars_mg,
-                  DataArrayGhostedBlock_t const &       slopes_x,
-                  DataArrayGhostedBlock_t const &       slopes_y,
-                  DataArrayGhostedBlock_t const &       slopes_z,
-                  FieldMap<core::models::Hydro> const & fm,
-                  int32_t                               num_mirrors,
-                  int32_t                               num_ghosts,
-                  HydroSettings const &                 hydro_settings);
+  apply_on_ghosts(DataArrayGhostedBlock_t const & primitive_vars_mg,
+                  DataArrayGhostedBlock_t const & slopes_x,
+                  DataArrayGhostedBlock_t const & slopes_y,
+                  DataArrayGhostedBlock_t const & slopes_z,
+                  int32_t                         num_mirrors,
+                  int32_t                         num_ghosts,
+                  HydroSettings const &           hydro_settings);
 
   // ====================================================================
   // ====================================================================

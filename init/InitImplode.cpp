@@ -22,7 +22,6 @@ namespace godunov_hydro
 template <size_t dim, typename device_t>
 void
 InitImplodeDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &             Udata,
-                                             FieldMap<core::models::Hydro>        fm,
                                              orchard_key_view_t<device_t> const & orchard_keys,
                                              int32_t                              local_num_octants,
                                              HydroSettings const &                settings,
@@ -32,7 +31,7 @@ InitImplodeDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &           
 
   // data init functor
   InitImplodeDataFunctor functor(
-    Udata, fm, orchard_keys, local_num_octants, settings, implode_params, config_map);
+    Udata, orchard_keys, local_num_octants, settings, implode_params, config_map);
 
   // compute total number of cells
   const auto nbCellsPerLeaf = Udata.num_cells();
@@ -58,12 +57,6 @@ InitImplodeDataFunctor<dim, device_t>::operator()(const int32_t & global_index) 
   const auto cell_index = global_index - iOct * m_Udata.num_cells();
 
   const auto block_sizes = m_Udata.block_size();
-
-  constexpr auto                  ID = core::models::Hydro::ID;
-  constexpr auto                  IP = core::models::Hydro::IP;
-  constexpr auto                  IU = core::models::Hydro::IU;
-  constexpr auto                  IV = core::models::Hydro::IV;
-  [[maybe_unused]] constexpr auto IW = core::models::Hydro::IW;
 
   // compute ix,iy,iz of local cell inside
   // block from index
@@ -118,20 +111,21 @@ InitImplodeDataFunctor<dim, device_t>::operator()(const int32_t & global_index) 
 
     if (is_in)
     {
-      m_Udata(cell_index, m_fm[ID], iOct) = rho_in;
-      m_Udata(cell_index, m_fm[IP], iOct) = m_eos_wrapper.volumic_eint_from_pressure(p_in, rho_in) +
-                                            HALF_F * rho_in * (u_in * u_in + v_in * v_in);
-      m_Udata(cell_index, m_fm[IU], iOct) = rho_in * u_in;
-      m_Udata(cell_index, m_fm[IV], iOct) = rho_in * v_in;
+      m_Udata(cell_index, Hydro<dim>::ID, iOct) = rho_in;
+      m_Udata(cell_index, Hydro<dim>::IP, iOct) =
+        m_eos_wrapper.volumic_eint_from_pressure(p_in, rho_in) +
+        HALF_F * rho_in * (u_in * u_in + v_in * v_in);
+      m_Udata(cell_index, Hydro<dim>::IU, iOct) = rho_in * u_in;
+      m_Udata(cell_index, Hydro<dim>::IV, iOct) = rho_in * v_in;
     }
     else
     {
-      m_Udata(cell_index, m_fm[ID], iOct) = rho_out;
-      m_Udata(cell_index, m_fm[IP], iOct) =
+      m_Udata(cell_index, Hydro<dim>::ID, iOct) = rho_out;
+      m_Udata(cell_index, Hydro<dim>::IP, iOct) =
         m_eos_wrapper.volumic_eint_from_pressure(p_out, rho_out) +
         HALF_F * rho_out * (u_out * u_out + v_out * v_out);
-      m_Udata(cell_index, m_fm[IU], iOct) = rho_out * u_out;
-      m_Udata(cell_index, m_fm[IV], iOct) = rho_out * v_out;
+      m_Udata(cell_index, Hydro<dim>::IU, iOct) = rho_out * u_out;
+      m_Udata(cell_index, Hydro<dim>::IV, iOct) = rho_out * v_out;
     }
   }
   else if constexpr (dim == 3)
@@ -162,23 +156,23 @@ InitImplodeDataFunctor<dim, device_t>::operator()(const int32_t & global_index) 
 
     if (is_in)
     {
-      m_Udata(cell_index, m_fm[ID], iOct) = rho_in;
-      m_Udata(cell_index, m_fm[IP], iOct) =
+      m_Udata(cell_index, Hydro<dim>::ID, iOct) = rho_in;
+      m_Udata(cell_index, Hydro<dim>::IP, iOct) =
         m_eos_wrapper.volumic_eint_from_pressure(p_in, rho_in) +
         HALF_F * rho_in * (u_in * u_in + v_in * v_in + w_in * w_in);
-      m_Udata(cell_index, m_fm[IU], iOct) = rho_in * u_in;
-      m_Udata(cell_index, m_fm[IV], iOct) = rho_in * v_in;
-      m_Udata(cell_index, m_fm[IW], iOct) = rho_in * w_in;
+      m_Udata(cell_index, Hydro<dim>::IU, iOct) = rho_in * u_in;
+      m_Udata(cell_index, Hydro<dim>::IV, iOct) = rho_in * v_in;
+      m_Udata(cell_index, Hydro<dim>::IW, iOct) = rho_in * w_in;
     }
     else
     {
-      m_Udata(cell_index, m_fm[ID], iOct) = rho_out;
-      m_Udata(cell_index, m_fm[IP], iOct) =
+      m_Udata(cell_index, Hydro<dim>::ID, iOct) = rho_out;
+      m_Udata(cell_index, Hydro<dim>::IP, iOct) =
         m_eos_wrapper.volumic_eint_from_pressure(p_out, rho_out) +
         HALF_F * rho_out * (u_out * u_out + v_out * v_out + w_out * w_out);
-      m_Udata(cell_index, m_fm[IU], iOct) = rho_out * u_out;
-      m_Udata(cell_index, m_fm[IV], iOct) = rho_out * v_out;
-      m_Udata(cell_index, m_fm[IW], iOct) = rho_out * w_out;
+      m_Udata(cell_index, Hydro<dim>::IU, iOct) = rho_out * u_out;
+      m_Udata(cell_index, Hydro<dim>::IV, iOct) = rho_out * v_out;
+      m_Udata(cell_index, Hydro<dim>::IW, iOct) = rho_out * w_out;
     }
   }
 } // end InitImplodeDataFunctor::operator ()
@@ -192,7 +186,6 @@ template class InitImplodeDataFunctor<3, kalypsso::DefaultDevice>;
 template <size_t dim, typename device_t>
 void
 InitImplodeRefineFunctor<dim, device_t>::apply(DataArrayBlock_t const &             Udata,
-                                               FieldMap<core::models::Hydro>        fm,
                                                orchard_key_view_t<device_t> const & orchard_keys,
                                                amrflags_view_t const &              amrflags,
                                                int32_t               local_num_octants,
@@ -204,7 +197,6 @@ InitImplodeRefineFunctor<dim, device_t>::apply(DataArrayBlock_t const &         
 
   // iterate functor for refinement
   InitImplodeRefineFunctor functor(Udata,
-                                   fm,
                                    orchard_keys,
                                    amrflags,
                                    local_num_octants,
@@ -381,7 +373,6 @@ InitImplode<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
 
   // first init of Udata
   InitImplodeDataFunctor<dim, device_t>::apply(solver.U(),
-                                               solver.hydro().get_fieldmap(),
                                                solver.mesh_map()->orchard_keys(),
                                                solver.amr_mesh()->local_num_quadrants(),
                                                settings,
@@ -405,7 +396,6 @@ InitImplode<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
       // 2. update Udata
       //
       InitImplodeDataFunctor<dim, device_t>::apply(solver.U(),
-                                                   solver.hydro().get_fieldmap(),
                                                    solver.mesh_map()->orchard_keys(),
                                                    solver.amr_mesh()->local_num_quadrants(),
                                                    settings,
@@ -433,7 +423,6 @@ InitImplode<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
       // 2. compute refine/coarsen flags
       //
       InitImplodeRefineFunctor<dim, device_t>::apply(solver.U(),
-                                                     solver.hydro().get_fieldmap(),
                                                      solver.mesh_map()->orchard_keys(),
                                                      flags_d,
                                                      solver.amr_mesh()->local_num_quadrants(),
@@ -467,7 +456,6 @@ InitImplode<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
       // 6. update Udata
       //
       InitImplodeDataFunctor<dim, device_t>::apply(solver.U(),
-                                                   solver.hydro().get_fieldmap(),
                                                    solver.mesh_map()->orchard_keys(),
                                                    solver.amr_mesh()->local_num_quadrants(),
                                                    settings,
