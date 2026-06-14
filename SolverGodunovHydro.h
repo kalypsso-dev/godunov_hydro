@@ -14,7 +14,6 @@
 #define KALYPSSO_GODUNOV_HYDRO_SOLVER_GODUNOV_HYDRO_H_
 
 #include <cstdio>
-#include <cstdbool>
 #include <cassert> // assert
 
 // shared
