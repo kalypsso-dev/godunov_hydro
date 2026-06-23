@@ -46,6 +46,8 @@
 
 #include <kalypsso/utils/monitoring/memory_utils.h>
 
+#include <algorithm> // std::for_each
+
 namespace kalypsso
 {
 namespace godunov_hydro
@@ -798,40 +800,20 @@ SolverGodunovHydro<dim, device_t>::save_solution_hdf5([[maybe_unused]] bool pure
 
     if (!pure_checkpoint)
     {
-      if (is_present(write_variables, std::string{ "thermal_pressure" }))
+      for (DERIVED_QUANTITY derived_var : DERIVED_QUANTITY::_values())
       {
-        const auto thermal_pressure_host =
-          get_derived_quantity_on_host(DERIVED_QUANTITY::THERMAL_PRESSURE);
+        auto name = std::string{ derived_var._to_string() };
+        // get lower case name
+        std::for_each(
+          name.begin(), name.end(), [](char & c) { c = static_cast<char>(std::tolower(c)); });
 
-        total_num_bytes += m_hdf5_writer->write_quadrant_attribute(
-          thermal_pressure_host, 0, "thermal_pressure", 0, local_num_quadrants);
-      }
+        if (is_present(write_variables, name))
+        {
+          const auto derived_quantity_host = get_derived_quantity_on_host(derived_var);
 
-      if (is_present(write_variables, std::string{ "speed_of_sound" }))
-      {
-        const auto speed_of_sound_host =
-          get_derived_quantity_on_host(DERIVED_QUANTITY::SPEED_OF_SOUND);
-
-        total_num_bytes += m_hdf5_writer->write_quadrant_attribute(
-          speed_of_sound_host, 0, "speed_of_sound", 0, local_num_quadrants);
-      }
-
-      if (is_present(write_variables, std::string{ "specific_ekin" }))
-      {
-        const auto specific_ekin_host =
-          get_derived_quantity_on_host(DERIVED_QUANTITY::SPECIFIC_EKIN);
-
-        total_num_bytes += m_hdf5_writer->write_quadrant_attribute(
-          specific_ekin_host, 0, "specific_ekin", 0, local_num_quadrants);
-      }
-
-      if (is_present(write_variables, std::string{ "local_mach_number" }))
-      {
-        const auto local_mach_number_host =
-          get_derived_quantity_on_host(DERIVED_QUANTITY::LOCAL_MACH_NUMBER);
-
-        total_num_bytes += m_hdf5_writer->write_quadrant_attribute(
-          local_mach_number_host, 0, "local_mach_number", 0, local_num_quadrants);
+          total_num_bytes += m_hdf5_writer->write_quadrant_attribute(
+            derived_quantity_host, 0, name, 0, local_num_quadrants);
+        }
       }
 
       if (is_present(write_variables, std::string{ "rho_schlieren" }))
@@ -1017,7 +999,8 @@ SolverGodunovHydro<dim, device_t>::mark_cells()
 
   for (auto const & name : names)
   {
-    if (name == "thermal_pressure" or name == "specific_ekin")
+    const auto maybe_derived_quantity = DERIVED_QUANTITY::_from_string_nocase_nothrow(name.c_str());
+    if (*maybe_derived_quantity)
     {
       const int           ivar_to_refine = 0;
       RefineIndicatorData refine_params{ static_cast<int>(m_params.level_min),
