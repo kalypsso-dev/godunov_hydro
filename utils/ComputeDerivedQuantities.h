@@ -36,13 +36,19 @@ namespace godunov_hydro
  * - speed of sound
  * - specific kinetic energy
  * - local Mach number : M =|u|/c where c is local speed of sound
+ * - velocity along X
+ * - velocity along Y
+ * - velocity along Z
  */
 // clang-format off
 BETTER_ENUM(DERIVED_QUANTITY, uint32_t,
             THERMAL_PRESSURE,
             SPEED_OF_SOUND,
             SPECIFIC_EKIN,
-            LOCAL_MACH_NUMBER
+            LOCAL_MACH_NUMBER,
+            VX,
+            VY,
+            VZ
   )
 // clang-format on
 
@@ -56,7 +62,6 @@ BETTER_ENUM(DERIVED_QUANTITY, uint32_t,
 template <size_t dim, typename device_t>
 struct ComputeDerivedQuantities
 {
-
   //! type alias for cell-centered data array at block level (see kalypsso_data_container.h)
   using DataArrayBlock_t = DataArrayBlock<dim, real_t, device_t>;
 
@@ -88,13 +93,13 @@ struct ComputeDerivedQuantities
   // ==========================================================================
   // ==========================================================================
   static DataArrayBlock_t
-  run(DataArrayBlock_t          Udata,
-      DERIVED_QUANTITY          quantity,
-      HydroSettings             hydro_settings,
-      eos::EosWrapper<device_t> eos,
-      int64_t                   iOct_begin,
-      int64_t                   num_octs,
-      ParallelEnv const &       par_env)
+  run(DataArrayBlock_t const &          Udata,
+      DERIVED_QUANTITY                  quantity,
+      HydroSettings const &             hydro_settings,
+      eos::EosWrapper<device_t> const & eos,
+      int64_t                           iOct_begin,
+      int64_t                           num_octs,
+      ParallelEnv const &               par_env)
   {
     check_args_validity(Udata, iOct_begin, num_octs);
 
@@ -165,6 +170,25 @@ struct ComputeDerivedQuantities
 
           res(cell_index, 0, iOct) = u_norm / cs;
         }
+        else if (quantity._to_integral() == +DERIVED_QUANTITY::VX)
+        {
+          res(cell_index, 0, iOct) = qLoc[Hydro::IU];
+        }
+        else if (quantity._to_integral() == +DERIVED_QUANTITY::VY)
+        {
+          res(cell_index, 0, iOct) = qLoc[Hydro::IV];
+        }
+        else if (quantity._to_integral() == +DERIVED_QUANTITY::VZ)
+        {
+          if constexpr (dim == 3)
+          {
+            res(cell_index, 0, iOct) = qLoc[Hydro::IW];
+          }
+          else
+          {
+            res(cell_index, 0, iOct) = ZERO_F;
+          }
+        }
       });
 
     return res;
@@ -174,54 +198,19 @@ struct ComputeDerivedQuantities
   // ==========================================================================
   // ==========================================================================
   static DataArrayBlock_t
-  run(DataArrayBlock_t          Udata,
-      std::string               quantity,
-      HydroSettings             hydro_settings,
-      eos::EosWrapper<device_t> eos,
-      int64_t                   iOct_begin,
-      int64_t                   num_octs,
-      ParallelEnv const &       par_env)
+  run(DataArrayBlock_t const &          Udata,
+      std::string                       quantity,
+      HydroSettings const &             hydro_settings,
+      eos::EosWrapper<device_t> const & eos,
+      int64_t                           iOct_begin,
+      int64_t                           num_octs,
+      ParallelEnv const &               par_env)
   {
-    if (quantity == "thermal_pressure")
+    auto derived_quantity = DERIVED_QUANTITY::_from_string_nocase_nothrow(quantity.c_str());
+
+    if (derived_quantity)
     {
-      return run(Udata,
-                 DERIVED_QUANTITY::THERMAL_PRESSURE,
-                 hydro_settings,
-                 eos,
-                 iOct_begin,
-                 num_octs,
-                 par_env);
-    }
-    else if (quantity == "speed_of_sound")
-    {
-      return run(Udata,
-                 DERIVED_QUANTITY::SPEED_OF_SOUND,
-                 hydro_settings,
-                 eos,
-                 iOct_begin,
-                 num_octs,
-                 par_env);
-    }
-    else if (quantity == "specific_ekin")
-    {
-      // clang-format off
-      return run(Udata,
-                 DERIVED_QUANTITY::SPECIFIC_EKIN,
-                 hydro_settings,eos,
-                 iOct_begin,
-                 num_octs,
-                 par_env);
-      // clang-format on
-    }
-    else if (quantity == "local_mach_number")
-    {
-      return run(Udata,
-                 DERIVED_QUANTITY::LOCAL_MACH_NUMBER,
-                 hydro_settings,
-                 eos,
-                 iOct_begin,
-                 num_octs,
-                 par_env);
+      return run(Udata, *derived_quantity, hydro_settings, eos, iOct_begin, num_octs, par_env);
     }
     else
     {
