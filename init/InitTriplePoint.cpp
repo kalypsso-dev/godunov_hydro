@@ -73,7 +73,7 @@ InitTriplePointDataFunctor<dim, device_t>::operator()(const int32_t & global_ind
     m_Udata(cell_index, Hydro<dim>::IU, iOct) = ZERO_F;
     m_Udata(cell_index, Hydro<dim>::IV, iOct) = ZERO_F;
     if constexpr (dim == 3)
-      m_Udata(cell_index, Hydro<dim>::IW, iOct) = 0.0;
+      m_Udata(cell_index, Hydro<dim>::IW, iOct) = ZERO_F;
     m_Udata(cell_index, Hydro<dim>::IE, iOct) = m_eos_wrapper.volumic_eint_from_pressure(
       m_triple_point_params.p0, m_triple_point_params.rho0);
   }
@@ -85,7 +85,7 @@ InitTriplePointDataFunctor<dim, device_t>::operator()(const int32_t & global_ind
       m_Udata(cell_index, Hydro<dim>::IU, iOct) = ZERO_F;
       m_Udata(cell_index, Hydro<dim>::IV, iOct) = ZERO_F;
       if constexpr (dim == 3)
-        m_Udata(cell_index, Hydro<dim>::IW, iOct) = 0.0;
+        m_Udata(cell_index, Hydro<dim>::IW, iOct) = ZERO_F;
       m_Udata(cell_index, Hydro<dim>::IE, iOct) = m_eos_wrapper.volumic_eint_from_pressure(
         m_triple_point_params.p1, m_triple_point_params.rho1);
     }
@@ -95,7 +95,7 @@ InitTriplePointDataFunctor<dim, device_t>::operator()(const int32_t & global_ind
       m_Udata(cell_index, Hydro<dim>::IU, iOct) = ZERO_F;
       m_Udata(cell_index, Hydro<dim>::IV, iOct) = ZERO_F;
       if constexpr (dim == 3)
-        m_Udata(cell_index, Hydro<dim>::IW, iOct) = 0.0;
+        m_Udata(cell_index, Hydro<dim>::IW, iOct) = ZERO_F;
       m_Udata(cell_index, Hydro<dim>::IE, iOct) = m_eos_wrapper.volumic_eint_from_pressure(
         m_triple_point_params.p2, m_triple_point_params.rho2);
     }
