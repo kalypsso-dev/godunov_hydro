@@ -90,15 +90,15 @@ KOKKOS_INLINE_FUNCTION HydroState<dim>
   // specific internal energy
   const auto specific_eint = u[Hydro::IE] / d - eken;
 
-  valid = specific_eint >= 0;
-
-  if (settings.abort_when_negative_eint and !valid)
-  {
-    Kokkos::abort("Negative specific internal energy detected - can't proceed further");
-  }
-
   // compute pressure
   const auto p = eos.pressure_from_specific_eint(specific_eint, d);
+
+  valid = p >= 0;
+
+  if (settings.abort_when_negative_pressure and !valid)
+  {
+    Kokkos::abort("Negative pressure detected - can't proceed further");
+  }
 
   HydroState<dim> q;
   q[Hydro::ID] = d;
@@ -158,6 +158,13 @@ KOKKOS_INLINE_FUNCTION HydroState<dim>
 {
   using Hydro = models::Hydro<dim>;
 
+  valid = q[Hydro::IP] >= 0;
+
+  if (settings.abort_when_negative_pressure and !valid)
+  {
+    Kokkos::abort("Negative pressure detected - can't proceed further");
+  }
+
   real_t smallr = settings.smallr;
 
   const auto d = fmax(q[Hydro::ID], smallr);
@@ -181,13 +188,6 @@ KOKKOS_INLINE_FUNCTION HydroState<dim>
 
   // volumic internal energy
   const auto volumic_eint = eos.volumic_eint_from_pressure(q[Hydro::IP], d);
-
-  valid = volumic_eint >= 0;
-
-  if (settings.abort_when_negative_eint and !valid)
-  {
-    Kokkos::abort("Negative specific internal energy detected - can't proceed further");
-  }
 
   u[Hydro::IE] = volumic_eint + volumic_ekin;
 
