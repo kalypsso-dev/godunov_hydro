@@ -29,9 +29,6 @@
 
 #include <kalypsso/utils/monitoring/ProfilingManager.h>
 
-// Equation of state
-#include <godunov_hydro/eos/EosWrapper.h>
-
 // godunov implementation details
 #include <godunov_hydro/scheme/GodunovImplemBase.h>
 #include <godunov_hydro/scheme/GodunovImplemV0.h>

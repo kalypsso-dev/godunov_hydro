@@ -13,10 +13,10 @@
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/HydroParams.h>
 #include <kalypsso/core/models/HydroSettings.h>
+#include <kalypsso/core/eos/EosWrapperMonoFluid.h>
 
 #include <godunov_hydro/models/Hydro.h>
 #include <godunov_hydro/models/HydroState.h>
-#include <godunov_hydro/eos/EosWrapper.h>
 
 namespace kalypsso
 {
@@ -62,10 +62,10 @@ compute_ekin_from_primitives(const HydroState<dim> & q)
  */
 template <size_t dim, typename device_t>
 KOKKOS_INLINE_FUNCTION HydroState<dim>
-                       compute_primitives(const HydroState<dim> &           u,
-                                          const HydroSettings &             settings,
-                                          eos::EosWrapper<device_t> const & eos,
-                                          bool &                            valid)
+                       compute_primitives(const HydroState<dim> &                          u,
+                                          const HydroSettings &                            settings,
+                                          core::eos::EosWrapperMonoFluid<device_t> const & eos,
+                                          bool &                                           valid)
 {
   using Hydro = models::Hydro<dim>;
 
@@ -128,9 +128,9 @@ KOKKOS_INLINE_FUNCTION HydroState<dim>
  */
 template <size_t dim, typename device_t>
 KOKKOS_INLINE_FUNCTION HydroState<dim>
-                       compute_primitives(HydroState<dim> const &           u,
-                                          HydroSettings const &             settings,
-                                          eos::EosWrapper<device_t> const & eos)
+                       compute_primitives(HydroState<dim> const &                          u,
+                                          HydroSettings const &                            settings,
+                                          core::eos::EosWrapperMonoFluid<device_t> const & eos)
 {
 
   [[maybe_unused]] bool valid = true;
@@ -151,10 +151,10 @@ KOKKOS_INLINE_FUNCTION HydroState<dim>
  */
 template <size_t dim, typename device_t>
 KOKKOS_INLINE_FUNCTION HydroState<dim>
-                       compute_conservative_variables(const HydroState<dim> &           q,
-                                                      const HydroSettings &             settings,
-                                                      eos::EosWrapper<device_t> const & eos,
-                                                      bool &                            valid)
+                       compute_conservative_variables(const HydroState<dim> &                          q,
+                                                      const HydroSettings &                            settings,
+                                                      core::eos::EosWrapperMonoFluid<device_t> const & eos,
+                                                      bool &                                           valid)
 {
   using Hydro = models::Hydro<dim>;
 

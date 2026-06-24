@@ -18,8 +18,8 @@
 #include <kalypsso/core/amr_hashmap.h>
 #include <kalypsso/core/AMRContext.h>
 #include <kalypsso/core/brick_utils.h>
+#include <kalypsso/core/eos/EosWrapperMonoFluid.h>
 
-#include <godunov_hydro/eos/EosWrapper.h>
 #include <godunov_hydro/models/Hydro.h>
 #include <godunov_hydro/models/HydroState.h>
 #include <godunov_hydro/models/utils_hydro.h>
@@ -55,6 +55,10 @@ using amrflags_view_t = typename AMRContext<dim, device_t>::amrflags_view_t;
 template <size_t dim, typename device_t>
 using InitialStates = Kokkos::View<HydroState<dim> *, device_t>;
 
+//! type alias to access equations of state (EOS)
+template <typename device_t>
+using EosWrapper = core::eos::EosWrapperMonoFluid<device_t>;
+
 // ===============================================================================
 // ===============================================================================
 /**
@@ -73,9 +77,9 @@ using InitialStates = Kokkos::View<HydroState<dim> *, device_t>;
  */
 template <size_t dim>
 HydroState<dim>
-get_region_init_state(const int32_t                       i_region,
-                      eos::EosWrapper<HostDevice> const & eos_wrapper,
-                      const ConfigMap &                   config_map)
+get_region_init_state(const int32_t                  i_region,
+                      EosWrapper<HostDevice> const & eos_wrapper,
+                      const ConfigMap &              config_map)
 {
 
   // variables specific (per mass unit)
@@ -134,7 +138,7 @@ get_initial_states(ConfigMap const & config_map, int nb_regions) -> InitialState
   InitialStates<dim, device_t> initial_states("Initial states", static_cast<uint>(nb_regions));
   auto                         initial_states_host = Kokkos::create_mirror_view(initial_states);
 
-  const auto eos_wrapper = eos::EosWrapper<HostDevice>(config_map);
+  const auto eos_wrapper = EosWrapper<HostDevice>(config_map);
 
   for (int i_region = 0; i_region < nb_regions; i_region++)
   {

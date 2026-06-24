@@ -93,13 +93,13 @@ struct ComputeDerivedQuantities
   // ==========================================================================
   // ==========================================================================
   static DataArrayBlock_t
-  run(DataArrayBlock_t const &          Udata,
-      DERIVED_QUANTITY                  quantity,
-      HydroSettings const &             hydro_settings,
-      eos::EosWrapper<device_t> const & eos,
-      int64_t                           iOct_begin,
-      int64_t                           num_octs,
-      ParallelEnv const &               par_env)
+  run(DataArrayBlock_t const &     Udata,
+      DERIVED_QUANTITY             quantity,
+      HydroSettings const &        hydro_settings,
+      EosWrapper<device_t> const & eos,
+      int64_t                      iOct_begin,
+      int64_t                      num_octs,
+      ParallelEnv const &          par_env)
   {
     check_args_validity(Udata, iOct_begin, num_octs);
 
@@ -198,13 +198,13 @@ struct ComputeDerivedQuantities
   // ==========================================================================
   // ==========================================================================
   static DataArrayBlock_t
-  run(DataArrayBlock_t const &          Udata,
-      std::string                       quantity,
-      HydroSettings const &             hydro_settings,
-      eos::EosWrapper<device_t> const & eos,
-      int64_t                           iOct_begin,
-      int64_t                           num_octs,
-      ParallelEnv const &               par_env)
+  run(DataArrayBlock_t const &     Udata,
+      std::string                  quantity,
+      HydroSettings const &        hydro_settings,
+      EosWrapper<device_t> const & eos,
+      int64_t                      iOct_begin,
+      int64_t                      num_octs,
+      ParallelEnv const &          par_env)
   {
     auto derived_quantity = DERIVED_QUANTITY::_from_string_nocase_nothrow(quantity.c_str());
 

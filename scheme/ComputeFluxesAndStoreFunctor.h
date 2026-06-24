@@ -22,8 +22,6 @@
 #include <kalypsso/core/ViscosityParams.h>
 #include <kalypsso/core/TimeIntegratorConfig.h>
 
-// equation of state wrapper
-#include <godunov_hydro/eos/EosWrapper.h>
 #include <godunov_hydro/models/RiemannSolvers.h>
 
 #include <type_traits>
@@ -117,7 +115,7 @@ private:
   HydroSettings m_hydro_settings;
 
   //! EOS parameters
-  eos::EosWrapper<device_t> m_eos;
+  EosWrapper<device_t> m_eos;
 
   //! time step
   real_t m_dt;
@@ -144,45 +142,45 @@ public:
    * \param[in]  time step (as computed by CFL condition)
    *
    */
-  ComputeFluxesAndStoreFunctor(orchard_key_view_t const &        orchard_keys,
-                               AMRMeshInfo const &               amr_mesh_info,
-                               DataArrayBlock_t const &          fluxes,
-                               DataArrayGhostedBlock_t const &   q_ghosted,
-                               DataArrayGhostedBlock_t const &   slopes_x,
-                               DataArrayGhostedBlock_t const &   slopes_y,
-                               DataArrayGhostedBlock_t const &   slopes_z,
-                               int32_t                           iOct_flux_offset,
-                               int32_t                           num_quads,
-                               int                               direction,
-                               HydroSettings const &             hydro_settings,
-                               eos::EosWrapper<device_t> const & eos,
-                               real_t                            dt,
-                               real_t                            scaling_factor,
-                               bool                              gravity_enabled,
-                               UniformGravityField<dim> const &  gravity_field,
-                               ViscosityParams const &           viscosity,
-                               TimeIntegrator                    time_integrator);
+  ComputeFluxesAndStoreFunctor(orchard_key_view_t const &       orchard_keys,
+                               AMRMeshInfo const &              amr_mesh_info,
+                               DataArrayBlock_t const &         fluxes,
+                               DataArrayGhostedBlock_t const &  q_ghosted,
+                               DataArrayGhostedBlock_t const &  slopes_x,
+                               DataArrayGhostedBlock_t const &  slopes_y,
+                               DataArrayGhostedBlock_t const &  slopes_z,
+                               int32_t                          iOct_flux_offset,
+                               int32_t                          num_quads,
+                               int                              direction,
+                               HydroSettings const &            hydro_settings,
+                               EosWrapper<device_t> const &     eos,
+                               real_t                           dt,
+                               real_t                           scaling_factor,
+                               bool                             gravity_enabled,
+                               UniformGravityField<dim> const & gravity_field,
+                               ViscosityParams const &          viscosity,
+                               TimeIntegrator                   time_integrator);
 
   // ==============================================================
   // ==============================================================
   //! static method which does it all: create and execute functor with range policy
   //!
   static void
-  apply(ConfigMap const &                 config_map,
-        orchard_key_view_t const &        orchard_keys,
-        AMRMeshInfo const &               amr_mesh_info,
-        DataArrayBlock_t const &          fluxes,
-        DataArrayGhostedBlock_t const &   q_ghosted,
-        DataArrayGhostedBlock_t const &   slopes_x,
-        DataArrayGhostedBlock_t const &   slopes_y,
-        DataArrayGhostedBlock_t const &   slopes_z,
-        int32_t                           iOct_flux_offset,
-        int32_t                           num_quads,
-        int                               direction,
-        HydroSettings const &             hydro_settings,
-        eos::EosWrapper<device_t> const & eos,
-        ViscosityParams const &           viscosity,
-        real_t                            dt);
+  apply(ConfigMap const &               config_map,
+        orchard_key_view_t const &      orchard_keys,
+        AMRMeshInfo const &             amr_mesh_info,
+        DataArrayBlock_t const &        fluxes,
+        DataArrayGhostedBlock_t const & q_ghosted,
+        DataArrayGhostedBlock_t const & slopes_x,
+        DataArrayGhostedBlock_t const & slopes_y,
+        DataArrayGhostedBlock_t const & slopes_z,
+        int32_t                         iOct_flux_offset,
+        int32_t                         num_quads,
+        int                             direction,
+        HydroSettings const &           hydro_settings,
+        EosWrapper<device_t> const &    eos,
+        ViscosityParams const &         viscosity,
+        real_t                          dt);
 
   // ====================================================================
   // ====================================================================

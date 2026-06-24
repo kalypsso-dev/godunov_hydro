@@ -33,7 +33,7 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::ComputeFluxesAndUpdateFunctor(
   Kokkos::Array<uint8_t, dim> const & brick_sizes,
   Kokkos::Array<bool, dim> const &    is_brick_periodic,
   HydroSettings const &               hydro_settings,
-  eos::EosWrapper<device_t> const &   eos,
+  EosWrapper<device_t> const &        eos,
   real_t                              dt,
   bool                                gravity_enabled,
   UniformGravityField<dim> const &    gravity_field,
@@ -84,7 +84,7 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::apply_on_group(
   Kokkos::Array<uint8_t, dim> const & brick_sizes,
   Kokkos::Array<bool, dim> const &    is_brick_periodic,
   HydroSettings const &               hydro_settings,
-  eos::EosWrapper<device_t> const &   eos,
+  EosWrapper<device_t> const &        eos,
   real_t                              dt,
   bool                                use_flux_oriented_computation)
 {

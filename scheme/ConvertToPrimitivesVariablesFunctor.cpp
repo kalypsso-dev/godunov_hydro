@@ -18,14 +18,14 @@ namespace godunov_hydro
 // ==============================================================
 template <size_t dim, typename device_t>
 ConvertToPrimitivesVariablesFunctor<dim, device_t>::ConvertToPrimitivesVariablesFunctor(
-  StencilHelper_t const &           stencil_helper,
-  AMRMeshInfo const &               amr_mesh_info,
-  int32_t                           iOct_begin,
-  DataArrayBlock_t const &          userdata_in,
-  DataArrayGhostedBlock_t const &   userdata_out,
-  HydroSettings const &             hydro_settings,
-  eos::EosWrapper<device_t> const & eos,
-  CellCenteredProlongationType      prolongation)
+  StencilHelper_t const &         stencil_helper,
+  AMRMeshInfo const &             amr_mesh_info,
+  int32_t                         iOct_begin,
+  DataArrayBlock_t const &        userdata_in,
+  DataArrayGhostedBlock_t const & userdata_out,
+  HydroSettings const &           hydro_settings,
+  EosWrapper<device_t> const &    eos,
+  CellCenteredProlongationType    prolongation)
   : m_stencil_helper(stencil_helper)
   , m_mirror_orchard_keys_device()
   , m_amr_mesh_info(amr_mesh_info)
@@ -46,14 +46,14 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::ConvertToPrimitivesVariables
 // same as above, but specifying also the mirror keys array
 template <size_t dim, typename device_t>
 ConvertToPrimitivesVariablesFunctor<dim, device_t>::ConvertToPrimitivesVariablesFunctor(
-  StencilHelper_t const &           stencil_helper,
-  orchard_key_view_t const &        mirror_orchard_keys,
-  AMRMeshInfo const &               amr_mesh_info,
-  DataArrayBlock_t const &          userdata_in,
-  DataArrayGhostedBlock_t const &   userdata_out,
-  HydroSettings const &             hydro_settings,
-  eos::EosWrapper<device_t> const & eos,
-  CellCenteredProlongationType      prolongation)
+  StencilHelper_t const &         stencil_helper,
+  orchard_key_view_t const &      mirror_orchard_keys,
+  AMRMeshInfo const &             amr_mesh_info,
+  DataArrayBlock_t const &        userdata_in,
+  DataArrayGhostedBlock_t const & userdata_out,
+  HydroSettings const &           hydro_settings,
+  EosWrapper<device_t> const &    eos,
+  CellCenteredProlongationType    prolongation)
   : m_stencil_helper(stencil_helper)
   , m_mirror_orchard_keys_device(mirror_orchard_keys)
   , m_amr_mesh_info(amr_mesh_info)
@@ -74,18 +74,18 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::ConvertToPrimitivesVariables
 template <size_t dim, typename device_t>
 void
 ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_on_group(
-  ConfigMap const &                 config_map,
-  amr_hashmap_t const &             amr_hashmap,
-  orchard_key_view_t const &        orchard_keys,
-  AMRMeshInfo const &               amr_mesh_info,
-  int32_t                           iOct_begin,
-  int32_t                           num_octants_in_group,
-  DataArrayBlock_t const &          userdata_in,
-  DataArrayGhostedBlock_t const &   userdata_out,
-  brick_size_t<dim> const &         brick_sizes,
-  Kokkos::Array<bool, dim> const &  is_brick_periodic,
-  HydroSettings const &             hydro_settings,
-  eos::EosWrapper<device_t> const & eos)
+  ConfigMap const &                config_map,
+  amr_hashmap_t const &            amr_hashmap,
+  orchard_key_view_t const &       orchard_keys,
+  AMRMeshInfo const &              amr_mesh_info,
+  int32_t                          iOct_begin,
+  int32_t                          num_octants_in_group,
+  DataArrayBlock_t const &         userdata_in,
+  DataArrayGhostedBlock_t const &  userdata_out,
+  brick_size_t<dim> const &        brick_sizes,
+  Kokkos::Array<bool, dim> const & is_brick_periodic,
+  HydroSettings const &            hydro_settings,
+  EosWrapper<device_t> const &     eos)
 {
   // make sure the range of octants to process is valid
   assertm((iOct_begin + num_octants_in_group) <= amr_mesh_info.local_num_quadrants(),
@@ -119,17 +119,17 @@ ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_on_group(
 template <size_t dim, typename device_t>
 void
 ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_in_mirrors(
-  ConfigMap const &                 config_map,
-  amr_hashmap_t const &             amr_hashmap,
-  orchard_key_view_t const &        orchard_keys,
-  orchard_key_view_t const &        mirror_orchard_keys,
-  AMRMeshInfo const &               amr_mesh_info,
-  DataArrayBlock_t const &          userdata_in,
-  DataArrayGhostedBlock_t const &   userdata_out,
-  brick_size_t<dim> const &         brick_sizes,
-  Kokkos::Array<bool, dim> const &  is_brick_periodic,
-  HydroSettings const &             hydro_settings,
-  eos::EosWrapper<device_t> const & eos)
+  ConfigMap const &                config_map,
+  amr_hashmap_t const &            amr_hashmap,
+  orchard_key_view_t const &       orchard_keys,
+  orchard_key_view_t const &       mirror_orchard_keys,
+  AMRMeshInfo const &              amr_mesh_info,
+  DataArrayBlock_t const &         userdata_in,
+  DataArrayGhostedBlock_t const &  userdata_out,
+  brick_size_t<dim> const &        brick_sizes,
+  Kokkos::Array<bool, dim> const & is_brick_periodic,
+  HydroSettings const &            hydro_settings,
+  EosWrapper<device_t> const &     eos)
 {
 
   auto stencil_helper = StencilHelper_t(

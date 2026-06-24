@@ -56,7 +56,7 @@ private:
   TriplePointParams m_triple_point_params;
 
   //! Equation of state wrapper
-  eos::EosWrapper<device_t> m_eos_wrapper;
+  EosWrapper<device_t> m_eos_wrapper;
 
   //! get geometrical scaling factor
   const real_t m_scaling_factor;

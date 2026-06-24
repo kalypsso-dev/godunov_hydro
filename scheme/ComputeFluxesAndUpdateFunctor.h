@@ -20,8 +20,6 @@
 #include <kalypsso/core/Kokkos_Array_extensions.h>
 #include <kalypsso/core/GravityField.h>
 
-// equation of state wrapper
-#include <godunov_hydro/eos/EosWrapper.h>
 #include <godunov_hydro/models/RiemannSolvers.h>
 
 #include <type_traits>
@@ -126,7 +124,7 @@ private:
   HydroSettings m_hydro_settings;
 
   //! EOS parameters
-  eos::EosWrapper<device_t> m_eos;
+  EosWrapper<device_t> m_eos;
 
   //! time step
   real_t m_dt;
@@ -180,7 +178,7 @@ public:
                                 Kokkos::Array<uint8_t, dim> const & brick_sizes,
                                 Kokkos::Array<bool, dim> const &    is_brick_periodic,
                                 HydroSettings const &               hydro_settings,
-                                eos::EosWrapper<device_t> const &   eos,
+                                EosWrapper<device_t> const &        eos,
                                 real_t                              dt,
                                 bool                                gravity_enabled,
                                 UniformGravityField<dim> const &    gravity_field,
@@ -205,7 +203,7 @@ public:
                  Kokkos::Array<uint8_t, dim> const & brick_sizes,
                  Kokkos::Array<bool, dim> const &    is_brick_periodic,
                  HydroSettings const &               hydro_settings,
-                 eos::EosWrapper<device_t> const &   eos,
+                 EosWrapper<device_t> const &        eos,
                  real_t                              dt,
                  bool                                use_flux_oriented_computation);
 

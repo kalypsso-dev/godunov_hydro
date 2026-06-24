@@ -4,6 +4,9 @@
 
 /**
  * \file EosWrapper.h
+ *
+ * \note This header is currently not used, we prefer EosWrapperMonoFluid from kalypsso-core.
+ * But anyone can locally custmized it and use it instead just by redefining type alias in common.h
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_MODELS_EOS_WRAPPER_H_
 #define KALYPSSO_GODUNOV_HYDRO_MODELS_EOS_WRAPPER_H_
