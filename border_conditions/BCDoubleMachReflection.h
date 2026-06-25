@@ -26,7 +26,6 @@
 #include <kalypsso/core/AMRMeshInfo.h>
 #include <kalypsso/core/problems/DoubleMachReflectionParams.h>
 
-#include <godunov_hydro/eos/EosWrapper.h>
 #include <godunov_hydro/common.h>
 #include <godunov_hydro/models/utils_hydro.h>
 
@@ -52,7 +51,7 @@ struct BCDoubleMachReflection
     : dmr_params(config_map)
   {
     [[maybe_unused]] bool valid = true;
-    const auto            eos_wrapper = eos::EosWrapper<HostDevice>(config_map);
+    const auto            eos_wrapper = EosWrapper<HostDevice>(config_map);
     const auto            settings = HydroSettings(config_map);
 
     // get primitive variables

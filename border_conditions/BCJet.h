@@ -26,7 +26,6 @@
 #include <kalypsso/core/AMRMeshInfo.h>
 #include <kalypsso/core/init_func.h> // for InitFunc1 and InitFunc2
 
-#include <godunov_hydro/eos/EosWrapper.h>
 #include <godunov_hydro/common.h>
 #include <godunov_hydro/models/utils_hydro.h>
 
@@ -80,7 +79,7 @@ struct BCJet
     // get conservative variables
     [[maybe_unused]] bool valid = true;
     const auto            settings = HydroSettings(config_map);
-    const auto            eos_wrapper = eos::EosWrapper<HostDevice>(config_map);
+    const auto            eos_wrapper = EosWrapper<HostDevice>(config_map);
     inflow.u =
       models::compute_conservative_variables<dim, HostDevice>(q, settings, eos_wrapper, valid);
 

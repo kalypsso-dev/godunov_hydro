@@ -74,7 +74,7 @@ private:
   KHParams m_khParams;
 
   //! Equation of state wrapper
-  eos::EosWrapper<device_t> m_eos_wrapper;
+  EosWrapper<device_t> m_eos_wrapper;
 
   //! random number generator pool
   RGPool_t m_rand_pool;

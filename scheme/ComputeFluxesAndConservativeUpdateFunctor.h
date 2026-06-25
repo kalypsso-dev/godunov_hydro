@@ -21,8 +21,6 @@
 #include <kalypsso/core/GravityField.h>
 #include <kalypsso/core/TimeIntegratorConfig.h>
 
-// equation of state wrapper
-#include <godunov_hydro/eos/EosWrapper.h>
 #include <godunov_hydro/models/RiemannSolvers.h>
 
 #include <type_traits>
@@ -130,7 +128,7 @@ private:
   HydroSettings m_hydro_settings;
 
   //! EOS parameters
-  eos::EosWrapper<device_t> m_eos;
+  EosWrapper<device_t> m_eos;
 
   //! time step
   real_t m_dt;
@@ -179,7 +177,7 @@ public:
                                             int32_t                            iOct_begin,
                                             int32_t                            num_octants,
                                             HydroSettings const &              hydro_settings,
-                                            eos::EosWrapper<device_t> const &  eos,
+                                            EosWrapper<device_t> const &       eos,
                                             real_t                             dt,
                                             bool                               gravity_enabled,
                                             UniformGravityField<dim> const &   gravity_field,
@@ -207,7 +205,7 @@ public:
                  brick_size_t<dim> const &          brick_sizes,
                  Kokkos::Array<bool, dim> const &   is_brick_periodic,
                  HydroSettings const &              hydro_settings,
-                 eos::EosWrapper<device_t> const &  eos,
+                 EosWrapper<device_t> const &       eos,
                  real_t                             dt);
 
   // ==============================================================
@@ -230,7 +228,7 @@ public:
                   brick_size_t<dim> const &          brick_sizes,
                   Kokkos::Array<bool, dim> const &   is_brick_periodic,
                   HydroSettings const &              hydro_settings,
-                  eos::EosWrapper<device_t> const &  eos,
+                  EosWrapper<device_t> const &       eos,
                   real_t                             dt);
 
   // ====================================================================

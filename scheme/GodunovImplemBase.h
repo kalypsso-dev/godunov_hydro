@@ -34,7 +34,6 @@
 #endif // KALYPSSO_CORE_USE_MPI
 
 #include <godunov_hydro/scheme/AddGravitySourceTerm.h>
-#include <godunov_hydro/eos/EosWrapper.h>
 
 namespace kalypsso
 {
@@ -138,7 +137,7 @@ public:
   const HydroSettings m_hydro_settings;
 
   //! EOS parameters
-  eos::EosWrapper<device_t> const m_eos;
+  EosWrapper<device_t> const m_eos;
 
   //! unordered map of parameters read from input ini file
   ConfigMap const & m_config_map;

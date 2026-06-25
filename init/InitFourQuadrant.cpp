@@ -45,7 +45,7 @@ InitFourQuadrantDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &      
    */
 
   // Equation of state wrapper
-  const auto            eos = eos::EosWrapper<HostDevice>(config_map);
+  const auto            eos = EosWrapper<HostDevice>(config_map);
   [[maybe_unused]] bool valid = true;
 
   for (int i = 0; i < 4; ++i)

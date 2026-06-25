@@ -67,7 +67,7 @@ private:
   RayleighTaylorParams m_rt_params;
 
   //! Equation of state wrapper
-  eos::EosWrapper<device_t> m_eos_wrapper;
+  EosWrapper<device_t> m_eos_wrapper;
 
   //! gravity field
   Kokkos::Array<real_t, dim> m_grav;

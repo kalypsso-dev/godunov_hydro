@@ -59,9 +59,6 @@ private:
   //! Initial states (one per region, conservative variables)
   InitialStates<dim, device_t> m_initial_states;
 
-  //! Equation of state wrapper
-  eos::EosWrapper<device_t> m_eos_wrapper;
-
   //! get geometrical scaling factor
   const real_t m_scaling_factor;
 
@@ -78,7 +75,6 @@ private:
     , m_local_num_octants(local_num_octants)
     , m_sb_params(config_map)
     , m_initial_states(initial_states)
-    , m_eos_wrapper(config_map)
     , m_scaling_factor(get_scaling_factor(config_map))
     , m_xyz_min(get_xyz_min<dim>(config_map)){};
 

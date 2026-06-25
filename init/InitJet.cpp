@@ -36,7 +36,7 @@ InitJetDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &             Ud
     q[Hydro<dim>::IW] = config_map.getReal("jet", "w_inside", KALYPSSO_NUM(0.0));
 
   // Equation of state wrapper
-  const auto            eos = eos::EosWrapper<HostDevice>(config_map);
+  const auto            eos = EosWrapper<HostDevice>(config_map);
   [[maybe_unused]] bool valid = true;
 
   const auto U_jet =
