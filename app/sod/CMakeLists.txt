@@ -27,3 +27,7 @@ configure_file(sod_nitromethane_plot.py sod_nitromethane_plot.py COPYONLY)
 # Mie-Gruneisen with JWL EOS: TNT
 configure_file(test_sod_2d_tnt.ini test_sod_2d_tnt.ini COPYONLY)
 configure_file(sod_tnt_plot.py sod_tnt_plot.py COPYONLY)
+
+# Mie-Gruneisen with JWL EOS: LX17
+configure_file(test_sod_2d_lx17_jwl.ini test_sod_2d_lx17_jwl.ini COPYONLY)
+configure_file(sod_lx17_plot.py sod_lx17_plot.py COPYONLY)
