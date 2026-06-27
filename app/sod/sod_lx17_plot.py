@@ -55,6 +55,15 @@ def sod_plot(ini_filename):
     sod_num_vx = sod_num_rho_vx/sod_num_rho
     sod_num_level = np.load(prefix+'_level.npy')
 
+    time_integrator = config.get('amr','time_integrator',fallback='unknown')
+    slope_type = config.get('hydro','slope_type',fallback=-1)
+    order = -1
+    if time_integrator=='RK1':
+        if slope_type==0:
+            order = 1
+    elif time_integrator=='RK2_SSP' or time_integrator=='HANCOCK':
+        order = 2
+
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, ncols=1, figsize=(8,16))
     #ax1 = plt.subplot(2,1,1)
     #ax2 = plt.subplot(2,1,2, sharex=ax1)
@@ -66,7 +75,7 @@ def sod_plot(ini_filename):
     ax2.legend()
     ax3.legend()
     ax4.legend()
-    plt.suptitle('Shock-tube:\n LX17 with Mie-Gruneisen JWL at tEnd={}'.format(tEnd), fontsize=20)
+    plt.suptitle('Shock-tube:\n LX17 with Mie-Gruneisen JWL at tEnd={}\n Godunov MUSCL-{} order {}'.format(tEnd, time_integrator, order), fontsize=20)
     plt.show()
 
 ###############################################################################
