@@ -22,6 +22,7 @@ def sod_plot(ini_filename):
     config.read(ini_filename)
 
     tEnd=config.getfloat('run','tEnd', fallback=0.2)
+    prefix=config.get('output','outputPrefix',fallback='sod')
 
     if (config['run']['dimension'] == '2'):
         # doing 2d
@@ -53,10 +54,10 @@ def sod_plot(ini_filename):
     #sod_num_rho = sod_num[:,1]
     #sod_num_level = sod_num[:,0]
 
-    sod_num_x = np.load('sod_positions.npy')
-    sod_num_rho = np.load('sod_rho.npy')
-    sod_num_p = np.load('sod_pressure.npy')
-    sod_num_level = np.load('sod_level.npy')
+    sod_num_x = np.load(prefix+'_positions.npy')
+    sod_num_rho = np.load(prefix+'_rho.npy')
+    sod_num_p = np.load(prefix+'_thermal_pressure.npy')
+    sod_num_level = np.load(prefix+'_level.npy')
 
     fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, ncols=1, figsize=(8,12))
     #ax1 = plt.subplot(2,1,1)
@@ -74,7 +75,7 @@ def sod_plot(ini_filename):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Display sod density plots.')
-    parser.add_argument('--ini', type=str, default='test_sod_2d.ini', help='kalypsso ini parameter file')
+    parser.add_argument('--ini', type=str, default='test_sod_2d_nitromethane.ini', help='kalypsso ini parameter file')
     args = parser.parse_args()
 
     sod_plot(args.ini)

@@ -138,67 +138,64 @@ run_simulation(ParallelEnv const &       par_env,
 
     auto solver_hydro = dynamic_cast<godunov_hydro::SolverGodunovHydro<dim, device_t> *>(solver);
 
+    const auto output_prefix = config_map.getString("output", "outputPrefix", "sod");
+
+    const auto cell_var_names = config_map.getStringVector(
+      "sod",
+      "output_slices",
+      std::vector<std::string>{
+        "rho", "e_tot", "rho_vx", "rho_vy", "rho_vz", "thermal_pressure", "speed_of_sound" });
+
+    //
     // 1. save conservative variables
+    //
+    for (auto const & name : cell_var_names)
     {
-      const auto cell_var_ids = std::vector<int32_t>{
-        Hydro::ID, Hydro::IE, Hydro::IU, Hydro::IV, Hydro::IW,
-      };
+      const auto id = Hydro::id_from_name(name);
 
-      const auto cell_var_names =
-        std::vector<std::string>{ "rho", "e_tot", "rhou", "rhov", "rhow" };
-
-      kalypsso::core::ComputeDataSliceAlongLine<dim, device_t>::apply(
-        solver_hydro->U(),
-        0,
-        solver_hydro->mesh_map()->get_amr_mesh_info().local_num_quadrants(),
-        IX,
-        solver_hydro->mesh_map()->orchard_keys(),
-        cell_var_ids,
-        cell_var_names,
-        "sod",
-        par_env,
-        config_map);
+      if (id != Hydro::INVALID_ID)
+      {
+        kalypsso::core::ComputeDataSliceAlongLine<dim, device_t>::apply(
+          solver_hydro->U(),
+          0,
+          solver_hydro->mesh_map()->get_amr_mesh_info().local_num_quadrants(),
+          IX,
+          solver_hydro->mesh_map()->orchard_keys(),
+          std::vector<int32_t>{ id },
+          std::vector<std::string>{ name },
+          output_prefix,
+          par_env,
+          config_map);
+      }
     }
 
-    // 2. save other valuable quantities: pressure
+    //
+    // 2. save other derived quantities: e.g. pressure, speed of sound, ...
+    //
+    for (godunov_hydro::DERIVED_QUANTITY derived_var : godunov_hydro::DERIVED_QUANTITY::_values())
     {
-      const auto thermal_pressure =
-        solver_hydro->get_derived_quantity(godunov_hydro::DERIVED_QUANTITY::THERMAL_PRESSURE);
+      auto name = std::string{ derived_var._to_string() };
+      // get lower case name
+      std::for_each(
+        name.begin(), name.end(), [](char & c) { c = static_cast<char>(std::tolower(c)); });
 
-      const auto cell_var_ids = std::vector<int32_t>{ 0 };
-      const auto cell_var_names = std::vector<std::string>{ "pressure" };
-      kalypsso::core::ComputeDataSliceAlongLine<dim, device_t>::apply(
-        thermal_pressure,
-        0,
-        solver_hydro->mesh_map()->get_amr_mesh_info().local_num_quadrants(),
-        IX,
-        solver_hydro->mesh_map()->orchard_keys(),
-        cell_var_ids,
-        cell_var_names,
-        "sod",
-        par_env,
-        config_map);
-    }
+      if (is_present(cell_var_names, name))
+      {
+        const auto derived_quantity = solver_hydro->get_derived_quantity(derived_var);
 
-    // 3. save other valuable quantities: speed of sound
-    {
-      const auto speed_of_sound =
-        solver_hydro->get_derived_quantity(godunov_hydro::DERIVED_QUANTITY::SPEED_OF_SOUND);
-
-      const auto cell_var_ids = std::vector<int32_t>{ 0 };
-      const auto cell_var_names = std::vector<std::string>{ "speed_of_sound" };
-      kalypsso::core::ComputeDataSliceAlongLine<dim, device_t>::apply(
-        speed_of_sound,
-        0,
-        solver_hydro->mesh_map()->get_amr_mesh_info().local_num_quadrants(),
-        IX,
-        solver_hydro->mesh_map()->orchard_keys(),
-        cell_var_ids,
-        cell_var_names,
-        "sod",
-        par_env,
-        config_map);
-    }
+        kalypsso::core::ComputeDataSliceAlongLine<dim, device_t>::apply(
+          derived_quantity,
+          0,
+          solver_hydro->mesh_map()->get_amr_mesh_info().local_num_quadrants(),
+          IX,
+          solver_hydro->mesh_map()->orchard_keys(),
+          std::vector<int32_t>{ 0 },
+          std::vector<std::string>{ name },
+          output_prefix,
+          par_env,
+          config_map);
+      }
+    } // end derived quantities
   }
   // =================================================================================
   // when doing the isentropic vortex test case, compute error versus exact solution

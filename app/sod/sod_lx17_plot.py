@@ -22,6 +22,7 @@ def sod_plot(ini_filename):
     config.read(ini_filename)
 
     tEnd=config.getfloat('run','tEnd', fallback=0.2)
+    prefix=config.get('output','outputPrefix',fallback='sod')
 
     if (config['run']['dimension'] == '2'):
         # doing 2d
@@ -47,20 +48,24 @@ def sod_plot(ini_filename):
     #sod_num_rho = sod_num[:,1]
     #sod_num_level = sod_num[:,0]
 
-    sod_num_x = np.load('sod_positions.npy')
-    sod_num_rho = np.load('sod_rho.npy')
-    sod_num_p = np.load('sod_pressure.npy')
-    sod_num_level = np.load('sod_level.npy')
+    sod_num_x = np.load(prefix+'_positions.npy')
+    sod_num_rho = np.load(prefix+'_rho.npy')
+    sod_num_p = np.load(prefix+'_thermal_pressure.npy')
+    sod_num_rho_vx = np.load(prefix+'_rho_vx.npy')
+    sod_num_vx = sod_num_rho_vx/sod_num_rho
+    sod_num_level = np.load(prefix+'_level.npy')
 
-    fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, ncols=1, figsize=(8,12))
+    fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, ncols=1, figsize=(8,16))
     #ax1 = plt.subplot(2,1,1)
     #ax2 = plt.subplot(2,1,2, sharex=ax1)
     ax1.plot(sod_num_x, sod_num_rho, 'xb-', label='rho')
-    ax2.plot(sod_num_x, sod_num_p, 'xb-', label='pressure')
-    ax3.plot(sod_num_x, sod_num_level, 'xb-', label='AMR levels')
+    ax2.plot(sod_num_x, sod_num_vx, 'xb-', label='velocity')
+    ax3.plot(sod_num_x, sod_num_p, 'xb-', label='pressure')
+    ax4.plot(sod_num_x, sod_num_level, 'xb-', label='AMR levels')
     ax1.legend()
     ax2.legend()
     ax3.legend()
+    ax4.legend()
     plt.suptitle('Shock-tube:\n LX17 with Mie-Gruneisen JWL at tEnd={}'.format(tEnd), fontsize=20)
     plt.show()
 
