@@ -490,7 +490,7 @@ template <size_t dim, typename device_t>
 void
 SolverGodunovHydro<dim, device_t>::godunov_unsplit(real_t dt)
 {
-  if (m_time_integrator == +TimeIntegrator::HANCOCK)
+  if (m_time_integrator == +TimeIntegrator::HANCOCK or m_time_integrator == +TimeIntegrator::RK1)
   {
     // we need conservative variables in ghost cell to be up to date
     synchronize_mpi_ghost_data(m_U);
