@@ -692,7 +692,7 @@ SolverGodunovHydro<dim, device_t>::total_mem_size_in_bytes()
   total += m_U.allocated_size_in_bytes();
   total += m_U2.allocated_size_in_bytes();
 
-  if (m_time_integrator != +TimeIntegrator::HANCOCK)
+  if (m_time_integrator != +TimeIntegrator::HANCOCK and m_time_integrator != +TimeIntegrator::RK1)
   {
     total += m_U_RK.allocated_size_in_bytes();
   }
