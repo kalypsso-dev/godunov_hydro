@@ -23,6 +23,7 @@ def sod_plot(ini_filename):
 
     tEnd=config.getfloat('run','tEnd', fallback=0.2)
     gamma=config.getfloat('material0','gamma', fallback=1.4)
+    prefix=config.get('output','outputPrefix',fallback='sod')
 
     if (config['run']['dimension'] == '2'):
         # doing 2d
@@ -60,7 +61,7 @@ def sod_plot(ini_filename):
     sod_ana_x = values['x']
     sod_ana_rho = values['rho']
     sod_ana_p = values['p']
-    sod_ana_u = values['u']
+    sod_ana_vx = values['u']
 
     # load numerical solution
     #num_data = sod_num=np.loadtxt('sod_numerical_solution.csv', skiprows=1, delimiter=',',usecols=(1,2,6))
@@ -68,12 +69,12 @@ def sod_plot(ini_filename):
     #sod_num_rho = sod_num[:,1]
     #sod_num_level = sod_num[:,0]
 
-    sod_num_x = np.load('sod_positions.npy')
-    sod_num_rho = np.load('sod_rho.npy')
-    sod_num_p = np.load('sod_pressure.npy')
-    sod_num_rhou = np.load('sod_rhou.npy')
-    sod_num_u = sod_num_rhou/sod_num_rho
-    sod_num_level = np.load('sod_level.npy')
+    sod_num_x = np.load(prefix+'_positions.npy')
+    sod_num_rho = np.load(prefix+'_rho.npy')
+    sod_num_p = np.load(prefix+'_thermal_pressure.npy')
+    sod_num_rho_vx = np.load(prefix+'_rho_vx.npy')
+    sod_num_vx = sod_num_rho_vx/sod_num_rho
+    sod_num_level = np.load(prefix+'_level.npy')
 
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, ncols=1, figsize=(8,11))
     #ax1 = plt.subplot(2,1,1)
@@ -82,8 +83,8 @@ def sod_plot(ini_filename):
     ax1.plot(sod_num_x, sod_num_rho, 'xb', label='numerical - density')
     ax2.plot(sod_ana_x, sod_ana_p, 'g-', label='analytical - pressure')
     ax2.plot(sod_num_x, sod_num_p, 'xb', label='numerical - pressure')
-    ax3.plot(sod_ana_x, sod_ana_u, 'g-', label='analytical - velocity')
-    ax3.plot(sod_num_x, sod_num_u, 'xb', label='numerical - velocity')
+    ax3.plot(sod_ana_x, sod_ana_vx, 'g-', label='analytical - velocity')
+    ax3.plot(sod_num_x, sod_num_vx, 'xb', label='numerical - velocity')
     ax4.plot(sod_num_x, sod_num_level, 'xb-', label='AMR levels')
     ax1.legend()
     ax2.legend()

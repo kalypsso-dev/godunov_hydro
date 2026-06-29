@@ -36,14 +36,15 @@ public:
    */
   enum VarId : Id_t
   {
-    ID = 0,                         /*!< ID mixture density */
-    IP = 1,                         /*!< IP Pressure/Energy field index */
-    IE = 1,                         /*!< IE Energy/Pressure field index */
-    IU = 2,                         /*!< X velocity / momentum index */
-    IV = 3,                         /*!< Y velocity / momentum index */
-    IW = (dim == 2) ? IV : IV + 1,  /*!< Z velocity / momentum index */
-    HYDRO_VARID_COUNT = IW + 1,     /*!< number of hydrodynamics variables */
-    VARID_COUNT = HYDRO_VARID_COUNT /*!< invalid index, just counting number of fields */
+    ID = 0,                          /*!< ID mixture density */
+    IP = 1,                          /*!< IP Pressure/Energy field index */
+    IE = 1,                          /*!< IE Energy/Pressure field index */
+    IU = 2,                          /*!< X velocity / momentum index */
+    IV = 3,                          /*!< Y velocity / momentum index */
+    IW = (dim == 2) ? IV : IV + 1,   /*!< Z velocity / momentum index */
+    HYDRO_VARID_COUNT = IW + 1,      /*!< number of hydrodynamics variables */
+    VARID_COUNT = HYDRO_VARID_COUNT, /*!< invalid index, just counting number of fields */
+    INVALID_ID
   };
 
   enum GradTensorId : Id_t
@@ -81,6 +82,18 @@ public:
   name(size_t var)
   {
     return name(static_cast<Id_t>(var));
+  }
+
+  static int32_t
+  id_from_name(std::string const & a_name)
+  {
+    for (int32_t i_var = 0; i_var < static_cast<int32_t>(Hydro<dim>::nbvar()); ++i_var)
+    {
+      auto const varName = Hydro<dim>::name(i_var);
+      if (varName == a_name)
+        return i_var;
+    }
+    return Hydro<dim>::INVALID_ID;
   }
 
   static var_names_t
