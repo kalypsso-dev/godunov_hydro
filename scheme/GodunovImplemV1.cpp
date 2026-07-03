@@ -86,7 +86,7 @@ GodunovImplemV1<dim, device_t>::do_time_step(DataArrayBlock_t U, DataArrayBlock_
    */
 
   // start main computation
-  KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME);
+  KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME);
 
   // convert conservative variable into primitives ones m_U ==> m_Q_ghosted_mg
   // also perform a half time step gravity predictor
@@ -146,7 +146,7 @@ void
 GodunovImplemV1<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayBlock_t U)
 {
 
-  KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
+  KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
 
   // compute primitive variables in owned mirror blocks (U must have MPI ghost up to date)
   ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_in_mirrors(
@@ -173,7 +173,7 @@ GodunovImplemV1<dim, device_t>::convert_to_primitives_in_group(DataArrayBlock_t 
                                                                int32_t          num_quads_in_group)
 {
 
-  KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
+  KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
 
   const auto num_quads_owned_total =
     static_cast<int32_t>(this->m_mesh_map.get_amr_mesh_info().local_num_quadrants());
@@ -261,7 +261,7 @@ void
 GodunovImplemV1<dim, device_t>::compute_limited_slopes_in_group(int32_t num_quads_to_process)
 {
 
-  KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_SLOPES);
+  KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_SLOPES);
 
   // compute limited slopes in all quadrants of q_group
   ComputeLimitedSlopesFunctor<dim, device_t>::apply_on_group(m_Q_ghosted_group,
@@ -282,7 +282,7 @@ GodunovImplemV1<dim, device_t>::compute_fluxes_and_store_in_group(real_t  dt,
                                                                   int32_t num_quadrants_in_group)
 {
 
-  KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_COMPUTE_FLUXES);
+  KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_COMPUTE_FLUXES);
 
   // compute fluxes and update all quadrant in a group of quadrants
   ComputeFluxesAndStoreFunctor<dim, device_t>::apply(this->m_config_map,
@@ -345,7 +345,7 @@ void
 GodunovImplemV1<dim, device_t>::read_fluxes_and_update_in_owned(DataArrayBlock_t u_out, real_t dt)
 {
 
-  KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_UPDATE);
+  KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_UPDATE);
 
   // compute incoming fluxes in all ghost quadrants and perform conservative update only at
   // interface between ghost and owned quadrants (in case the owned quadrant is coarser than the

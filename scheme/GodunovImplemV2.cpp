@@ -117,7 +117,7 @@ GodunovImplemV2<dim, device_t>::do_time_step(DataArrayBlock_t U, DataArrayBlock_
       (iGroup == nbGroup - 1) ? nbOcts - iOct_begin : m_nbOctsPerGroup;
 
     // start main computation
-    KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME);
+    KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME);
 
     // update primitive variables in ghosted block for all octant in current group of octants
     this->convert_to_primitives_in_group_of_quads(U, iOct_begin, num_octants_in_group);
@@ -147,7 +147,7 @@ void
 GodunovImplemV2<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayBlock_t U)
 {
 
-  KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
+  KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
 
   // compute primitive variables in owned mirror blocks (U must have MPI ghost up to date)
   ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_in_mirrors(
@@ -174,7 +174,7 @@ GodunovImplemV2<dim, device_t>::convert_to_primitives_in_group_of_quads(DataArra
                                                                         int32_t num_octant_in_group)
 {
 
-  KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
+  KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
 
   // compute primitive variables in all owned blocks (U must have MPI ghost up to date)
   ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_on_group(
@@ -200,7 +200,7 @@ void
 GodunovImplemV2<dim, device_t>::compute_limited_slopes_in_group(int32_t num_octants_to_process)
 {
 
-  KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_SLOPES);
+  KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_SLOPES);
 
   // compute limited slopes in all quadrants of q_group
   ComputeLimitedSlopesFunctor<dim, device_t>::apply_on_group(m_Q_ghosted_group,
@@ -218,7 +218,7 @@ template <size_t dim, typename device_t>
 void
 GodunovImplemV2<dim, device_t>::compute_limited_slopes_in_ghosts()
 {
-  KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_SLOPES);
+  KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_SLOPES);
 
   // compute limited slopes in all quadrants that are ghost quadrants
   ComputeLimitedSlopesFunctor<dim, device_t>::apply_on_ghosts(m_Q_ghosted_mg,
@@ -242,7 +242,7 @@ GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_group(DataArrayBloc
                                                                    real_t  dt)
 {
 
-  KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_UPDATE);
+  KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_UPDATE);
 
   // compute fluxes and update all quadrant in a group of quadrants
   ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::apply_on_group(
@@ -276,7 +276,7 @@ GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_ghosts(DataArrayBlo
                                                                     real_t           dt)
 {
 
-  KALYPSSO_PROFILING_REGION(this->m_profiling_mgr, NUM_SCHEME_UPDATE);
+  KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_UPDATE);
 
   // compute incoming fluxes in all ghost quadrants and perform conservative update only at
   // interface between ghost and owned quadrants (in case the owned quadrant is coarser than the
