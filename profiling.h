@@ -19,8 +19,10 @@
     }
 
 #ifndef KALYPSSO_PROFILING_REGION
-#  define KALYPSSO_PROFILING_REGION(mgr, value) \
-    ProfilingTimer region_##value(mgr, ProfilingZone::value)
+#  define KALYPSSO_PROFILING_REGION_HOST(mgr, value) \
+    ProfilingTimer region_##value(mgr, ProfilingZone::value, ProfilingRegion::TIMER_HOST)
+#  define KALYPSSO_PROFILING_REGION_DEVICE(mgr, value) \
+    ProfilingTimer region_##value(mgr, ProfilingZone::value, ProfilingRegion::TIMER_DEVICE)
 #endif
 
 namespace kalypsso
@@ -97,14 +99,24 @@ private:
 
 public:
   static auto &
-  get_profiling_region(ProfilingManager & profiling_mgr, const ProfilingZone zone)
+  get_profiling_region(ProfilingManager &                profiling_mgr,
+                       const ProfilingZone               zone,
+                       ProfilingRegion::timer_location_t timer_location)
   {
     const auto [name, color] = get_name_color(zone);
-    return profiling_mgr.get_region(name, ProfilingRegion::TIMER_HOST, color);
+    return profiling_mgr.get_region(name, timer_location, color);
   }
 
   ProfilingTimer(ProfilingManager & profiling_mgr, const ProfilingZone zone)
-    : m_timer(get_profiling_region(profiling_mgr, zone))
+    : m_timer(get_profiling_region(profiling_mgr, zone, ProfilingRegion::TIMER_HOST))
+  {
+    m_timer.start();
+  }
+
+  ProfilingTimer(ProfilingManager &                profiling_mgr,
+                 const ProfilingZone               zone,
+                 ProfilingRegion::timer_location_t timer_location)
+    : m_timer(get_profiling_region(profiling_mgr, zone, timer_location))
   {
     m_timer.start();
   }
