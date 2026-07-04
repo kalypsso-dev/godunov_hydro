@@ -217,7 +217,7 @@ run_simulation(ParallelEnv const &       par_env,
         solver2d->hydro_settings(),
         config_map);
 
-      const int  varId = core::models::Hydro::ID;
+      const int  varId = godunov_hydro::models::Hydro<dim>::ID;
       const auto error_L1 =
         ComputeError<dim, device_t>::apply(par_env, U, U2, varId, NormType::L1, false);
       const auto error_L2 =
@@ -263,7 +263,7 @@ run_simulation(ParallelEnv const &       par_env,
         tEnd,
         config_map);
 
-      const int  varId = core::models::Hydro::IU;
+      const int  varId = godunov_hydro::models::Hydro<dim>::IU;
       const auto error_L1 =
         ComputeError<dim, device_t>::apply(par_env, U, U2, varId, NormType::L1, true);
       const auto error_L2 =

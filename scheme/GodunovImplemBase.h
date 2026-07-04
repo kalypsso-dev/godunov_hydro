@@ -72,7 +72,6 @@ public:
 #ifdef KALYPSSO_CORE_USE_MPI
     , m_mesh_ghosts_exchanger(mesh_ghosts_exchanger)
 #endif // KALYPSSO_CORE_USE_MPI
-    , m_hydro(params.dimType)
     , m_viscosity(config_map)
   {}
 
@@ -164,9 +163,6 @@ public:
   //! MPI communications to exchange ghost block userdata
   MeshGhostsExchanger<dim, real_t, device_t> & m_mesh_ghosts_exchanger;
 #endif // KALYPSSO_CORE_USE_MPI
-
-  //! model
-  core::models::Hydro m_hydro;
 
   //! viscosity parameter
   ViscosityParams m_viscosity;

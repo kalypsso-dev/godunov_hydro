@@ -61,7 +61,7 @@ template <size_t dim, typename device_t, int dir>
 KOKKOS_FUNCTION HydroState<dim>
                 compute_hydro_flux(const HydroState<dim> & q, EosWrapper<device_t> const & eos)
 {
-  using Hydro = kalypsso::core::models::Hydro;
+  using Hydro = kalypsso::godunov_hydro::models::Hydro<dim>;
 
   if constexpr (dim == 2)
   {
