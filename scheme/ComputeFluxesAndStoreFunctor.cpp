@@ -6,6 +6,7 @@
  * \file ComputeFluxesAndStoreFunctor.cpp
  */
 #include <godunov_hydro/scheme/ComputeFluxesAndStoreFunctor.h>
+#include <kalypsso/core/config_utils.h>
 
 namespace kalypsso
 {
@@ -80,8 +81,8 @@ ComputeFluxesAndStoreFunctor<dim, device_t>::apply(ConfigMap const &            
 {
   // Important note: the caller is responsible for provide a flux array with right shape.
   {
-    [[maybe_unused]] auto flux_block_sizes = q_ghosted.block_size();
-    flux_block_sizes[direction]++;
+    [[maybe_unused]] const auto flux_block_sizes =
+      get_flux_block_sizes<dim>(q_ghosted.block_size(), direction);
     assertm(flux_block_sizes == fluxes.shape(), "Flux array has incompatible shape.");
   }
 

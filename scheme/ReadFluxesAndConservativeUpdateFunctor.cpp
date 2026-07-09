@@ -6,6 +6,7 @@
  * \file ReadFluxesAndConservativeUpdateFunctor.cpp
  */
 #include <godunov_hydro/scheme/ReadFluxesAndConservativeUpdateFunctor.h>
+#include <kalypsso/core/config_utils.h>
 
 namespace kalypsso
 {
@@ -63,8 +64,8 @@ ReadFluxesAndConservativeUpdateFunctor<dim, device_t>::apply(
 {
   // Important note: the caller is responsible for providing a flux array with right shape.
   {
-    [[maybe_unused]] auto flux_block_sizes = Uout.block_size();
-    flux_block_sizes[direction]++;
+    [[maybe_unused]] const auto flux_block_sizes =
+      get_flux_block_sizes<dim>(Uout.block_size(), direction);
     assertm(flux_block_sizes == fluxes.shape(), "Flux array has incompatible shape.");
   }
 

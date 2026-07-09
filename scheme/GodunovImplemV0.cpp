@@ -267,9 +267,7 @@ GodunovImplemV0<dim, device_t>::compute_fluxes_and_store_in_owned_and_ghosts(rea
   const auto num_quadrants_ghost = this->m_mesh_map.get_amr_mesh_info().local_num_ghosts();
 
   // reshape flux to be a flux array in given direction
-  auto flux_block_sizes = m_Q_ghosted.block_size();
-  flux_block_sizes[direction]++;
-  m_Fluxes.reshape(flux_block_sizes);
+  m_Fluxes.reshape(get_flux_block_sizes<dim>(m_Q_ghosted.block_size(), direction));
 
   // compute fluxes and update all quadrants in a group of quadrants
   ComputeFluxesAndStoreFunctor<dim, device_t>::apply(this->m_config_map,
@@ -303,9 +301,7 @@ GodunovImplemV0<dim, device_t>::compute_viscous_fluxes_and_store_in_owned_and_gh
   const auto num_quadrants_ghost = this->m_mesh_map.get_amr_mesh_info().local_num_ghosts();
 
   // reshape flux to be a flux array in given direction
-  auto flux_block_sizes = m_Q_ghosted.block_size();
-  flux_block_sizes[direction]++;
-  m_Fluxes.reshape(flux_block_sizes);
+  m_Fluxes.reshape(get_flux_block_sizes<dim>(m_Q_ghosted.block_size(), direction));
 
   // compute fluxes and update all quadrants in a group of quadrants
   ComputeViscousFluxesAndStoreFunctor<dim, device_t>::apply(this->m_config_map,
@@ -335,8 +331,8 @@ GodunovImplemV0<dim, device_t>::read_fluxes_and_update_in_owned(DataArrayBlock_t
 
   // check flux array sizes
   {
-    [[maybe_unused]] auto flux_block_sizes = m_Q_ghosted.block_size();
-    flux_block_sizes[direction]++;
+    [[maybe_unused]] const auto flux_block_sizes =
+      get_flux_block_sizes<dim>(m_Q_ghosted.block_size(), direction);
     assertm(flux_block_sizes == m_Fluxes.shape(), "Flux array has incompatible shape.");
   }
 
