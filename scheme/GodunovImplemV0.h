@@ -96,7 +96,7 @@ public:
                  "Slope_z_group",
                  nbvar_hydro<dim>(),
                  0)
-    , m_Fluxes("Fluxes", get_flux_block_sizes<dim>(this->m_block_sizes), nbvar_hydro<dim>(), 0)
+    , m_Fluxes("Fluxes", get_flux_block_sizes<dim>(this->m_block_sizes, IX), nbvar_hydro<dim>(), 0)
     , m_time_integrator(TimeIntegratorConfig::get_time_integrator(config_map))
   {} // GodunovImplemV0
 
