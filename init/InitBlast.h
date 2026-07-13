@@ -280,7 +280,7 @@ private:
 public:
   // ===========================================================
   // ===========================================================
-  // static method which does it all: create and execute functor
+  //! static method which does it all: create and execute functor
   static void
   apply(DataArrayBlock_t const &             Udata,
         orchard_key_view_t<device_t> const & orchard_keys,

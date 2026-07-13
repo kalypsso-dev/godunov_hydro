@@ -94,7 +94,7 @@ private:
     , m_t_eval(t_eval){};
 
 public:
-  // static method which does it all: create and execute functor
+  //! static method which does it all: create and execute functor
   static void
   apply(DataArrayBlock_t const &             Udata,
         orchard_key_view_t<device_t> const & orchard_keys,
@@ -146,7 +146,7 @@ public:
   InitBreakingWaveRefineFunctor(amrflags_view_t amrflags)
     : m_amrflags(amrflags){};
 
-  // static method which does it all: create and execute functor
+  //! static method which does it all: create and execute functor
   static void
   apply(amrflags_view_t const & amrflags, int32_t local_num_octants, ConfigMap const & config_map)
   {
