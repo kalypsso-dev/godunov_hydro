@@ -235,7 +235,7 @@ private:
   //! Jet parameters
   BCJet<dim> m_bc_jet;
 
-}; // class FillOutsideCellFunctor
+}; // class FillOutsideJet
 
 // explicit template instantiation
 extern template class FillOutsideJet<2, kalypsso::DefaultDevice>;
