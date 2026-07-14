@@ -79,10 +79,10 @@ InitTriplePointDataFunctor<dim, device_t>::operator()(const int32_t & global_ind
   }
   else
   {
-    auto is_in_region1 = xyz[IY] <= m_triple_point_params.xd;
+    auto is_in_region1 = xyz[IY] <= m_triple_point_params.yd;
     if constexpr (dim == 3)
     {
-      is_in_region1 = sqrt(xyz[IY] * xyz[IY] + xyz[IZ] * xyz[IZ]) <= m_triple_point_params.xd;
+      is_in_region1 = sqrt(xyz[IY] * xyz[IY] + xyz[IZ] * xyz[IZ]) <= m_triple_point_params.yd;
     }
 
     if (is_in_region1)
