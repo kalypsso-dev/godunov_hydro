@@ -14,10 +14,10 @@
 
 #include <kalypsso/core/HydroParams.h>
 #include <kalypsso/core/models/HydroSettings.h>
-#include <kalypsso/core/models/riemann_solver_types.h>
 #include <kalypsso/core/real_type.h>
 #include <kalypsso/core/eos/eos_utils.h>
 
+#include <godunov_hydro/models/riemann_solver_types.h>
 #include <godunov_hydro/models/HydroState.h>
 #include <godunov_hydro/models/Hydro.h>
 
