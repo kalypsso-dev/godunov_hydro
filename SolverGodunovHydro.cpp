@@ -906,7 +906,7 @@ SolverGodunovHydro<dim, device_t>::save_solution_hdf5([[maybe_unused]] bool pure
 template <size_t dim, typename device_t>
 void
 SolverGodunovHydro<dim, device_t>::synchronize_mpi_ghost_data(
-  [[maybe_unused]] DataArrayBlock_t data)
+  [[maybe_unused]] DataArrayBlock_t const & data)
 {
 
 #ifdef KALYPSSO_CORE_USE_MPI
@@ -923,7 +923,7 @@ SolverGodunovHydro<dim, device_t>::synchronize_mpi_ghost_data(
 // =======================================================
 template <size_t dim, typename device_t>
 void
-SolverGodunovHydro<dim, device_t>::fill_outside_quadrants(DataArrayBlock_t data)
+SolverGodunovHydro<dim, device_t>::fill_outside_quadrants(DataArrayBlock_t const & data)
 {
 
   // assert data has expected size (in terms of number of octants/quadrants)
