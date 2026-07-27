@@ -9,7 +9,7 @@
 #include <godunov_hydro/init/InitBreakingWave.h>
 #include <godunov_hydro/SolverGodunovHydro.h>
 
-#include <kalypsso/core/models/utils_hydro.h>
+#include <godunov_hydro/models/utils_hydro.h>
 #include <kalypsso/core/orchard_key_utils.h>
 
 namespace kalypsso
@@ -94,8 +94,12 @@ InitBreakingWaveDataFunctor<dim, device_t>::operator()(const int32_t & global_in
     {
       hydro_state[Hydro<dim>::IW] = m_Udata(cell_index, Hydro<dim>::IW, iOct);
     }
-    real_t pf, cf;
-    core::models::compute_Pressure_and_SpeedOfSound(hydro_state, pf, cf, m_settings);
+    const auto hydro_state_prim =
+      models::compute_primitives<dim>(hydro_state, m_settings, m_eos_wrapper);
+    const auto pf = hydro_state_prim[Hydro<dim>::IP];
+    const auto rhof = hydro_state[Hydro<dim>::ID];
+    const auto cf = m_eos_wrapper.sound_speed(pf, rhof);
+
     const real_t uf = hydro_state[Hydro<dim>::IU] / hydro_state[Hydro<dim>::ID];
     // get preimage by advection at speed u-c
     x0 = xyz[IX] - (uf - cf) * m_t_eval;
