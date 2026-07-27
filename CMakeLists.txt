@@ -40,6 +40,8 @@ set(GODUNOV_HYDRO_SRCS
     init/InitWoodward.cpp
     init/InitWoodward.h
     models/Hydro.h
+    models/HydroSettings.cpp
+    models/HydroSettings.h
     models/HydroState.h
     models/riemann_solver_types.h
     models/RiemannSolvers.h
