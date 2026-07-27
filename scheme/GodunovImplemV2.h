@@ -67,49 +67,49 @@ public:
                         this->m_block_sizes + 2 * 2,
                         get_shift<dim>(-2),
                         "Q_ghosted_group",
-                        nbvar_hydro<dim>(),
+                        models::Hydro<dim>::nbvar(),
                         m_nbOctsPerGroup)
     , m_Q_ghosted_mg(this->m_block_sizes,
                      this->m_block_sizes + 2 * 2,
                      get_shift<dim>(-2),
                      "Q_ghosted_mg",
-                     nbvar_hydro<dim>(),
+                     models::Hydro<dim>::nbvar(),
                      0)
     , m_Slopes_x_group(this->m_block_sizes,
                        this->m_block_sizes + 2 * 1,
                        get_shift<dim>(-1),
                        "Slope_x_group",
-                       nbvar_hydro<dim>(),
+                       models::Hydro<dim>::nbvar(),
                        m_nbOctsPerGroup)
     , m_Slopes_y_group(this->m_block_sizes,
                        this->m_block_sizes + 2 * 1,
                        get_shift<dim>(-1),
                        "Slope_y_group",
-                       nbvar_hydro<dim>(),
+                       models::Hydro<dim>::nbvar(),
                        m_nbOctsPerGroup)
     , m_Slopes_z_group(this->m_block_sizes,
                        this->m_block_sizes + 2 * 1,
                        get_shift<dim>(-1),
                        "Slope_z_group",
-                       nbvar_hydro<dim>(),
+                       models::Hydro<dim>::nbvar(),
                        dim == 3 ? m_nbOctsPerGroup : 0)
     , m_Slopes_x_g(this->m_block_sizes,
                    this->m_block_sizes + 2 * 1,
                    get_shift<dim>(-1),
                    "Slope_x_g",
-                   nbvar_hydro<dim>(),
+                   models::Hydro<dim>::nbvar(),
                    0)
     , m_Slopes_y_g(this->m_block_sizes,
                    this->m_block_sizes + 2 * 1,
                    get_shift<dim>(-1),
                    "Slope_y_g",
-                   nbvar_hydro<dim>(),
+                   models::Hydro<dim>::nbvar(),
                    0)
     , m_Slopes_z_g(this->m_block_sizes,
                    this->m_block_sizes + 2 * 1,
                    get_shift<dim>(-1),
                    "Slope_z_g",
-                   nbvar_hydro<dim>(),
+                   models::Hydro<dim>::nbvar(),
                    0)
   {}
 

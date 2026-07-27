@@ -95,7 +95,7 @@ SolverGodunovHydro<dim, device_t>::SolverGodunovHydro(ParallelEnv const & par_en
     Kokkos::abort("Wrong value for input parameter hydro/implementation_version");
   }
 
-  int nbvar = nbvar_hydro<dim>();
+  int nbvar = models::Hydro<dim>::nbvar();
 
   /*
    * memory pre-allocation.

@@ -9,7 +9,6 @@
 #include <godunov_hydro/init/InitBlast.h>
 #include <godunov_hydro/SolverGodunovHydro.h>
 
-#include <kalypsso/core/models/utils_hydro.h>
 #include <kalypsso/core/orchard_key_utils.h>
 #include <kalypsso/core/problems/init_cond_utils.h>
 #include <kalypsso/core/region_utils.h>

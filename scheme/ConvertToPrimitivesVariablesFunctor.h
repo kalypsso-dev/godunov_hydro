@@ -15,7 +15,6 @@
 #include <kalypsso/core/StencilHelper.h>
 #include <kalypsso/core/prolongation.h>
 
-#include <kalypsso/core/models/utils_hydro.h>
 #include <kalypsso/core/HydroParams.h> // for HydroSettings
 #include <kalypsso/core/AMRMeshInfo.h>
 

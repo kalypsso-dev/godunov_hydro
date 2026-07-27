@@ -11,7 +11,6 @@
 
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/kalypsso_data_container.h> // for DataArrayBlock
-#include <kalypsso/core/models/utils_hydro.h>      // for computePrimitives
 #include <kalypsso/core/GravityField.h>
 #include <godunov_hydro/common.h>
 
