@@ -1090,7 +1090,8 @@ SolverGodunovHydro<dim, device_t>::adapt_mesh()
 // =======================================================
 template <size_t dim, typename device_t>
 void
-SolverGodunovHydro<dim, device_t>::map_userdata_after_adapt(amr_hashmap_t amr_hashmap_before_adapt)
+SolverGodunovHydro<dim, device_t>::map_userdata_after_adapt(
+  amr_hashmap_t const & amr_hashmap_before_adapt)
 {
 
   KALYPSSO_PROFILING_REGION_HOST(m_profiling_mgr, AMR_CYCLE_USERDATA_REMAP);

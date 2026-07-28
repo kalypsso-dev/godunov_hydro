@@ -148,7 +148,7 @@ public:
   total_mem_size_in_bytes() override;
 
   void
-  do_time_step(DataArrayBlock_t U, DataArrayBlock_t U2, real_t dt) override;
+  do_time_step(DataArrayBlock_t const & U, DataArrayBlock_t const & U2, real_t dt) override;
 
 private:
   //! number of quadrants/octants (octree leaves) per group used for spatial subcycling.

@@ -69,7 +69,9 @@ GodunovImplemV1<dim, device_t>::total_mem_size_in_bytes()
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV1<dim, device_t>::do_time_step(DataArrayBlock_t U, DataArrayBlock_t U2, real_t dt)
+GodunovImplemV1<dim, device_t>::do_time_step(DataArrayBlock_t const & U,
+                                             DataArrayBlock_t const & U2,
+                                             real_t                   dt)
 {
 
   /*

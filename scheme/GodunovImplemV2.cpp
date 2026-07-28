@@ -66,7 +66,9 @@ GodunovImplemV2<dim, device_t>::total_mem_size_in_bytes()
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV2<dim, device_t>::do_time_step(DataArrayBlock_t U, DataArrayBlock_t U2, real_t dt)
+GodunovImplemV2<dim, device_t>::do_time_step(DataArrayBlock_t const & U,
+                                             DataArrayBlock_t const & U2,
+                                             real_t                   dt)
 {
 
   int32_t nbOcts = static_cast<int32_t>(this->m_amr_mesh.local_num_quadrants());
