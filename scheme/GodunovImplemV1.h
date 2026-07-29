@@ -65,43 +65,43 @@ public:
                         this->m_block_sizes + 2 * 2,
                         get_shift<dim>(-2),
                         "Q_ghosted_group",
-                        nbvar_hydro<dim>(),
+                        models::Hydro<dim>::nbvar(),
                         m_nbQuadsPerGroup)
     , m_Q_ghosted_mg(this->m_block_sizes,
                      this->m_block_sizes + 2 * 2,
                      get_shift<dim>(-2),
                      "Q_ghosted_mg",
-                     nbvar_hydro<dim>(),
+                     models::Hydro<dim>::nbvar(),
                      0)
     , m_Slopes_x(this->m_block_sizes,
                  this->m_block_sizes + 2 * 1,
                  get_shift<dim>(-1),
                  "Slope_x_group",
-                 nbvar_hydro<dim>(),
+                 models::Hydro<dim>::nbvar(),
                  m_nbQuadsPerGroup)
     , m_Slopes_y(this->m_block_sizes,
                  this->m_block_sizes + 2 * 1,
                  get_shift<dim>(-1),
                  "Slope_y_group",
-                 nbvar_hydro<dim>(),
+                 models::Hydro<dim>::nbvar(),
                  m_nbQuadsPerGroup)
     , m_Slopes_z(this->m_block_sizes,
                  this->m_block_sizes + 2 * 1,
                  get_shift<dim>(-1),
                  "Slope_z_group",
-                 nbvar_hydro<dim>(),
+                 models::Hydro<dim>::nbvar(),
                  dim == 3 ? m_nbQuadsPerGroup : 0)
     , m_Fluxes_x("Fluxes_x",
                  get_flux_block_sizes<dim>(this->m_block_sizes, IX),
-                 nbvar_hydro<dim>(),
+                 models::Hydro<dim>::nbvar(),
                  0)
     , m_Fluxes_y("Fluxes_y",
                  get_flux_block_sizes<dim>(this->m_block_sizes, IY),
-                 nbvar_hydro<dim>(),
+                 models::Hydro<dim>::nbvar(),
                  0)
     , m_Fluxes_z("Fluxes_z",
                  get_flux_block_sizes<dim>(this->m_block_sizes, IZ),
-                 nbvar_hydro<dim>(),
+                 models::Hydro<dim>::nbvar(),
                  0)
   {} // GodunovImplemV1
 
@@ -148,7 +148,7 @@ public:
   total_mem_size_in_bytes() override;
 
   void
-  do_time_step(DataArrayBlock_t U, DataArrayBlock_t U2, real_t dt) override;
+  do_time_step(DataArrayBlock_t const & U, DataArrayBlock_t const & U2, real_t dt) override;
 
 private:
   //! number of quadrants/octants (octree leaves) per group used for spatial subcycling.

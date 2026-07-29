@@ -65,6 +65,9 @@ private:
   //! BreakingWave problem specific parameters (used on device)
   BreakingWaveParams m_bwParams;
 
+  //! Equation of state wrapper
+  EosWrapper<device_t> m_eos_wrapper;
+
   //! get geometrical scaling factor
   const real_t m_scaling_factor;
 
@@ -89,6 +92,7 @@ private:
     , m_local_num_octants(local_num_octants)
     , m_settings(settings)
     , m_bwParams(bwParams)
+    , m_eos_wrapper(config_map)
     , m_scaling_factor(get_scaling_factor(config_map))
     , m_xyz_min(get_xyz_min<dim>(config_map))
     , m_t_eval(t_eval){};

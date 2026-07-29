@@ -9,7 +9,6 @@
 #include <godunov_hydro/init/InitTriplePoint.h>
 #include <godunov_hydro/SolverGodunovHydro.h>
 
-#include <kalypsso/core/models/utils_hydro.h>
 #include <kalypsso/core/orchard_key_utils.h>
 
 namespace kalypsso

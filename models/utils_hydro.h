@@ -12,10 +12,10 @@
 
 #include <kalypsso/core/kokkos_shared.h>
 #include <kalypsso/core/HydroParams.h>
-#include <kalypsso/core/models/HydroSettings.h>
 #include <kalypsso/core/eos/EosWrapperMonoFluid.h>
 
 #include <godunov_hydro/models/Hydro.h>
+#include <godunov_hydro/models/HydroSettings.h>
 #include <godunov_hydro/models/HydroState.h>
 
 namespace kalypsso
