@@ -43,6 +43,7 @@ configure_file(test_breaking_wave_2d.ini test_breaking_wave_2d.ini COPYONLY)
 configure_file(test_double_mach_reflection_2d.ini test_double_mach_reflection_2d.ini COPYONLY)
 configure_file(test_four_quadrant_2d.ini test_four_quadrant_2d.ini COPYONLY)
 configure_file(test_four_quadrant_3d.ini test_four_quadrant_3d.ini COPYONLY)
+configure_file(test_four_quadrant_2d_large.ini test_four_quadrant_2d_large.ini COPYONLY)
 configure_file(test_kelvin_helmholtz_2d.ini test_kelvin_helmholtz_2d.ini COPYONLY)
 configure_file(test_kelvin_helmholtz_3d.ini test_kelvin_helmholtz_3d.ini COPYONLY)
 configure_file(test_kelvin_helmholtz_2d_stone_small.ini test_kelvin_helmholtz_2d_stone_small.ini
