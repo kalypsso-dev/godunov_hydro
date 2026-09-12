@@ -88,7 +88,7 @@ InitFourQuadrantDataFunctor<dim, device_t>::operator()(const int32_t & global_in
   const auto center_vertex = orchard_key_to_cell_coord<dim>(key, iCoord, block_sizes[IX]);
   const auto center = vertex_coord_to_real_space<dim>(center_vertex, m_scaling_factor, m_xyz_min);
 
-  // initialize with invalid value
+  // get region id
   const auto region_id = m_params.get_region_id<dim>(center);
 
   m_Udata(cell_index, Hydro<dim>::ID, iOct) = m_Us[region_id][Hydro<dim>::ID];
