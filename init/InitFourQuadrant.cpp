@@ -29,16 +29,9 @@ InitFourQuadrantDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &      
 {
 
   // load problem specific parameters
-  const int configNumber = config_map.getInteger("four_quadrant", "config_number", 0);
-  Kokkos::Array<real_t, dim> pos;
-  pos[IX] = config_map.getReal("four_quadrant", "x", KALYPSSO_NUM(0.8));
-  pos[IY] = config_map.getReal("four_quadrant", "y", KALYPSSO_NUM(0.8));
-  if constexpr (dim == 3)
-  {
-    pos[IZ] = config_map.getReal("four_quadrant", "z", KALYPSSO_NUM(0.8));
-  }
+  const auto params = FourQuadrantParams(config_map);
 
-  auto Us = getRiemannConfig<dim>(configNumber);
+  auto Us = getRiemannConfig<dim>(params.config_number);
 
   /*
    * convert primitive to conservative variables
@@ -57,7 +50,7 @@ InitFourQuadrantDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &      
   }
 
   InitFourQuadrantDataFunctor functor(
-    Udata, orchard_keys, local_num_octants, settings, Us, pos, config_map);
+    Udata, orchard_keys, local_num_octants, settings, Us, config_map);
 
   // compute total number of cells
   const auto nbCellsPerLeaf = Udata.num_cells();
@@ -98,49 +91,39 @@ InitFourQuadrantDataFunctor<dim, device_t>::operator()(const int32_t & global_in
   const real_t & x = center[IX];
   const real_t & y = center[IY];
 
-  const auto & U0 = m_Us[0];
-  const auto & U1 = m_Us[1];
-  const auto & U2 = m_Us[2];
-  const auto & U3 = m_Us[3];
+  // initialize with invalid value
+  int region_id = -1;
+
+  /*
+   * region labeling
+   *
+   *  1 | 0
+   *  -----
+   *  2 | 3
+   */
 
   if constexpr (dim == 2)
   {
-    if (x < m_pos[IX])
+    if (x < m_params.pos[IX])
     {
-      if (y < m_pos[IY])
+      if (y < m_params.pos[IY])
       {
-        // region 2
-        m_Udata(cell_index, Hydro<dim>::ID, iOct) = U2[Hydro<dim>::ID];
-        m_Udata(cell_index, Hydro<dim>::IP, iOct) = U2[Hydro<dim>::IP];
-        m_Udata(cell_index, Hydro<dim>::IU, iOct) = U2[Hydro<dim>::IU];
-        m_Udata(cell_index, Hydro<dim>::IV, iOct) = U2[Hydro<dim>::IV];
+        region_id = 2;
       }
       else
       {
-        // region 1
-        m_Udata(cell_index, Hydro<dim>::ID, iOct) = U1[Hydro<dim>::ID];
-        m_Udata(cell_index, Hydro<dim>::IP, iOct) = U1[Hydro<dim>::IP];
-        m_Udata(cell_index, Hydro<dim>::IU, iOct) = U1[Hydro<dim>::IU];
-        m_Udata(cell_index, Hydro<dim>::IV, iOct) = U1[Hydro<dim>::IV];
+        region_id = 1;
       }
     }
     else
     {
-      if (y < m_pos[IY])
+      if (y < m_params.pos[IY])
       {
-        // region 3
-        m_Udata(cell_index, Hydro<dim>::ID, iOct) = U3[Hydro<dim>::ID];
-        m_Udata(cell_index, Hydro<dim>::IP, iOct) = U3[Hydro<dim>::IP];
-        m_Udata(cell_index, Hydro<dim>::IU, iOct) = U3[Hydro<dim>::IU];
-        m_Udata(cell_index, Hydro<dim>::IV, iOct) = U3[Hydro<dim>::IV];
+        region_id = 3;
       }
       else
       {
-        // region 0
-        m_Udata(cell_index, Hydro<dim>::ID, iOct) = U0[Hydro<dim>::ID];
-        m_Udata(cell_index, Hydro<dim>::IP, iOct) = U0[Hydro<dim>::IP];
-        m_Udata(cell_index, Hydro<dim>::IU, iOct) = U0[Hydro<dim>::IU];
-        m_Udata(cell_index, Hydro<dim>::IV, iOct) = U0[Hydro<dim>::IV];
+        region_id = 0;
       }
     }
   }
@@ -148,102 +131,68 @@ InitFourQuadrantDataFunctor<dim, device_t>::operator()(const int32_t & global_in
   {
     const real_t & z = center[IZ];
 
-    const auto & U4 = m_Us[4];
-    const auto & U5 = m_Us[5];
-    const auto & U6 = m_Us[6];
-    const auto & U7 = m_Us[7];
-
-    if (x < m_pos[IX])
+    if (x < m_params.pos[IX])
     {
-      if (y < m_pos[IY])
+      if (y < m_params.pos[IY])
       {
-        if (z < m_pos[IZ])
+        if (z < m_params.pos[IZ])
         {
-          // region 2
-          m_Udata(cell_index, Hydro<dim>::ID, iOct) = U2[Hydro<dim>::ID];
-          m_Udata(cell_index, Hydro<dim>::IP, iOct) = U2[Hydro<dim>::IP];
-          m_Udata(cell_index, Hydro<dim>::IU, iOct) = U2[Hydro<dim>::IU];
-          m_Udata(cell_index, Hydro<dim>::IV, iOct) = U2[Hydro<dim>::IV];
-          m_Udata(cell_index, Hydro<dim>::IW, iOct) = U2[Hydro<dim>::IW];
+          region_id = 2;
         }
         else
         {
-          // region 6
-          m_Udata(cell_index, Hydro<dim>::ID, iOct) = U6[Hydro<dim>::ID];
-          m_Udata(cell_index, Hydro<dim>::IP, iOct) = U6[Hydro<dim>::IP];
-          m_Udata(cell_index, Hydro<dim>::IU, iOct) = U6[Hydro<dim>::IU];
-          m_Udata(cell_index, Hydro<dim>::IV, iOct) = U6[Hydro<dim>::IV];
-          m_Udata(cell_index, Hydro<dim>::IW, iOct) = U6[Hydro<dim>::IW];
+          region_id = 6;
         }
       }
       else
       {
-        if (z < m_pos[IZ])
+        if (z < m_params.pos[IZ])
         {
-          // region 1
-          m_Udata(cell_index, Hydro<dim>::ID, iOct) = U1[Hydro<dim>::ID];
-          m_Udata(cell_index, Hydro<dim>::IP, iOct) = U1[Hydro<dim>::IP];
-          m_Udata(cell_index, Hydro<dim>::IU, iOct) = U1[Hydro<dim>::IU];
-          m_Udata(cell_index, Hydro<dim>::IV, iOct) = U1[Hydro<dim>::IV];
-          m_Udata(cell_index, Hydro<dim>::IW, iOct) = U1[Hydro<dim>::IW];
+          region_id = 1;
         }
         else
         {
-          // region 5
-          m_Udata(cell_index, Hydro<dim>::ID, iOct) = U5[Hydro<dim>::ID];
-          m_Udata(cell_index, Hydro<dim>::IP, iOct) = U5[Hydro<dim>::IP];
-          m_Udata(cell_index, Hydro<dim>::IU, iOct) = U5[Hydro<dim>::IU];
-          m_Udata(cell_index, Hydro<dim>::IV, iOct) = U5[Hydro<dim>::IV];
-          m_Udata(cell_index, Hydro<dim>::IW, iOct) = U5[Hydro<dim>::IW];
+          region_id = 5;
         }
-      }
+      } // end y
     }
     else
     {
-      if (y < m_pos[IY])
+      if (y < m_params.pos[IY])
       {
-        if (z < m_pos[IZ])
+        if (z < m_params.pos[IZ])
         {
-          // region 3
-          m_Udata(cell_index, Hydro<dim>::ID, iOct) = U3[Hydro<dim>::ID];
-          m_Udata(cell_index, Hydro<dim>::IP, iOct) = U3[Hydro<dim>::IP];
-          m_Udata(cell_index, Hydro<dim>::IU, iOct) = U3[Hydro<dim>::IU];
-          m_Udata(cell_index, Hydro<dim>::IV, iOct) = U3[Hydro<dim>::IV];
-          m_Udata(cell_index, Hydro<dim>::IW, iOct) = U3[Hydro<dim>::IW];
+          region_id = 3;
         }
         else
         {
-          // region 7
-          m_Udata(cell_index, Hydro<dim>::ID, iOct) = U7[Hydro<dim>::ID];
-          m_Udata(cell_index, Hydro<dim>::IP, iOct) = U7[Hydro<dim>::IP];
-          m_Udata(cell_index, Hydro<dim>::IU, iOct) = U7[Hydro<dim>::IU];
-          m_Udata(cell_index, Hydro<dim>::IV, iOct) = U7[Hydro<dim>::IV];
-          m_Udata(cell_index, Hydro<dim>::IW, iOct) = U7[Hydro<dim>::IW];
+          region_id = 7;
         }
       }
       else
       {
-        if (z < m_pos[IZ])
+        if (z < m_params.pos[IZ])
         {
-          // region 0
-          m_Udata(cell_index, Hydro<dim>::ID, iOct) = U0[Hydro<dim>::ID];
-          m_Udata(cell_index, Hydro<dim>::IP, iOct) = U0[Hydro<dim>::IP];
-          m_Udata(cell_index, Hydro<dim>::IU, iOct) = U0[Hydro<dim>::IU];
-          m_Udata(cell_index, Hydro<dim>::IV, iOct) = U0[Hydro<dim>::IV];
-          m_Udata(cell_index, Hydro<dim>::IW, iOct) = U0[Hydro<dim>::IW];
+          region_id = 0;
         }
         else
         {
-          // region 4
-          m_Udata(cell_index, Hydro<dim>::ID, iOct) = U4[Hydro<dim>::ID];
-          m_Udata(cell_index, Hydro<dim>::IP, iOct) = U4[Hydro<dim>::IP];
-          m_Udata(cell_index, Hydro<dim>::IU, iOct) = U4[Hydro<dim>::IU];
-          m_Udata(cell_index, Hydro<dim>::IV, iOct) = U4[Hydro<dim>::IV];
-          m_Udata(cell_index, Hydro<dim>::IW, iOct) = U4[Hydro<dim>::IW];
+          region_id = 4;
         }
-      }
-    }
+      } // end y
+    } // end x
   } // end dim == 3
+
+
+  m_Udata(cell_index, Hydro<dim>::ID, iOct) = m_Us[region_id][Hydro<dim>::ID];
+  m_Udata(cell_index, Hydro<dim>::IP, iOct) = m_Us[region_id][Hydro<dim>::IP];
+  m_Udata(cell_index, Hydro<dim>::IU, iOct) = m_Us[region_id][Hydro<dim>::IU];
+  m_Udata(cell_index, Hydro<dim>::IV, iOct) = m_Us[region_id][Hydro<dim>::IV];
+
+  if constexpr (dim == 3)
+  {
+    m_Udata(cell_index, Hydro<dim>::IW, iOct) = m_Us[region_id][Hydro<dim>::IW];
+  }
 
 } // end InitFourQuadrantDataFunctor<dim, device_t>::operator ()
 
