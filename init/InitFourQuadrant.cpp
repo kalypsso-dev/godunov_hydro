@@ -29,7 +29,7 @@ InitFourQuadrantDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &      
 {
 
   // load problem specific parameters
-  const auto params = FourQuadrantParams(config_map);
+  const auto params = core::FourQuadrantParams(config_map);
 
   auto Us = getRiemannConfig<dim>(params.config_number);
 

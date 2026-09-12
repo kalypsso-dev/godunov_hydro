@@ -68,7 +68,7 @@ private:
   HydroStates_t m_Us;
 
   //! Four-quadrant problem parameters
-  FourQuadrantParams m_params;
+  core::FourQuadrantParams m_params;
 
   // get geometrical scaling factor
   const real_t m_scaling_factor;
