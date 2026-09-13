@@ -67,8 +67,8 @@ private:
   //! Four quadrant states
   HydroStates_t m_Us;
 
-  //! discontinuity location
-  Kokkos::Array<real_t, dim> m_pos;
+  //! Four-quadrant problem parameters
+  core::FourQuadrantParams m_params;
 
   // get geometrical scaling factor
   const real_t m_scaling_factor;
@@ -81,14 +81,13 @@ private:
                               int32_t                              local_num_octants,
                               HydroSettings const &                settings,
                               HydroStates_t const &                Us,
-                              Kokkos::Array<real_t, dim> const &   pos,
                               ConfigMap const &                    config_map)
     : m_Udata(Udata)
     , m_orchard_keys(orchard_keys)
     , m_local_num_octants(local_num_octants)
     , m_settings(settings)
     , m_Us(Us)
-    , m_pos(pos)
+    , m_params(config_map)
     , m_scaling_factor(get_scaling_factor(config_map))
     , m_xyz_min(get_xyz_min<dim>(config_map)){};
 
