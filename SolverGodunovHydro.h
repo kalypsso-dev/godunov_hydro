@@ -313,6 +313,8 @@ private:
   //! version 2: don't store fluxes; just compute flux and use them to perform atomic updates in a
   //! single kokkos functor; we can do a sub-domain decomposition (which help decreasing memory
   //! footprint due to ghosted block array).
+  //!
+  //! version 3: don't store slope (recompute them as needed) but store reconstructed states
   int m_godunov_impl_version;
 
   GodunovImplemBase<dim, device_t> * m_godunov_implem;
