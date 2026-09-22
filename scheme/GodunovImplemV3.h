@@ -71,6 +71,24 @@ public:
                      "Q_ghosted_mg",
                      models::Hydro<dim>::nbvar(),
                      0)
+    , m_Slopes_x(this->m_block_sizes,
+                 this->m_block_sizes + 2 * 1,
+                 get_shift<dim>(-1),
+                 "Slope_x_group",
+                 models::Hydro<dim>::nbvar(),
+                 0)
+    , m_Slopes_y(this->m_block_sizes,
+                 this->m_block_sizes + 2 * 1,
+                 get_shift<dim>(-1),
+                 "Slope_y_group",
+                 models::Hydro<dim>::nbvar(),
+                 0)
+    , m_Slopes_z(this->m_block_sizes,
+                 this->m_block_sizes + 2 * 1,
+                 get_shift<dim>(-1),
+                 "Slope_z_group",
+                 models::Hydro<dim>::nbvar(),
+                 0)
     , m_Q_left("Q_left",
                get_flux_block_sizes<dim>(this->m_block_sizes, IX),
                models::Hydro<dim>::nbvar(),
@@ -144,6 +162,18 @@ private:
   //! mirror (m) and ghosts(g)
   //! ghostwidth of 2
   DataArrayGhostedBlock_t m_Q_ghosted_mg;
+
+  //! slopes along X dir - ghosted block array of octant's block data - owned + ghosts
+  //! ghostwidth of 1
+  DataArrayGhostedBlock_t m_Slopes_x;
+
+  //! slopes along Y dir - ghosted block array of octant's block data - owned + ghosts
+  //! ghostwidth of 1
+  DataArrayGhostedBlock_t m_Slopes_y;
+
+  //! slopes along Z dir - ghosted block array of octant's block data - owned + ghosts
+  //! ghostwidth of 1
+  DataArrayGhostedBlock_t m_Slopes_z;
 
   //! reconstruct state on the left cell interface along a given direction (X, Y or Z)
   DataArrayBlock_t m_Q_left;

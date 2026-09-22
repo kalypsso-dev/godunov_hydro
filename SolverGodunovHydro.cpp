@@ -87,10 +87,11 @@ SolverGodunovHydro<dim, device_t>::SolverGodunovHydro(ParallelEnv const & par_en
 #endif // KALYPSSO_CORE_USE_HDF5
 {
   // TODO: evaluate if we should abort earlier, i.e. before this constructor
-  if (m_godunov_impl_version != 0 and m_godunov_impl_version != 1 and m_godunov_impl_version != 2)
+  if (m_godunov_impl_version != 0 and m_godunov_impl_version != 1 and
+      m_godunov_impl_version != 2 and m_godunov_impl_version != 3)
   {
     KALYPSSO_ERROR("Wrong value for input parameter \"hydro/implementation_version={}\". Please "
-                   "review your input parameter file (allowed values: 0, 1 or 2).",
+                   "review your input parameter file (allowed values: 0, 1, 2 or 3).",
                    m_godunov_impl_version);
     Kokkos::abort("Wrong value for input parameter hydro/implementation_version");
   }

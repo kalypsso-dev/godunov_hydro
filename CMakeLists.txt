@@ -71,6 +71,8 @@ set(GODUNOV_HYDRO_SRCS
     scheme/GodunovImplemV1.h
     scheme/GodunovImplemV2.cpp
     scheme/GodunovImplemV2.h
+    scheme/GodunovImplemV3.cpp
+    scheme/GodunovImplemV3.h
     scheme/ReadFluxesAndConservativeUpdateFunctor.cpp
     scheme/ReadFluxesAndConservativeUpdateFunctor.h
     SolverGodunovHydro.cpp

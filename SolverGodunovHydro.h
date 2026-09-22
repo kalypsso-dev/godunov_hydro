@@ -34,6 +34,7 @@
 #include <godunov_hydro/scheme/GodunovImplemV0.h>
 #include <godunov_hydro/scheme/GodunovImplemV1.h>
 #include <godunov_hydro/scheme/GodunovImplemV2.h>
+#include <godunov_hydro/scheme/GodunovImplemV3.h>
 #include <godunov_hydro/utils/ComputeDerivedQuantities.h>
 
 // AMR services
@@ -173,8 +174,7 @@ public:
 
   //! full numerical scheme (time integration from t_n to t_{n+1})
   //!
-  //! this is just a wrapper around actual implementation : \see godunov_unsplit_version0 and
-  //! godunov_unsplit_version1
+  //! this is just a wrapper around actual implementation.
   void
   godunov_unsplit(real_t dt);
 
@@ -359,6 +359,18 @@ private:
                                                m_mesh_ghosts_exchanger);
       return impl_ptr;
     }
+    else if (impl_version == 3)
+    {
+      GodunovImplemBase<dim, device_t> * impl_ptr =
+        GodunovImplemV3<dim, device_t>::create(m_par_env,
+                                               m_params,
+                                               m_config_map,
+                                               m_profiling_mgr,
+                                               *m_amr_mesh,
+                                               *m_mesh_map,
+                                               m_mesh_ghosts_exchanger);
+      return impl_ptr;
+    }
     else
     {
       Kokkos::abort("Wrong value for input parameter hydro/implementation_version");
@@ -384,6 +396,12 @@ private:
     else if (impl_version == 2)
     {
       GodunovImplemBase<dim, device_t> * impl_ptr = GodunovImplemV2<dim, device_t>::create(
+        m_par_env, m_params, m_config_map, m_profiling_mgr, *m_amr_mesh, *m_mesh_map);
+      return impl_ptr;
+    }
+    else if (impl_version == 3)
+    {
+      GodunovImplemBase<dim, device_t> * impl_ptr = GodunovImplemV3<dim, device_t>::create(
         m_par_env, m_params, m_config_map, m_profiling_mgr, *m_amr_mesh, *m_mesh_map);
       return impl_ptr;
     }
