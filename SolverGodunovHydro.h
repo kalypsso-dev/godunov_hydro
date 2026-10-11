@@ -21,8 +21,7 @@
 #include <kalypsso/core/SolverBase.h>
 #include <kalypsso/core/HydroParams.h>
 #include <kalypsso/core/kokkos_shared.h>
-#include <kalypsso/core/AMRmesh.h>
-#include <kalypsso/core/MeshMap.h>
+#include <kalypsso/core/AMRManager.h>
 #include <kalypsso/utils/mpi/ParallelEnv.h>
 #include <kalypsso/core/utils_block.h>
 #include <kalypsso/core/TimeIntegratorConfig.h>
@@ -134,6 +133,17 @@ public:
   void
   resize_solver_data();
 
+  /**
+   * \brief Gets the solver's amr details
+   *
+   * \return A reference to the solver's AMR manager
+   */
+  core::AMRManager<dim, device_t> &
+  amr_mgr()
+  {
+    return m_amr_mgr;
+  }
+
   //! update orchard keys by recomputing them from current forest state, and update hashmap
   //!
   //! \param[in] reset_p4est_ghost boolean value to enforce recompute p4est's ghost data structure
@@ -199,20 +209,6 @@ public:
   //! print monitoring info at the end (timing, cell-updates/s, etc...)
   void
   print_monitoring_info_final() override;
-
-  //! return a shared pointer to amr_mesh
-  std::shared_ptr<AMRmesh<dim>>
-  amr_mesh()
-  {
-    return m_amr_mesh;
-  }
-
-  //! return a shared pointer to our MeshMap
-  std::shared_ptr<MeshMap<dim, device_t>>
-  mesh_map()
-  {
-    return m_mesh_map;
-  }
 
   ConfigMap const &
   config_map() const
@@ -289,19 +285,8 @@ private:
   //! hydrodynamics parameters
   const HydroSettings m_hydro_settings;
 
-  //! The main AMR object
-  std::shared_ptr<AMRmesh<dim>> m_amr_mesh;
-
-  //! mesh map is a helper class for creating a hashmap of orchard key to memory address
-  std::shared_ptr<MeshMap<dim, device_t>> m_mesh_map;
-
-#ifdef KALYPSSO_CORE_USE_MPI
-  //! MPI communications to exchange ghost block userdata
-  MeshGhostsExchanger<dim, real_t, device_t> m_mesh_ghosts_exchanger;
-#endif // KALYPSSO_CORE_USE_MPI
-
-  //! Perform AMR mesh adaptation (no user data involved here)
-  AMRContext<dim, device_t> m_amr_context;
+  //! AMR manager
+  core::AMRManager<dim, device_t> m_amr_mgr;
 
   //! time integrator
   const TimeIntegrator m_time_integrator;
@@ -326,72 +311,25 @@ private:
 
   GodunovImplemBase<dim, device_t> * m_godunov_implem;
 
-#ifdef KALYPSSO_CORE_USE_MPI
-  GodunovImplemBase<dim, device_t> *
-  create_godunov_implem(int impl_version)
-  {
-    if (impl_version == 0)
-    {
-      GodunovImplemBase<dim, device_t> * impl_ptr =
-        GodunovImplemV0<dim, device_t>::create(m_par_env,
-                                               m_params,
-                                               m_config_map,
-                                               m_profiling_mgr,
-                                               *m_amr_mesh,
-                                               *m_mesh_map,
-                                               m_mesh_ghosts_exchanger);
-      return impl_ptr;
-    }
-    else if (impl_version == 1)
-    {
-      GodunovImplemBase<dim, device_t> * impl_ptr =
-        GodunovImplemV1<dim, device_t>::create(m_par_env,
-                                               m_params,
-                                               m_config_map,
-                                               m_profiling_mgr,
-                                               *m_amr_mesh,
-                                               *m_mesh_map,
-                                               m_mesh_ghosts_exchanger);
-      return impl_ptr;
-    }
-    else if (impl_version == 2)
-    {
-      GodunovImplemBase<dim, device_t> * impl_ptr =
-        GodunovImplemV2<dim, device_t>::create(m_par_env,
-                                               m_params,
-                                               m_config_map,
-                                               m_profiling_mgr,
-                                               *m_amr_mesh,
-                                               *m_mesh_map,
-                                               m_mesh_ghosts_exchanger);
-      return impl_ptr;
-    }
-    else
-    {
-      Kokkos::abort("Wrong value for input parameter hydro/implementation_version");
-    }
-    return nullptr;
-  } // create_godunov_implem
-#else
   GodunovImplemBase<dim, device_t> *
   create_godunov_implem(int impl_version)
   {
     if (impl_version == 0)
     {
       GodunovImplemBase<dim, device_t> * impl_ptr = GodunovImplemV0<dim, device_t>::create(
-        m_par_env, m_params, m_config_map, m_profiling_mgr, *m_amr_mesh, *m_mesh_map);
+        m_par_env, m_params, m_config_map, m_profiling_mgr, m_amr_mgr);
       return impl_ptr;
     }
     else if (impl_version == 1)
     {
       GodunovImplemBase<dim, device_t> * impl_ptr = GodunovImplemV1<dim, device_t>::create(
-        m_par_env, m_params, m_config_map, m_profiling_mgr, *m_amr_mesh, *m_mesh_map);
+        m_par_env, m_params, m_config_map, m_profiling_mgr, m_amr_mgr);
       return impl_ptr;
     }
     else if (impl_version == 2)
     {
       GodunovImplemBase<dim, device_t> * impl_ptr = GodunovImplemV2<dim, device_t>::create(
-        m_par_env, m_params, m_config_map, m_profiling_mgr, *m_amr_mesh, *m_mesh_map);
+        m_par_env, m_params, m_config_map, m_profiling_mgr, m_amr_mgr);
       return impl_ptr;
     }
     else
@@ -400,7 +338,6 @@ private:
     }
     return nullptr;
   } // create_godunov_implem
-#endif // KALYPSSO_CORE_USE_MPI
 
   //
   // user data
@@ -451,19 +388,17 @@ private:
   void
   fill_outside_quadrants(DataArrayBlock_t const & data);
 
-  //! mark cells for refinement
+  //! compute refinement flags
   void
-  mark_cells();
-
-  //! adapt mesh and recompute connectivity
-  void
-  adapt_mesh();
+  compute_refine_flags();
 
   //! map data from old U to new U after adapting mesh
   //!
   //! \param[in] amr_hashmap_before_adapt is the amr hashmap before mesh adaptation
+  //! \param[in] orchard_keys_before_adapt is the keys before mesh adaptation
   void
-  map_userdata_after_adapt(amr_hashmap_t const & amr_hashmap_before_adapt);
+  map_userdata_after_adapt(amr_hashmap_t const &               amr_hashmap_before_adapt,
+                           core::OrchardKeys<device_t> const & orchard_keys_before_adapt);
 
   //! temporary variable made a class member to avoid calling malloc/free at each time step
   Kokkos::View<real_t, kalypsso::DefaultDevice> m_inv_dt;

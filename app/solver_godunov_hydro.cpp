@@ -120,7 +120,7 @@ run_simulation(ParallelEnv const &       par_env,
     auto derived_solver = dynamic_cast<godunov_hydro::SolverGodunovHydro<dim, device_t> *>(solver);
     const std::string mesh_filename = derived_solver->output_basename() + ".p4est";
     derived_solver->template save_p4est_mesh<dim>(mesh_filename,
-                                                  derived_solver->amr_mesh()->forest());
+                                                  derived_solver->amr_mgr().get_forest());
   }
 
   solver->profiling_mgr().get_whole_region().stop();
@@ -158,9 +158,9 @@ run_simulation(ParallelEnv const &       par_env,
         kalypsso::core::ComputeDataSliceAlongLine<dim, device_t>::apply(
           solver_hydro->U(),
           0,
-          solver_hydro->mesh_map()->get_amr_mesh_info().local_num_quadrants(),
+          solver_hydro->amr_mgr().get_nb_owned(),
           IX,
-          solver_hydro->mesh_map()->orchard_keys(),
+          solver_hydro->amr_mgr().get_orchard_keys(),
           std::vector<int32_t>{ id },
           std::vector<std::string>{ name },
           output_prefix,
@@ -186,9 +186,9 @@ run_simulation(ParallelEnv const &       par_env,
         kalypsso::core::ComputeDataSliceAlongLine<dim, device_t>::apply(
           derived_quantity,
           0,
-          solver_hydro->mesh_map()->get_amr_mesh_info().local_num_quadrants(),
+          solver_hydro->amr_mgr().get_nb_owned(),
           IX,
-          solver_hydro->mesh_map()->orchard_keys(),
+          solver_hydro->amr_mgr().get_orchard_keys(),
           std::vector<int32_t>{ 0 },
           std::vector<std::string>{ name },
           output_prefix,
@@ -212,8 +212,8 @@ run_simulation(ParallelEnv const &       par_env,
       // re-initialize U2 with exact solution
       godunov_hydro::InitIsentropicVortexDataFunctor<2, device_t>::apply(
         solver2d->U2(),
-        solver2d->mesh_map()->orchard_keys(),
-        solver2d->amr_mesh()->local_num_quadrants(),
+        solver2d->amr_mgr().get_orchard_keys(),
+        solver2d->amr_mgr().get_nb_owned(),
         solver2d->hydro_settings(),
         config_map);
 
@@ -257,8 +257,8 @@ run_simulation(ParallelEnv const &       par_env,
       const auto tEnd = config_map.getReal("run", "tEnd", KALYPSSO_NUM(0.0));
       godunov_hydro::InitBreakingWaveDataFunctor<2, device_t>::apply(
         solver2d->U2(),
-        solver2d->mesh_map()->orchard_keys(),
-        solver2d->amr_mesh()->local_num_quadrants(),
+        solver2d->amr_mgr().get_orchard_keys(),
+        solver2d->amr_mgr().get_nb_owned(),
         solver2d->hydro_settings(),
         tEnd,
         config_map);
@@ -297,8 +297,8 @@ run_simulation(ParallelEnv const &       par_env,
     godunov_hydro::ComputeRadialProfileFunctor<dim, device_t>::apply(
       par_env,
       config_map,
-      solver_hydro->mesh_map()->orchard_keys(),
-      solver_hydro->mesh_map()->get_amr_mesh_info().local_num_quadrants(),
+      solver_hydro->amr_mgr().get_orchard_keys(),
+      solver_hydro->amr_mgr().get_nb_owned(),
       solver_hydro->block_sizes(),
       solver_hydro->U());
   }
