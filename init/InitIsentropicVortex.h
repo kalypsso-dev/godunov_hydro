@@ -4,6 +4,9 @@
 
 /**
  * \file InitIsentropicVortex.h
+ *
+ * \brief Contains the functors used to initialize the data and AMR status of isentropic
+ * vortex cases.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_INIT_ISENTROPIC_VORTEX_H_
 #define KALYPSSO_GODUNOV_HYDRO_INIT_ISENTROPIC_VORTEX_H_
@@ -22,7 +25,8 @@ namespace godunov_hydro
 /*************************************************/
 /*************************************************/
 /**
- * Implement user data initialization to solve isentropic vortex problem.
+ * \class InitIsentropicVortexDataFunctor
+ * \brief Implement user data initialization to solve isentropic vortex problem.
  */
 template <size_t dim, typename device_t>
 class InitIsentropicVortexDataFunctor
@@ -99,7 +103,7 @@ extern template class InitIsentropicVortexDataFunctor<3, kalypsso::DefaultDevice
 /**
  * \class InitIsentropicVortex
  *
- * This is a stationary solution of Euler equations, and as such useful for testing
+ * \brief This is a stationary solution of Euler equations, and as such useful for testing
  * how the numerical scheme is able to maintain this solution, and testing space convergence.
  *
  * References:

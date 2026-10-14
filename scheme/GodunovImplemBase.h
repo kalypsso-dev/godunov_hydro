@@ -5,7 +5,8 @@
 /**
  * \file GodunovImplemBase.h
  *
- * Godunov time integration implementation detail interface definition.
+ * \brief Contains the interface of the Godunov time integration implementation details.
+ *
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_GODUNOV_IMPLEM_BASE_H_
 #define KALYPSSO_GODUNOV_HYDRO_GODUNOV_IMPLEM_BASE_H_

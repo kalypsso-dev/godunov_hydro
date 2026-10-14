@@ -5,8 +5,10 @@
 /**
  * \file EosWrapper.h
  *
+ * \brief Contains a front-end helper to access equation of states data.
+ *
  * \note This header is currently not used, we prefer EosWrapperMonoFluid from kalypsso-core.
- * But anyone can locally custmized it and use it instead just by redefining type alias in common.h
+ * But anyone can locally customized it and use it instead just by redefining type alias in common.h
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_MODELS_EOS_WRAPPER_H_
 #define KALYPSSO_GODUNOV_HYDRO_MODELS_EOS_WRAPPER_H_
@@ -35,7 +37,8 @@ namespace eos
 // ==========================================================================
 // ==========================================================================
 /**
- * This a front-end helper to access equation of states data.
+ * \class EosWrapper
+ * \brief This a front-end helper to access equation of states data.
  *
  * \todo See if we could refactor using static polymorphism.
  */
@@ -58,7 +61,7 @@ public:
   {}
 
   /**
-   * Compute pressure from specific internal energy.
+   * \brief Compute pressure from specific internal energy.
    */
   KOKKOS_INLINE_FUNCTION
   real_t
@@ -96,7 +99,7 @@ public:
   }
 
   /**
-   * Compute pressure from volumic internal energy.
+   * \brief Compute pressure from volumic internal energy.
    */
   KOKKOS_INLINE_FUNCTION
   real_t
@@ -134,7 +137,7 @@ public:
   }
 
   /**
-   * Compute specific internal energy.
+   * \brief Compute specific internal energy.
    */
   KOKKOS_INLINE_FUNCTION
   real_t
@@ -172,7 +175,7 @@ public:
   }
 
   /**
-   * Compute volumic internal energy.
+   * \brief Compute volumic internal energy.
    */
   KOKKOS_INLINE_FUNCTION
   real_t
@@ -210,7 +213,7 @@ public:
   }
 
   /**
-   * Compute speed of sound.
+   * \brief Compute speed of sound.
    */
   KOKKOS_INLINE_FUNCTION
   real_t
@@ -248,7 +251,7 @@ public:
   }
 
   /**
-   * specific heat ratio (when available and meaningful)
+   * \brief specific heat ratio (when available and meaningful)
    */
   KOKKOS_INLINE_FUNCTION
   real_t

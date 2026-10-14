@@ -5,6 +5,8 @@
 /**
  * \file InitRayleighTaylor.h
  *
+ * \brief Contains the functors used to initialize the data and AMR status of Rayleigh-Taylor cases.
+ *
  * Reference:
  * - http://www.astro.princeton.edu/~jstone/Athena/tests/rt/rt.html
  */
@@ -27,7 +29,8 @@ namespace godunov_hydro
 /*************************************************/
 /*************************************************/
 /**
- * Implement user data initialization to solve Rayleigh-Taylor problem.
+ * \class InitRayleighTaylorDataFunctor
+ * \brief Implement user data initialization to solve Rayleigh-Taylor problem.
  *
  * This functor takes as input a mesh, already refined and initializes user data
  * on device.
@@ -127,7 +130,8 @@ extern template class InitRayleighTaylorDataFunctor<3, kalypsso::DefaultDevice>;
 // ====================================================================
 // ====================================================================
 /**
- * Implement initial refinement to solve Rayleigh-Taylor problem.
+ * \class InitRayleighTaylorRefineFunctor
+ * \brief Implement initial refinement to solve Rayleigh-Taylor problem.
  *
  * Use distance to interface as refine criterion.
  *
@@ -233,8 +237,9 @@ extern template class InitRayleighTaylorRefineFunctor<3, kalypsso::DefaultDevice
 // =======================================================
 // =======================================================
 /**
+ * \class InitRayleighTaylor
  *
- * Initial condition is mostly done on device.
+ * \brief Initial condition is mostly done on device.
  *
  */
 template <size_t dim, typename device_t>

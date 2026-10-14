@@ -4,6 +4,10 @@
 
 /**
  * \file ComputeFluxesAndConservativeUpdateFunctor.h
+ *
+ * \brief Contains the functor used to compute fluxes (on conservative variables) and perform a
+ * CONSERVATIVE update of conservative variables (i.e. perform time integration using Godunov
+ * (e.g. MUSCL-Hancock) scheme).
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_FLUXES_AND_CONSERVATIVE_UPDATE_FUNCTOR_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_FLUXES_AND_CONSERVATIVE_UPDATE_FUNCTOR_H_
@@ -35,8 +39,10 @@ namespace godunov_hydro
 /*************************************************/
 /*************************************************/
 /**
- * Compute fluxes (on conservative variables) and perform a CONSERVATIVE update of conservative
- * variables (i.e. perform time integration using Godunov (e.g. MUSCL-Hancock) scheme).
+ * \class ComputeFluxesAndConservativeUpdateFunctor
+ * \brief Compute fluxes (on conservative variables) and perform a CONSERVATIVE update of
+ * conservative variables (i.e. perform time integration using Godunov (e.g. MUSCL-Hancock)
+ * scheme).
  *
  * Input data is Ugroup (containing ghosted block data)
  *
@@ -158,7 +164,7 @@ public:
   }
 
   /**
-   * Perform full or partial time integration (either MUSCL-Hancock or one Runge-Kutta step).
+   * \brief Perform full or partial time integration (either MUSCL-Hancock or one Runge-Kutta step).
    *
    * \param[in]  time step (as computed by CFL condition)
    *
@@ -234,7 +240,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * return true when octant is a "owned" octant (not a ghost or outside)
+   * \brief return true when octant is a "owned" octant (not a ghost or outside)
    */
   KOKKOS_INLINE_FUNCTION bool
   is_owned_quadrant(iOct_t const & iOct_global) const
@@ -245,7 +251,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get conservative variables state vector.
+   * \brief Get conservative variables state vector.
    *
    * \param[in] index identifies location in the ghosted block
    * \param[in] iOct_global identifies octant (global)
@@ -270,7 +276,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get conservative variables state vector.
+   * \brief Get conservative variables state vector.
    *
    * \param[in] index identifies location in the ghosted block
    * \param[in] iOct_global identifies octant (global)
@@ -296,7 +302,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get primitive variables state vector.
+   * \brief Get primitive variables state vector.
    *
    * \param[in] index identifies location in the ghosted block
    * \param[in] iOct_local identifies octant (local index relative to
@@ -321,7 +327,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get primitive variables state vector.
+   * \brief Get primitive variables state vector.
    *
    * \param[in] index identifies location in the ghosted block
    * \param[in] iOct_local identifies octant (local index relative to
@@ -347,7 +353,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Update state vector (hydro variables only) using Kokkos::atomic_add.
+   * \brief Update state vector (hydro variables only) using Kokkos::atomic_add.
    *
    * \param[in] data a  block data array 2d view (Uout)
    * \param[in] i identifies location in the ghosted block
@@ -374,7 +380,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Update state vector (hydro variables only) using Kokkos::atomic_add.
+   * \brief Update state vector (hydro variables only) using Kokkos::atomic_add.
    *
    * \param[in] data a block data array 3d view (Uout)
    * \param[in] i identifies location in the ghosted block
@@ -404,7 +410,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Update state vector (hydro variables only) using Kokkos::atomic_sub.
+   * \brief Update state vector (hydro variables only) using Kokkos::atomic_sub.
    *
    * \param[in] data a block data array 2d view (Uout)
    * \param[in] i identifies location in the ghosted block
@@ -431,7 +437,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Update state vector (hydro variables only) using Kokkos::atomic_sub.
+   * \brief Update state vector (hydro variables only) using Kokkos::atomic_sub.
    *
    * \param[in] data a block data array 3d view (Uout)
    * \param[in] i identifies location in the ghosted block
@@ -461,7 +467,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Reconstruct an hydro state at a cell border location specified by offsets.
+   * \brief Reconstruct an hydro state at a cell border location specified by offsets.
    *
    * This is equivalent to trace operation in Ramses.
    * We just extrapolate primitive variables (at cell center) to border
@@ -492,7 +498,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Reconstruct an hydro state at a cell border location specified by offsets (3d version).
+   * \brief Reconstruct an hydro state at a cell border location specified by offsets (3d version).
    *
    * This is equivalent to trace operation in Ramses.
    * We just extrapolate primitive variables (at cell center) to border

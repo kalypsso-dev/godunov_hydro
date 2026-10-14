@@ -4,6 +4,8 @@
 
 /**
  * \file ComputeLimitedSlopesFunctor.h
+ *
+ * \brief Contains the functor used to compute limited slopes in a range of octants.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_LIMITED_SLOPES_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_LIMITED_SLOPES_H_
@@ -25,7 +27,8 @@ namespace godunov_hydro
 // ====================================================================
 // ====================================================================
 /**
- * Compute limited slopes in a range of octants.
+ * \class ComputeLimitedSlopesFunctor
+ * \brief Compute limited slopes in a range of octants.
  *
  * \note
  * This functor has two modes of operation:
@@ -92,7 +95,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Compute limited slopes functor.
+   * \brief Compute limited slopes functor.
    *
    * \param[in] prim_var : primitives variables (ghosted block, width=2)
    * \param[in,out] slopes_x : limited slopes along x (ghosted block width=1)
@@ -160,7 +163,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Compute primitive variables slopes (dq) for one component from q and its neighbors.
+   * \brief Compute primitive variables slopes (dq) for one component from q and its neighbors.
    *
    * Only slope_type 1 and 2 are supported.
    *
@@ -177,7 +180,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Compute limited slopes in all cells of ghosted block array (slopes_x, ...)
+   * \brief Compute limited slopes in all cells of ghosted block array (slopes_x, ...)
    *
    * \param[in] cell index integer used to map a cell inside a block
    * \param[in] iOct_in index identify an octant in input array
@@ -199,7 +202,8 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * range policy functor for computing limited slopes in all quadrants of a group of quadrants.
+   * \brief range policy functor for computing limited slopes in all quadrants of a group of
+   * quadrants.
    */
   KOKKOS_INLINE_FUNCTION
   void
@@ -208,7 +212,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * range policy functor when computing only ghosts quadrants.
+   * \brief range policy functor when computing only ghosts quadrants.
    */
   KOKKOS_INLINE_FUNCTION void
   operator()(TagComputeGhostQuad const &, const index_t & global_index) const;

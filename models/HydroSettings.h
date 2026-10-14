@@ -25,7 +25,8 @@ namespace godunov_hydro
 // ===========================================================================
 // ===========================================================================
 /**
- * Parameters that can be passed by copy to a Kokkos device.
+ * \struct HydroSettings
+ * \brief Parameters that can be passed by copy to a Kokkos device.
  */
 struct HydroSettings
 {

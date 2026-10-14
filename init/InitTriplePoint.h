@@ -5,6 +5,8 @@
 /**
  * \file InitTriplePoint.h
  *
+ * \brief Contains the functors used to initialize the data and AMR status of triple point cases.
+ *
  * Triple point problem.
  *
  */
@@ -25,7 +27,8 @@ namespace godunov_hydro
 // ====================================================================
 // ====================================================================
 /**
- * Implement user data initialization to solve triple point problem.
+ * \class InitTriplePointDataFunctor
+ * \brief Implement user data initialization to solve triple point problem.
  *
  * Initial conditions is refined near strong density gradients.
  */
@@ -101,7 +104,8 @@ extern template class InitTriplePointDataFunctor<3, kalypsso::DefaultDevice>;
 // ==================================================================================
 // ==================================================================================
 /**
- * Implement initial refinement to solve TriplePoint problem.
+ * \class InitTriplePointRefineFunctor
+ * \brief Implement initial refinement to solve TriplePoint problem.
  *
  * Use distance to interface as refine criterion.
  *
@@ -201,7 +205,8 @@ extern template class InitTriplePointRefineFunctor<3, kalypsso::DefaultDevice>;
 // =======================================================
 // =======================================================
 /**
- * Hydrodynamical triple point problem initialization.
+ * \class InitTriplePoint
+ * \brief Hydrodynamical triple point problem initialization.
  */
 template <size_t dim, typename device_t>
 class InitTriplePoint

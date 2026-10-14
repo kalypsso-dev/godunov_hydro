@@ -62,7 +62,7 @@ using EosWrapper = core::eos::EosWrapperMonoFluid<device_t>;
 // ===============================================================================
 // ===============================================================================
 /**
- * Read initial hydrodynamics state.
+ * \brief Read initial hydrodynamics state.
  *
  * This is useful when doing an initialization that is constant (i.e. space uniform)
  * inside spatial regions.
@@ -127,7 +127,7 @@ get_region_init_state(const int32_t                  i_region,
 // ===============================================================================
 // ===============================================================================
 /**
- * Get an array of initiaal states (one per region).
+ * \brief Get an array of initiaal states (one per region).
  *
  * This is useful for all simple test case that are initialized with a uniform state per region.
  */
@@ -152,7 +152,7 @@ get_initial_states(ConfigMap const & config_map, int nb_regions) -> InitialState
 // ===============================================================================
 // ===============================================================================
 /**
- * Compute volumic kinetic energy of a pure state.
+ * \brief Compute volumic kinetic energy of a pure state.
  *
  * \param[in] initial_states array of conservative variables hydrodynamics states
  * \param[in] i_state state index to initial_states
@@ -175,7 +175,7 @@ compute_volumic_ekin(InitialStates<dim, device_t> const & initial_states, int i_
 // ===============================================================================
 // ===============================================================================
 /**
- * Compute volumic kinetic energy of a pure state (conservative variables).
+ * \brief Compute volumic kinetic energy of a pure state (conservative variables).
  */
 template <size_t dim>
 KOKKOS_INLINE_FUNCTION real_t
@@ -194,7 +194,7 @@ compute_volumic_ekin(HydroState<dim> const & U)
 // ===============================================================================
 // ===============================================================================
 /**
- * Compute a mixed state between two pure states.
+ * \brief Compute a mixed state between two pure states.
  *
  * \param[in] initial_states array of conservative variables hydrodynamics states
  * \param[in] state0 first state index to initial_states
@@ -236,7 +236,7 @@ KOKKOS_INLINE_FUNCTION HydroState<dim>
 // ===============================================================================
 // ===============================================================================
 /**
- * Compute a mixed state between two pure states.
+ * \brief Compute a mixed state between two pure states.
  *
  * \param[in] initial_states array of conservative variables hydrodynamics states
  * \param[in] state0 first state index to initial_states

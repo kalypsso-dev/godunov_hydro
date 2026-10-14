@@ -4,6 +4,8 @@
 
 /**
  * \file InitFourQuadrant.h
+ *
+ * \brief Contains the functors used to initialize the data and AMR status of four quadrant cases.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_INIT_FOUR_QUANDRANT_H_
 #define KALYPSSO_GODUNOV_HYDRO_INIT_FOUR_QUANDRANT_H_
@@ -24,7 +26,8 @@ namespace godunov_hydro
 /*************************************************/
 /*************************************************/
 /**
- * Implement initialization functor to solve a four quadrant 2D Riemann
+ * \class InitFourQuadrantDataFunctor
+ * \brief Implement initialization functor to solve a four quadrant 2D Riemann
  * problem.
  *
  * This functor takes as input a mesh, already refined, and initializes
@@ -115,7 +118,8 @@ extern template class InitFourQuadrantDataFunctor<3, kalypsso::DefaultDevice>;
 /*************************************************/
 /*************************************************/
 /**
- * Implement initialization functor to solve a four quadrant 2D Riemann
+ * \class InitFourQuadrantRefineFunctor
+ * \brief Implement initialization functor to solve a four quadrant 2D Riemann
  * problem.
  *
  * This functor only performs mesh refinement, no user data init.

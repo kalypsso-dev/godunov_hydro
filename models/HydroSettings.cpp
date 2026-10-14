@@ -4,6 +4,8 @@
 
 /**
  * \file HydroSettings.cpp
+ *
+ * \brief Contains the definition of HydroSettings.
  */
 #include <godunov_hydro/models/HydroSettings.h>
 

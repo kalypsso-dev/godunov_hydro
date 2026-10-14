@@ -4,6 +4,8 @@
 
 /**
  * \file init.cpp
+ *
+ * \brief Contains the definition of the solver initialization functions.
  */
 #include <godunov_hydro/init/init.h>
 

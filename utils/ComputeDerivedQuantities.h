@@ -4,6 +4,8 @@
 
 /**
  * \file ComputeDerivedQuantities.h
+ *
+ * \brief Contains the helper structure used to compute derived quantities.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_DERIVED_QUANTITIES_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_DERIVED_QUANTITIES_H_
@@ -25,7 +27,8 @@ namespace godunov_hydro
 {
 
 /**
- * Define a better enum to list supported derived quantities.
+ * \enum DERIVED_QUANTITY
+ * \brief Define a better enum to list supported derived quantities.
  *
  * Derived quantities are quantities that are not solved in the PDE systems but can be
  * deduced from conservative variables.
@@ -56,8 +59,9 @@ BETTER_ENUM(DERIVED_QUANTITY, uint32_t,
 // ========================================================
 // ========================================================
 /**
- * A simple helper structure to compute a derived quantity (thermal pressure, specific kinetic
- * energy, ...)
+ * \struct ComputeDerivedQuantities
+ * \brief A simple helper structure to compute a derived quantity (thermal pressure, specific
+ * kinetic energy, ...)
  */
 template <size_t dim, typename device_t>
 struct ComputeDerivedQuantities

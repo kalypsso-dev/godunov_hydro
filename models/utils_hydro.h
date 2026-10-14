@@ -4,6 +4,8 @@
 
 /**
  * \file utils_hydro.h
+ *
+ * \brief Contains helper functions to manipulate hydrodynamics variables.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_MODELS_UTILS_HYDRO_H_
 #define KALYPSSO_GODUNOV_HYDRO_MODELS_UTILS_HYDRO_H_
@@ -30,7 +32,7 @@ namespace models
 // ================================================================================
 // ================================================================================
 /**
- * Compute specific kinetic energy from primitive variables.
+ * \brief Compute specific kinetic energy from primitive variables.
  *
  * \param[in] q  primitive variables vector
  *
@@ -52,7 +54,7 @@ compute_ekin_from_primitives(const HydroState<dim> & q)
 // ================================================================================
 // ================================================================================
 /**
- * Convert conservative variables (rho, rho*u, rho*v, rho*e_tot) to
+ * \brief Convert conservative variables (rho, rho*u, rho*v, rho*e_tot) to
  * primitive variables (rho,u,v,p)
  *
  * \param[in]  u  conservative variables array
@@ -118,7 +120,7 @@ KOKKOS_INLINE_FUNCTION HydroState<dim>
 // ================================================================================
 // ================================================================================
 /**
- * Convert conservative variables (rho, rho*u, rho*v, e) to
+ * \brief Convert conservative variables (rho, rho*u, rho*v, e) to
  * primitive variables (rho,u,v,p)
  * \param[in]  u  conservative variables array
  * \param[in]  settings
@@ -141,7 +143,7 @@ KOKKOS_INLINE_FUNCTION HydroState<dim>
 // ================================================================================
 // ================================================================================
 /**
- * Convert primitive variables (rho,u,v,p) to
+ * \brief Convert primitive variables (rho,u,v,p) to
  * conservative variables (rho, rho*u, rho*v, rho*e_tot)
  *
  * \param[in]  q  primitive    variables array

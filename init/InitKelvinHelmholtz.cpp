@@ -4,6 +4,9 @@
 
 /**
  * \file InitKelvinHelmholtz.cpp
+ *
+ * \brief Contains the definitions of InitKelvinHelmholtzDataFunctor,
+ * InitKelvinHelmholtzRefineFunctor, InitKelvinHelmholtz.
  */
 
 #include <godunov_hydro/init/InitKelvinHelmholtz.h>

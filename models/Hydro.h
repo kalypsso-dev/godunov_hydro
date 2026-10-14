@@ -4,6 +4,8 @@
 
 /**
  * \file Hydro.h
+ *
+ * \brief Contains the hydrodynamics (Euler) model and its field ids.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_MODELS_HYDRO_H_
 #define KALYPSSO_GODUNOV_HYDRO_MODELS_HYDRO_H_
@@ -32,7 +34,7 @@ public:
   using Id_t = int32_t;
 
   /**
-   * Euler equations models field ids
+   * \brief Euler equations models field ids
    */
   enum VarId : Id_t
   {

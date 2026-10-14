@@ -4,6 +4,8 @@
 
 /**
  * \file ComputeDtHydroFunctor.cpp
+ *
+ * \brief Contains the definition of ComputeDtHydroFunctor.
  */
 #include <godunov_hydro/scheme/ComputeDtHydroFunctor.h>
 #include <godunov_hydro/models/utils_hydro.h>

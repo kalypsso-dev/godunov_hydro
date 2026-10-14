@@ -4,6 +4,8 @@
 
 /**
  * \file InitImplode.cpp
+ *
+ * \brief Contains the definitions of InitImplodeDataFunctor, InitImplodeRefineFunctor, InitImplode.
  */
 
 #include <godunov_hydro/init/InitImplode.h>

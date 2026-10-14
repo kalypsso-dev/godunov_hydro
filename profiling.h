@@ -4,6 +4,8 @@
 
 /**
  * \file profiling.h
+ *
+ * \brief Declares the profiling zones and helpers of the Godunov hydrodynamics solver.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_PROFILING_DATA_H_
 #define KALYPSSO_GODUNOV_HYDRO_PROFILING_DATA_H_

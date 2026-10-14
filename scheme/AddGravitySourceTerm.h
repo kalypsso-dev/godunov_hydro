@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 /**
- * \file AddGravitySourceTerm.
+ * \file AddGravitySourceTerm.h
  * \brief Add gravity source term.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_ADD_GRAVITY_SOURCE_TERM_H_
@@ -23,7 +23,8 @@ namespace godunov_hydro
 //*************************************************
 //*************************************************
 /**
- * This functor is aimed at being applied right after the hydro time step.
+ * \class AddGravitySourceTerm
+ * \brief This functor is aimed at being applied right after the hydro time step.
  *
  * So we need :
  * - Uold (conservative variables at the beginning of time step)

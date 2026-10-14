@@ -5,7 +5,8 @@
 /**
  * \file RiemannSolvers.h
  *
- * Several Riemann solvers for hydrodynamics.
+ * \brief Contains several Riemann solvers for hydrodynamics.
+ *
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_MODELS_RIEMANN_SOLVERS_H_
 #define KALYPSSO_GODUNOV_HYDRO_MODELS_RIEMANN_SOLVERS_H_
@@ -29,7 +30,7 @@ namespace godunov_hydro
 {
 
 /**
- * Compute cell fluxes from the Godunov state
+ * \brief Compute cell fluxes from the Godunov state
  * \param[in]  qgdnv input primitive variables Godunov state
  * \param[out] flux  output flux vector
  */
@@ -66,7 +67,7 @@ cmpflx(HydroState<dim> const & qgdnv, HydroState<dim> & flux, EosWrapper const &
 } // cmpflx
 
 /**
- * Riemann solver, equivalent to riemann_approx in RAMSES (see file
+ * \brief Riemann solver, equivalent to riemann_approx in RAMSES (see file
  * godunov_utils.f90 in RAMSES).
  *
  * @param[in] qL     : input left  state (primitive variables)
@@ -232,7 +233,7 @@ riemann_approx(HydroState<dim> const & qL,
 } // riemann_approx
 
 /**
- * Riemann solver, equivalent to riemann_llf in RAMSES (see file
+ * \brief Riemann solver, equivalent to riemann_llf in RAMSES (see file
  * godunov_utils.f90 in RAMSES).
  *
  * LLF = Local Lax-Friedrich (also called Rusanov flux).
@@ -353,7 +354,7 @@ riemann_llf(HydroState<dim> const & qL,
 } // riemann_llf
 
 /**
- * Riemann solver, equivalent to riemann_hll in RAMSES (see file
+ * \brief Riemann solver, equivalent to riemann_hll in RAMSES (see file
  * godunov_utils.f90 in RAMSES).
  *
  * This is the HYDRO only version. The MHD version is in file riemann_mhd.h
@@ -452,7 +453,7 @@ riemann_hll(HydroState<dim> const & qL,
 } // riemann_hll
 
 /**
- * Riemann solver HLLC
+ * \brief Riemann solver HLLC
  *
  * @param[in] qL    : input left  state (primitive variables)
  * @param[in] qR    : input right state (primitive variables)
@@ -590,7 +591,7 @@ riemann_hllc(HydroState<dim> const & qL,
 } // riemann_hllc
 
 /**
- * Riemann solver HLLC-LM
+ * \brief Riemann solver HLLC-LM
  *
  * This variant of HLLC has a low Mach correction for removing carbuncle instability problem
  * that arise when there is a strong axis-aligned shock.
@@ -739,7 +740,7 @@ riemann_hllc_lm(HydroState<dim> const & qL,
 } // riemann_hllc_lm
 
 /**
- * Wrapper function calling the actual riemann solver.
+ * \brief Wrapper function calling the actual riemann solver.
  */
 template <size_t dim, typename EosWrapper>
 KOKKOS_INLINE_FUNCTION void
@@ -778,7 +779,7 @@ riemann_hydro(HydroState<dim> const & qL,
 } // riemann_hydro
 
 /**
- * Another wrapper function calling the actual riemann solver.
+ * \brief Another wrapper function calling the actual riemann solver.
  */
 template <size_t dim, typename EosWrapper>
 KOKKOS_INLINE_FUNCTION HydroState<dim>

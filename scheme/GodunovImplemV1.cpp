@@ -5,6 +5,8 @@
 /**
  * \file GodunovImplemV1.cpp
  *
+ * \brief Contains the definition of GodunovImplemV1.
+ *
  * Godunov time integration implementation detail version v1.
  */
 #include <godunov_hydro/scheme/GodunovImplemV1.h>

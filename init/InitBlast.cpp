@@ -4,6 +4,8 @@
 
 /**
  * \file InitBlast.cpp
+ *
+ * \brief Contains the definitions of InitBlastDataFunctor, InitBlastRefineFunctor, InitBlast.
  */
 
 #include <godunov_hydro/init/InitBlast.h>

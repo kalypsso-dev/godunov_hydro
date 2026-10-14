@@ -5,7 +5,8 @@
 /**
  * \file GodunovImplemV0.h
  *
- * Godunov time integration implementation detail version v0.
+ * \brief Contains the Godunov time integration implementation detail version v0.
+ *
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_GODUNOV_IMPLEM_V0_H_
 #define KALYPSSO_GODUNOV_HYDRO_GODUNOV_IMPLEM_V0_H_
@@ -23,7 +24,7 @@ namespace godunov_hydro
 /**
  * \class GodunovImplemV0
  *
- * version 0 features:
+ * \brief version 0 features:
  *
  * - do compute fluxes and store them;
  * - in a separate kokkos functor perform update  (no atomic memory operations required),
@@ -107,7 +108,7 @@ public:
   ~GodunovImplemV0() = default;
 
   /**
-   * Static creation method called by the solver factory.
+   * \brief Static creation method called by the solver factory.
    */
   static GodunovImplemBase_t *
   create(ParallelEnv const &      par_env,

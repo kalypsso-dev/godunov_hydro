@@ -4,6 +4,8 @@
 
 /**
  * \file InitBreakingWave.cpp
+ *
+ * \brief Contains the definitions of InitBreakingWaveDataFunctor, InitBreakingWave.
  */
 
 #include <godunov_hydro/init/InitBreakingWave.h>

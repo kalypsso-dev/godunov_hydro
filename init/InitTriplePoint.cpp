@@ -4,6 +4,9 @@
 
 /**
  * \file InitTriplePoint.cpp
+ *
+ * \brief Contains the definitions of InitTriplePointDataFunctor, InitTriplePointRefineFunctor,
+ * InitTriplePoint.
  */
 
 #include <godunov_hydro/init/InitTriplePoint.h>

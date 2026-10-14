@@ -5,6 +5,9 @@
 /**
  * \file InitWoodward.h
  *
+ * \brief Contains the functors used to initialize the data and AMR status of Woodward-Colella
+ * blast wave cases.
+ *
  * - Woodward, P. and Colella, P., "The Numerical Simulation of Two-Dimensional
  * Fluid Flow with Strong Shocks", J. Computational Physics, 54, 115-173 (1984).
  * https://doi.org/10.1016/0021-9991(84)90142-6
@@ -27,7 +30,8 @@ namespace godunov_hydro
 // ====================================================================
 // ====================================================================
 /**
- * Implement user data initialization to solve Woodward problem: two interact blast waves.
+ * \class InitWoodwardDataFunctor
+ * \brief Implement user data initialization to solve Woodward problem: two interact blast waves.
  *
  * \sa references
  *
@@ -113,7 +117,8 @@ extern template class InitWoodwardDataFunctor<3, kalypsso::DefaultDevice>;
 // ====================================================================
 // ====================================================================
 /**
- * Implement initial refinement to solve Woodward problem.
+ * \class InitWoodwardRefineFunctor
+ * \brief Implement initial refinement to solve Woodward problem.
  *
  * Use distance to interface as refine criterion.
  *
@@ -214,7 +219,8 @@ extern template class InitWoodwardRefineFunctor<3, kalypsso::DefaultDevice>;
 // =======================================================
 // =======================================================
 /**
- * Hydrodynamical Woodward shock tube init.
+ * \class InitWoodward
+ * \brief Hydrodynamical Woodward shock tube init.
  */
 template <size_t dim, typename device_t>
 class InitWoodward

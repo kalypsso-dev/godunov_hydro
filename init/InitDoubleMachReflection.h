@@ -5,6 +5,9 @@
 /**
  * \file InitDoubleMachReflection.h
  *
+ * \brief Contains the functors used to initialize the data and AMR status of double Mach
+ * reflection cases.
+ *
  * - DoubleMachReflection, P. and Colella, P., "The Numerical Simulation of Two-Dimensional
  * Fluid Flow with Strong Shocks", J. Computational Physics, 54, 115-173 (1984).
  * https://doi.org/10.1016/0021-9991(84)90142-6
@@ -27,7 +30,8 @@ namespace godunov_hydro
 // ====================================================================
 // ====================================================================
 /**
- * Implement user data initialization to solve the DoubleMachReflection problem.
+ * \class InitDoubleMachReflectionDataFunctor
+ * \brief Implement user data initialization to solve the DoubleMachReflection problem.
  *
  * A shock making an angle with a wall.
  *
@@ -115,7 +119,8 @@ extern template class InitDoubleMachReflectionDataFunctor<3, kalypsso::DefaultDe
 // ====================================================================
 // ====================================================================
 /**
- * Implement initial refinement to solve DoubleMachReflection problem.
+ * \class InitDoubleMachReflectionRefineFunctor
+ * \brief Implement initial refinement to solve DoubleMachReflection problem.
  *
  * Use distance to interface as refine criterion.
  *
@@ -216,7 +221,8 @@ extern template class InitDoubleMachReflectionRefineFunctor<3, kalypsso::Default
 // =======================================================
 // =======================================================
 /**
- * Hydrodynamical DoubleMachReflection init.
+ * \class InitDoubleMachReflection
+ * \brief Hydrodynamical DoubleMachReflection init.
  */
 template <size_t dim, typename device_t>
 class InitDoubleMachReflection

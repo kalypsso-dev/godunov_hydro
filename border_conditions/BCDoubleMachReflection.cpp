@@ -5,12 +5,14 @@
 /**
  * \file BCDoubleMachReflection.cpp
  *
+ * \brief Contains the definition of FillOutsideDoubleMachReflection.
+ *
  * see reference
  * Woodward, P. and Colella, P., "The Numerical Simulation of Two-Dimensional
  * Fluid Flow with Strong Shocks", J. Computational Physics, 54, 115-173 (1984).
  * https://doi.org/10.1016/0021-9991(84)90142-6
  *
- * This configuration is also some time called wedge; see e.g.
+ * This configuration is also sometimes called wedge; see e.g.
  * http://amroc.sourceforge.net/examples/euler/2d/html/ramp_n.htm
  */
 

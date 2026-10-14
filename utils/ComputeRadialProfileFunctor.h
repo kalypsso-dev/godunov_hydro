@@ -3,7 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 /**
- * \file ComputeRadialProfile.h
+ * \file ComputeRadialProfileFunctor.h
+ *
+ * \brief Contains the functor used to compute a radial profile by averaging all directions.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_RADIAL_PROFILE_FUNCTOR_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_RADIAL_PROFILE_FUNCTOR_H_
@@ -35,7 +37,8 @@ namespace godunov_hydro
 /*************************************************/
 /*************************************************/
 /**
- * Compute radial profile by averaging all direction.
+ * \class ComputeRadialProfileFunctor
+ * \brief Compute radial profile by averaging all directions.
  *
  * This functor is mainly aimed at checking numerical and analytical solution of the radial Sedov
  * blast.
@@ -271,11 +274,10 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * range policy functor for computing CFL condition.
+   * \brief range policy functor for computing the radial profile.
    *
    * \param[in] global_index spans range from 0 to nbCellsPerLeaf * local_num_octants-1
    *            (i.e. total number of cells in current MPI process)
-   * \param[in,out] invDt is the reduced variable to update
    */
   KOKKOS_INLINE_FUNCTION
   void

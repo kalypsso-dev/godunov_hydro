@@ -4,6 +4,9 @@
 
 /**
  * \file InitShuOsher.cpp
+ *
+ * \brief Contains the definitions of InitShuOsherDataFunctor,
+ * InitShuOsherRefineFunctor, InitShuOsher.
  */
 
 #include <godunov_hydro/init/InitShuOsher.h>
