@@ -4,6 +4,8 @@
 
 /**
  * \file InitBlast.h
+ *
+ * \brief Contains the functors used to initialize the data and AMR status of blast cases.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_INIT_BLAST_H_
 #define KALYPSSO_GODUNOV_HYDRO_INIT_BLAST_H_
@@ -131,7 +133,7 @@ private:
   // ==========================================================================
   // ==========================================================================
   /**
-   * Utility to determine in which region a given point is.
+   * \brief Utility to determine in which region a given point is.
    */
   KOKKOS_INLINE_FUNCTION int
   point_to_region(Kokkos::Array<real_t, dim> const & xyz) const
@@ -158,7 +160,7 @@ private:
   // ==========================================================================
   // ==========================================================================
   /**
-   * For each corner of a given cell, determine in which region this corner is.
+   * \brief For each corner of a given cell, determine in which region this corner is.
    *
    * \param[in] ijk i-j-k indexes of a cell inside a block of cells
    * \param[in] key orchard key of current octant
@@ -205,7 +207,8 @@ extern template class InitBlastDataFunctor<3, kalypsso::DefaultDevice>;
 // ====================================================================
 // ====================================================================
 /**
- * Implement initial refinement to solve blast problem.
+ * \class InitBlastRefineFunctor
+ * \brief Implement initial refinement to solve blast problem.
  *
  * See http://www.astro.princeton.edu/~jstone/Athena/tests/blast/blast.html
  *

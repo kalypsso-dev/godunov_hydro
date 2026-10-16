@@ -4,6 +4,8 @@
 
 /**
  * \file InitJet.h
+ *
+ * \brief Contains the functors used to initialize the data and AMR status of jet cases.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_INIT_JET_H_
 #define KALYPSSO_GODUNOV_HYDRO_INIT_JET_H_
@@ -21,7 +23,8 @@ namespace godunov_hydro
 // =======================================================
 // =======================================================
 /**
- * Implement user data initialization to solve jet testcase.
+ * \class InitJetDataFunctor
+ * \brief Implement user data initialization to solve jet testcase.
  *
  * Init: fluid at rest in a mesh uniformly refined at level min.
  */
@@ -95,7 +98,8 @@ extern template class InitJetDataFunctor<3, kalypsso::DefaultDevice>;
 // =======================================================
 // =======================================================
 /**
- * Hydrodynamical jet shock tube init.
+ * \class InitJet
+ * \brief Hydrodynamical jet shock tube init.
  */
 template <size_t dim, typename device_t>
 class InitJet

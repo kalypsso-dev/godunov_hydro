@@ -5,6 +5,9 @@
 /**
  * \file InitShockBubble.h
  *
+ * \brief Contains the functors used to initialize the data and AMR status of shock-bubble
+ * interaction cases.
+ *
  * Shock-bubble interaction.
  *
  * Reference: http://amroc.sourceforge.net/examples/euler/2d/html/shbubble_n.htm
@@ -26,7 +29,8 @@ namespace godunov_hydro
 // ====================================================================
 // ====================================================================
 /**
- * Implement user data initialization to solve a shock-bubble interaction problem.
+ * \class InitShockBubbleDataFunctor
+ * \brief Implement user data initialization to solve a shock-bubble interaction problem.
  *
  * \sa references
  * - http://amroc.sourceforge.net/examples/euler/2d/html/shbubble_n.htm
@@ -102,7 +106,8 @@ extern template class InitShockBubbleDataFunctor<3, kalypsso::DefaultDevice>;
 // ====================================================================
 // ====================================================================
 /**
- * Implement initial refinement to solve ShockBubble problem.
+ * \class InitShockBubbleRefineFunctor
+ * \brief Implement initial refinement to solve ShockBubble problem.
  *
  * Use distance to interface as refine criterion.
  *
@@ -190,7 +195,7 @@ extern template class InitShockBubbleRefineFunctor<3, kalypsso::DefaultDevice>;
 /**
  * \class InitShockBubble
  *
- * Shock-bubble init.
+ * \brief Shock-bubble init.
  */
 template <size_t dim, typename device_t>
 class InitShockBubble

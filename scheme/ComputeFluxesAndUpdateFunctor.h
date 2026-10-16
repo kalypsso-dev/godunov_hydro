@@ -5,7 +5,10 @@
 /**
  * \file ComputeFluxesAndUpdateFunctor.h
  *
- * This is a legacy functor (don't use it). It is still here for reference.
+ * \brief Contains a legacy functor (don't use it) that computes fluxes (on conservative
+ * variables) and performs a NON CONSERVATIVE update of conservative variables.
+ *
+ * It is still here for reference.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_FLUXES_AND_UPDATE_FUNCTOR_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_FLUXES_AND_UPDATE_FUNCTOR_H_
@@ -34,8 +37,10 @@ namespace godunov_hydro
 /*************************************************/
 /*************************************************/
 /**
- * Compute fluxes (on conservative variables) and perform a NON CONSERVATIVE update of conservative
- * variables (i.e. perform time integration using Godunov (e.g. MUSCL-Hancock) scheme).
+ * \class ComputeFluxesAndUpdateFunctor
+ * \brief Compute fluxes (on conservative variables) and perform a NON CONSERVATIVE update of
+ * conservative variables (i.e. perform time integration using Godunov (e.g. MUSCL-Hancock)
+ * scheme).
  *
  * Input data is Ugroup (containing ghosted block data)
  *
@@ -160,7 +165,7 @@ public:
   }
 
   /**
-   * Perform time integration (MUSCL Godunov).
+   * \brief Perform time integration (MUSCL Godunov).
    *
    * \param[in]  time step (as cmputed by CFL condition)
    *
@@ -210,7 +215,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get conservative variables state vector.
+   * \brief Get conservative variables state vector.
    *
    * \param[in] index identifies location in the ghosted block
    * \param[in] iOct_global identifies octant (global)
@@ -223,7 +228,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get conservative variables state vector.
+   * \brief Get conservative variables state vector.
    *
    * \param[in] index identifies location in the ghosted block
    * \param[in] iOct_global identifies octant (global)
@@ -236,7 +241,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get primitive variables state vector.
+   * \brief Get primitive variables state vector.
    *
    * \param[in] index identifies location in the ghosted block
    * \param[in] iOct_local identifies octant (local index relative to
@@ -249,7 +254,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get primitive variables state vector.
+   * \brief Get primitive variables state vector.
    *
    * \param[in] index identifies location in the ghosted block
    * \param[in] iOct_local identifies octant (local index relative to
@@ -262,7 +267,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Reconstruct an hydro state at a cell border location specified by offsets.
+   * \brief Reconstruct an hydro state at a cell border location specified by offsets.
    *
    * This is equivalent to trace operation in Ramses.
    * We just extrapolate primitive variables (at cell center) to border
@@ -293,7 +298,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Reconstruct an hydro state at a cell border location specified by offsets (3d version).
+   * \brief Reconstruct an hydro state at a cell border location specified by offsets (3d version).
    *
    * This is equivalent to trace operation in Ramses.
    * We just extrapolate primitive variables (at cell center) to border

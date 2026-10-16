@@ -5,8 +5,8 @@
 /**
  * \file BCShockBubble.h
  *
- * Define a border condition functor that can be used to simulate a high-speed inlet flow inside
- * the computational domain.
+ * \brief Contains a border condition functor that simulates a high-speed inlet flow inside the
+ * computational domain.
  *
  * This functor is aimed to be called after FillOutside, to override values at some location.
  */
@@ -93,7 +93,7 @@ struct BCShockBubble
 /**
  * \class FillOutsideShockBubble
  *
- * Override values in some outside cell to have in inlet shock_bubble.
+ * \brief Override values in some outside cell to have an inlet shock_bubble.
  *
  * In the drawing below, the arrow locates the inlet shock_bubble.
  *
@@ -124,7 +124,7 @@ public:
 
   // ==============================================================
   // ==============================================================
-  /** Fill outside octant cells.
+  /** \brief Fill outside octant cells.
    *
    * \param[in,out] userdata_out data array which we want to fill the block ghosts cells
    * \param[in] amr_info gives the number of owned, ghost, outside, ghost_outside quads
@@ -143,7 +143,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * range policy functor to sweep outside leaves.
+   * \brief range policy functor to sweep outside leaves.
    *
    * \see FillOutsideCellFunctor
    */
@@ -152,6 +152,7 @@ public:
 
 private:
   /**
+   * \brief Constructor.
    *
    * \param[in,out] userdata_out data array which we want to fill the block ghosts cells
    * \param[in] amr_info gives the number of owned, ghost, outside, ghost_outside quads

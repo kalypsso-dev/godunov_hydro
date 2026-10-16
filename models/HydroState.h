@@ -4,6 +4,8 @@
 
 /**
  * \file HydroState.h
+ *
+ * \brief Contains the HydroState type used to store primitive or conservative variables.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_MODELS_HYDRO_STATE_H_
 #define KALYPSSO_GODUNOV_HYDRO_MODELS_HYDRO_STATE_H_
@@ -22,7 +24,7 @@ template <size_t nbvar>
 using StateNd = Kokkos::Array<real_t, nbvar>;
 
 /**
- * HydroState is a small array used for storing either primitive or conservative variables.
+ * \brief HydroState is a small array used for storing either primitive or conservative variables.
  *
  * \note the size is the number of independent degrees of freedom plus one for mixture density.
  */

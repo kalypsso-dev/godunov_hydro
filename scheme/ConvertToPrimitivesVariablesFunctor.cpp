@@ -4,6 +4,8 @@
 
 /**
  * \file ConvertToPrimitivesVariablesFunctor.cpp
+ *
+ * \brief Contains the definition of ConvertToPrimitivesVariablesFunctor.
  */
 #include <godunov_hydro/scheme/ConvertToPrimitivesVariablesFunctor.h>
 #include <godunov_hydro/models/utils_hydro.h>

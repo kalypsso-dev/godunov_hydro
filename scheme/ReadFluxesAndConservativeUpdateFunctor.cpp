@@ -4,6 +4,8 @@
 
 /**
  * \file ReadFluxesAndConservativeUpdateFunctor.cpp
+ *
+ * \brief Contains the definition of ReadFluxesAndConservativeUpdateFunctor.
  */
 #include <godunov_hydro/scheme/ReadFluxesAndConservativeUpdateFunctor.h>
 #include <kalypsso/core/config_utils.h>

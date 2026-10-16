@@ -4,6 +4,8 @@
 
 /**
  * \file ComputeFluxesAndUpdateFunctor.cpp
+ *
+ * \brief Contains the definition of ComputeFluxesAndUpdateFunctor.
  */
 #include <godunov_hydro/scheme/ComputeFluxesAndUpdateFunctor.h>
 
@@ -148,7 +150,7 @@ ComputeFluxesAndUpdateFunctor<dim, device_t>::get_cons_variables(int32_t i,
 // ====================================================================
 // ====================================================================
 /**
- * Get conservative variables state vector.
+ * \brief Get conservative variables state vector.
  *
  * \param[in] index identifies location in the ghosted block
  * \param[in] iOct_global identifies octant (global)

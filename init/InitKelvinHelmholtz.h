@@ -5,6 +5,9 @@
 /**
  * \file InitKelvinHelmholtz.h
  *
+ * \brief Contains the functors used to initialize the data and AMR status of
+ * Kelvin-Helmholtz cases.
+ *
  * Reference:
  * - http://www.astro.princeton.edu/~jstone/Athena/tests/kh/kh.html
  * - article by Robertson et al:
@@ -30,7 +33,8 @@ namespace godunov_hydro
 // ====================================================================
 // ====================================================================
 /**
- * Implement user data initialization to solve Kelvin-Helmholtz problem.
+ * \class InitKelvinHelmholtzDataFunctor
+ * \brief Implement user data initialization to solve Kelvin-Helmholtz problem.
  *
  * This functor takes as input a mesh, already refined and initializes user data
  * on device.
@@ -129,7 +133,8 @@ extern template class InitKelvinHelmholtzDataFunctor<3, kalypsso::DefaultDevice>
 // ====================================================================
 // ====================================================================
 /**
- * Implement initial refinement to solve Kelvin-Helmholtz problem.
+ * \class InitKelvinHelmholtzRefineFunctor
+ * \brief Implement initial refinement to solve Kelvin-Helmholtz problem.
  *
  * Use distance to interface as refine criterion.
  *
@@ -233,8 +238,9 @@ extern template class InitKelvinHelmholtzRefineFunctor<3, kalypsso::DefaultDevic
 // ====================================================================
 // ====================================================================
 /**
+ * \class InitKelvinHelmholtz
  *
- * Initial condition is mostly done on device.
+ * \brief Initial condition is mostly done on device.
  *
  */
 template <size_t dim, typename device_t>

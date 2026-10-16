@@ -4,6 +4,9 @@
 
 /**
  * \file InitDoubleMachReflection.cpp
+ *
+ * \brief Contains the definitions of InitDoubleMachReflectionDataFunctor,
+ * InitDoubleMachReflectionRefineFunctor, InitDoubleMachReflection.
  */
 
 #include <godunov_hydro/init/InitDoubleMachReflection.h>

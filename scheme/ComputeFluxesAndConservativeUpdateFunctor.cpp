@@ -4,6 +4,8 @@
 
 /**
  * \file ComputeFluxesAndConservativeUpdateFunctor.cpp
+ *
+ * \brief Contains the definition of ComputeFluxesAndConservativeUpdateFunctor.
  */
 #include <godunov_hydro/scheme/ComputeFluxesAndConservativeUpdateFunctor.h>
 

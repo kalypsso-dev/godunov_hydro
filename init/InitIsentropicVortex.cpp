@@ -4,6 +4,8 @@
 
 /**
  * \file InitIsentropicVortex.cpp
+ *
+ * \brief Contains the definitions of InitIsentropicVortexDataFunctor, InitIsentropicVortex.
  */
 
 #include <godunov_hydro/init/InitIsentropicVortex.h>

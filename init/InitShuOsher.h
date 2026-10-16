@@ -5,6 +5,8 @@
 /**
  * \file InitShuOsher.h
  *
+ * \brief Contains the functors used to initialize the data and AMR status of Shu-Osher cases.
+ *
  * A moving shock interacting with a density sine wave.
  *
  * Reference:
@@ -28,7 +30,8 @@ namespace godunov_hydro
 // ====================================================================
 // ====================================================================
 /**
- * Implement user data initialization to solve Shu-Osher problem.
+ * \class InitShuOsherDataFunctor
+ * \brief Implement user data initialization to solve Shu-Osher problem.
  *
  */
 template <size_t dim, typename device_t>
@@ -105,7 +108,8 @@ extern template class InitShuOsherDataFunctor<3, kalypsso::DefaultDevice>;
 // ====================================================================
 // ====================================================================
 /**
- * Implement initial refinement to solve ShuOsher problem.
+ * \class InitShuOsherRefineFunctor
+ * \brief Implement initial refinement to solve ShuOsher problem.
  *
  * Use distance to interface as refine criterion.
  *
@@ -206,7 +210,8 @@ extern template class InitShuOsherRefineFunctor<3, kalypsso::DefaultDevice>;
 // =======================================================
 // =======================================================
 /**
- * Shu-Osher problem initialization.
+ * \class InitShuOsher
+ * \brief Shu-Osher problem initialization.
  */
 template <size_t dim, typename device_t>
 class InitShuOsher

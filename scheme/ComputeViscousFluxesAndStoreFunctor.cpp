@@ -4,6 +4,8 @@
 
 /**
  * \file ComputeViscousFluxesAndStoreFunctor.cpp
+ *
+ * \brief Contains the definition of ComputeViscousFluxesAndStoreFunctor.
  */
 #include <godunov_hydro/scheme/ComputeViscousFluxesAndStoreFunctor.h>
 #include <kalypsso/core/config_utils.h>

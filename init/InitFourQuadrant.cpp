@@ -4,6 +4,9 @@
 
 /**
  * \file InitFourQuadrant.cpp
+ *
+ * \brief Contains the definitions of InitFourQuadrantDataFunctor,
+ * InitFourQuadrantRefineFunctor, InitFourQuadrant.
  */
 
 #include <godunov_hydro/init/InitFourQuadrant.h>

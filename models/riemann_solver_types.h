@@ -4,6 +4,8 @@
 
 /**
  * \file riemann_solver_types.h
+ *
+ * \brief Contains the enumeration of supported Riemann solver types.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_MODELS_RIEMANNSOLVERTYPES_H_
 #define KALYPSSO_GODUNOV_HYDRO_MODELS_RIEMANNSOLVERTYPES_H_
@@ -21,7 +23,8 @@ namespace godunov_hydro
 
 // clang-format off
 /**
- * Enumerate Riemann solver types.
+ * \enum RiemannSolverType
+ * \brief Enumerate Riemann solver types.
  */
 BETTER_ENUM(RiemannSolverType,
             int,

@@ -4,6 +4,8 @@
 
 /**
  * \file InitSod.cpp
+ *
+ * \brief Contains the definitions of InitSodDataFunctor, InitSodRefineFunctor, InitSod.
  */
 
 #include <godunov_hydro/init/InitSod.h>

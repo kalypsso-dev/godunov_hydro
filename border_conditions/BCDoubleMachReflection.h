@@ -5,8 +5,8 @@
 /**
  * \file BCDoubleMachReflection.h
  *
- * Define a border condition functor that can be used to simulate an inclined shock wave entering
- * the computational domain from the left, and lower y-border is a wall.
+ * \brief Contains a border condition functor that simulates an inclined shock wave entering the
+ * computational domain from the left, the lower y-border being a wall.
  *
  * This functor is aimed to be called after FillOutside, to override values at some location.
  */
@@ -139,7 +139,7 @@ struct BCDoubleMachReflection
 /**
  * \class FillOutsideDoubleMachReflection
  *
- * Override values in some outside cell.
+ * \brief Override values in some outside cell.
  *
  *
  * --------------------------------
@@ -169,7 +169,7 @@ public:
 
   // ==============================================================
   // ==============================================================
-  /** Fill outside octant cells.
+  /** \brief Fill outside octant cells.
    *
    * \param[in,out] userdata_out data array which we want to fill the block ghosts cells
    * \param[in] amr_info gives the number of owned, ghost, outside, ghost_outside quads
@@ -189,7 +189,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * range policy functor to sweep outside leaves.
+   * \brief range policy functor to sweep outside leaves.
    *
    * \see FillOutsideCellFunctor
    */
@@ -198,6 +198,7 @@ public:
 
 private:
   /**
+   * \brief Constructor.
    *
    * \param[in,out] userdata data array which we want to fill the block ghosts cells
    * \param[in] amr_meshinfo gives the number of owned, ghost, outside, ghost_outside quads

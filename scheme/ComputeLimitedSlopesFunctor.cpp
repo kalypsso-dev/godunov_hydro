@@ -4,6 +4,8 @@
 
 /**
  * \file ComputeLimitedSlopesFunctor.cpp
+ *
+ * \brief Contains the definition of ComputeLimitedSlopesFunctor.
  */
 #include <godunov_hydro/scheme/ComputeLimitedSlopesFunctor.h>
 

@@ -4,6 +4,8 @@
 
 /**
  * \file ComputeDtHydroFunctor.h
+ *
+ * \brief Contains the functor used to compute the CFL condition.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_DT_HYDRO_FUNCTOR_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_DT_HYDRO_FUNCTOR_H_
@@ -26,7 +28,8 @@ namespace godunov_hydro
 /*************************************************/
 /*************************************************/
 /**
- * Simplest CFL computational functor for compressible mono fluid hydrodynamics.
+ * \class ComputeDtHydroFunctor
+ * \brief Simplest CFL computational functor for compressible mono fluid hydrodynamics.
  *
  * All cell, whatever level, contribute equally to the CFL condition.
  *
@@ -123,7 +126,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Update reduced variable when visiting a cell.
+   * \brief Update reduced variable when visiting a cell.
    *
    * \param[in] iOct is the visited octant id
    * \param[in] cell_index is the visited local cell index (local to block)
@@ -137,7 +140,7 @@ public:
   compute_cfl_with_gravity(int32_t const & iOct, int32_t const & cell_index, real_t & invDt) const;
 
   /**
-   * range policy functor for computing CFL condition.
+   * \brief range policy functor for computing CFL condition.
    *
    * \param[in] global_index spans range from 0 to nbCellsPerLeaf * local_num_octants-1
    *            (i.e. total number of cells in current MPI process)

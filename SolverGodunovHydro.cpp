@@ -5,7 +5,8 @@
 /**
  * \file SolverGodunovHydro.cpp
  *
- * Class SolverGodunovHydro implementation.
+ * \brief Contains the definition of SolverGodunovHydro.
+ *
  */
 #include <godunov_hydro/SolverGodunovHydro.h>
 

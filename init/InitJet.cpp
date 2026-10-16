@@ -4,6 +4,8 @@
 
 /**
  * \file InitJet.cpp
+ *
+ * \brief Contains the definitions of InitJetDataFunctor, InitJet.
  */
 
 #include <godunov_hydro/init/InitJet.h>

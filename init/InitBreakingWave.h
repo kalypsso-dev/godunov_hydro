@@ -4,6 +4,8 @@
 
 /**
  * \file InitBreakingWave.h
+ *
+ * \brief Contains the functors used to initialize the data and AMR status of breaking wave cases.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_INIT_BREAKINGWAVE_H_
 #define KALYPSSO_GODUNOV_HYDRO_INIT_BREAKINGWAVE_H_
@@ -23,7 +25,8 @@ namespace godunov_hydro
 // ====================================================================
 // ====================================================================
 /**
- * Implement user data initialization for breaking wave test case.
+ * \class InitBreakingWaveDataFunctor
+ * \brief Implement user data initialization for breaking wave test case.
  *
  * see reference:
  * A. W. Cook and W. H. Cabot. A high-wavenumber viscosity for high-resolution numerical
@@ -122,7 +125,8 @@ extern template class InitBreakingWaveDataFunctor<3, kalypsso::DefaultDevice>;
 // ====================================================================
 // ====================================================================
 /**
- * Implement initial refinement for breaking wave testcase.
+ * \class InitBreakingWaveRefineFunctor
+ * \brief Implement initial refinement for breaking wave testcase.
  *
  * \sa InitBreakingWaveDataFunctor
  *
@@ -187,7 +191,8 @@ public:
 // ====================================================================
 // ====================================================================
 /**
- * Cook-Cabot breaking wave test case.
+ * \class InitBreakingWave
+ * \brief Cook-Cabot breaking wave test case.
  *
  */
 template <size_t dim, typename device_t>

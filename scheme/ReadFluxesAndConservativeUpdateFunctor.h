@@ -4,6 +4,9 @@
 
 /**
  * \file ReadFluxesAndConservativeUpdateFunctor.h
+ *
+ * \brief Contains the functor used to read fluxes (on conservative variables) and perform a
+ * CONSERVATIVE update of conservative variables.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_READ_FLUXES_AND_CONSERVATIVE_UPDATE_FUNCTOR_H_
 #define KALYPSSO_GODUNOV_HYDRO_READ_FLUXES_AND_CONSERVATIVE_UPDATE_FUNCTOR_H_
@@ -30,7 +33,8 @@ namespace godunov_hydro
 /*************************************************/
 /*************************************************/
 /**
- * Read fluxes (on conservative variables) and perform a CONSERVATIVE update of conservative
+ * \class ReadFluxesAndConservativeUpdateFunctor
+ * \brief Read fluxes (on conservative variables) and perform a CONSERVATIVE update of conservative
  * variables (i.e. perform time integration using Godunov (e.g. MUSCL-Hancock) scheme).
  *
  * Input data is Ugroup (containing ghosted block data)
@@ -112,7 +116,7 @@ private:
 
 public:
   /**
-   * Perform time integration (MUSCL Godunov).
+   * \brief Perform time integration (MUSCL Godunov).
    *
    * \param[in]  time step (as computed by CFL condition)
    *
@@ -150,7 +154,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * return true when octant is a "owned" octant (not a ghost or outside)
+   * \brief return true when octant is a "owned" octant (not a ghost or outside)
    */
   KOKKOS_INLINE_FUNCTION bool
   is_owned_quadrant(iOct_t const & iOct_global) const
@@ -161,7 +165,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get conservative variables state vector.
+   * \brief Get conservative variables state vector.
    *
    * \param[in] i,j identifies location in flux array
    * \param[in] iOct identifies a quadrant (owned + ghosts)
@@ -186,7 +190,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get conservative variables state vector.
+   * \brief Get conservative variables state vector.
    *
    * \param[in] i,j,k identifies in flux array
    * \param[in] iOct identifies a quadrant (owned + ghosts)
@@ -212,7 +216,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get flux from fine neighbor.
+   * \brief Get flux from fine neighbor.
    *
    * \param[in] iOct_cur current octant id
    * \param[in] coords current cell cartesian coordinate (inside current block)
@@ -254,7 +258,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Update state vector (hydro variables only).
+   * \brief Update state vector (hydro variables only).
    *
    * \param[in] i identifies location in the ghosted block
    * \param[in] j identifies location in the ghosted block
@@ -276,7 +280,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Update state vector (hydro variables only).
+   * \brief Update state vector (hydro variables only).
    *
    * \param[in] i identifies location in the ghosted block
    * \param[in] j identifies location in the ghosted block

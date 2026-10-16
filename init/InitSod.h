@@ -5,6 +5,8 @@
 /**
  * \file InitSod.h
  *
+ * \brief Contains the functors used to initialize the data and AMR status of Sod cases.
+ *
  * - https://github.com/ibackus/sod-shocktube
  * - https://github.com/pmocz/riemann-solver
  * - https://en.wikipedia.org/wiki/Sod_shock_tube
@@ -25,7 +27,8 @@ namespace godunov_hydro
 // ====================================================================
 // ====================================================================
 /**
- * Implement user data initialization to solve sod shock tube problem.
+ * \class InitSodDataFunctor
+ * \brief Implement user data initialization to solve sod shock tube problem.
  *
  * \sa references
  * - https://en.wikipedia.org/wiki/Sod_shock_tube
@@ -108,7 +111,8 @@ extern template class InitSodDataFunctor<3, kalypsso::DefaultDevice>;
 // ====================================================================
 // ====================================================================
 /**
- * Implement initial refinement to solve Sod problem.
+ * \class InitSodRefineFunctor
+ * \brief Implement initial refinement to solve Sod problem.
  *
  * Use distance to interface as refine criterion.
  *
@@ -209,7 +213,8 @@ extern template class InitSodRefineFunctor<3, kalypsso::DefaultDevice>;
 // =======================================================
 // =======================================================
 /**
- * Hydrodynamical sod shock tube init.
+ * \class InitSod
+ * \brief Hydrodynamical sod shock tube init.
  */
 template <size_t dim, typename device_t>
 class InitSod

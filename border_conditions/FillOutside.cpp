@@ -5,6 +5,8 @@
 /**
  * \file FillOutside.cpp
  *
+ * \brief Contains the definition of FillOutsideCellFunctor.
+ *
  * Implement border conditions (other than periodic) for Hydrodynamics.
  */
 

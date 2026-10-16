@@ -4,6 +4,9 @@
 
 /**
  * \file InitWoodward.cpp
+ *
+ * \brief Contains the definitions of InitWoodwardDataFunctor, InitWoodwardRefineFunctor,
+ * InitWoodward.
  */
 
 #include <godunov_hydro/init/InitWoodward.h>

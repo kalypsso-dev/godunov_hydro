@@ -4,6 +4,10 @@
 
 /**
  * \file ComputeFluxesAndStoreFunctor.h
+ *
+ * \brief Contains the functor used to compute fluxes (on conservative variables) and store; actual
+ * update of conservative variables (i.e. perform time integration using Godunov (e.g.
+ * MUSCL-Hancock) scheme) will be done in a separate functor.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_FLUXES_AND_STORE_FUNCTOR_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_FLUXES_AND_STORE_FUNCTOR_H_
@@ -36,10 +40,11 @@ namespace godunov_hydro
 /*************************************************/
 /*************************************************/
 /**
- * Compute fluxes (on conservative variables) and store. Actual update of conservative
- * variables (i.e. perform time integration using Godunov (e.g. MUSCL-Hancock) scheme) will be
- * done in a separate functor. This functor is designed to be used when performing a non-piecewise
- * godunov update (all block at once).
+ * \brief Compute fluxes (on conservative variables) and store.
+ *
+ * Actual update of conservative variables (i.e. perform time integration using Godunov
+ * (e.g. MUSCL-Hancock) scheme) will be done in a separate functor. This functor is designed to be
+ * used when performing a non-piecewise godunov update (all block at once).
  *
  * Input data is Ugroup (containing ghosted block data)
  *
@@ -137,7 +142,7 @@ private:
 
 public:
   /**
-   * Compute Godunov fluxes along a given direction.
+   * \brief Compute Godunov fluxes along a given direction.
    *
    * \param[in]  time step (as computed by CFL condition)
    *
@@ -185,7 +190,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get primitive variables state vector.
+   * \brief Get primitive variables state vector.
    *
    * \param[in] index identifies location in the ghosted block
    * \param[in] iOct_local identifies octant (from 0 to owned+ghost-1)
@@ -209,7 +214,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get primitive variables state vector.
+   * \brief Get primitive variables state vector.
    *
    * \param[in] index identifies location in the ghosted block
    * \param[in] iOct_local identifies octant (from 0 to owned+ghost-1)
@@ -234,7 +239,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Set flux (hydro variables only).
+   * \brief Set flux (hydro variables only).
    *
    * \param[in] i identifies location in the flux in block
    * \param[in] j identifies location in the flux in block
@@ -257,7 +262,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Set flux (hydro variables only).
+   * \brief Set flux (hydro variables only).
    *
    * \param[in] i identifies location in the flux in block
    * \param[in] j identifies location in the flux in block
@@ -283,7 +288,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Reconstruct an hydro state at a cell border location specified by offsets.
+   * \brief Reconstruct an hydro state at a cell border location specified by offsets.
    *
    * This is equivalent to trace operation in Ramses.
    * We just extrapolate primitive variables (at cell center) to border
@@ -318,7 +323,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Reconstruct an hydro state at a cell border location specified by offsets (3d version).
+   * \brief Reconstruct an hydro state at a cell border location specified by offsets (3d version).
    *
    * This is equivalent to trace operation in Ramses.
    * We just extrapolate primitive variables (at cell center) to border
@@ -361,7 +366,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Add viscous force predictor to reconstructed primitive variables state.
+   * \brief Add viscous force predictor to reconstructed primitive variables state.
    */
   template <size_t dim_ = dim, std::enable_if_t<(dim_ == 2), bool> = true>
   KOKKOS_INLINE_FUNCTION void
@@ -377,7 +382,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Add viscous force predictor to reconstructed primitive variables state.
+   * \brief Add viscous force predictor to reconstructed primitive variables state.
    */
   template <size_t dim_ = dim, std::enable_if_t<(dim_ == 3), bool> = true>
   KOKKOS_INLINE_FUNCTION void

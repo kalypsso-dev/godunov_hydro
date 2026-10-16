@@ -4,6 +4,9 @@
 
 /**
  * \file InitShockBubble.cpp
+ *
+ * \brief Contains the definitions of InitShockBubbleDataFunctor,
+ * InitShockBubbleRefineFunctor, InitShockBubble.
  */
 
 #include <godunov_hydro/init/InitShockBubble.h>

@@ -5,6 +5,8 @@
 /**
  * \file BCShockBubble.cpp
  *
+ * \brief Contains the definition of FillOutsideShockBubble.
+ *
  * Implement inlet border conditions according to
  * https://amroc.sourceforge.net/examples/euler/2d/html/shbubble_n.htm
  */

@@ -5,6 +5,8 @@
 /**
  * \file InitImplode.h
  *
+ * \brief Contains the functors used to initialize the data and AMR status of implosion cases.
+ *
  * Implosion test references:
  * - https://www.astro.princeton.edu/~jstone/Athena/tests/implode/Implode.html
  * - https://www.sciencedirect.com/science/article/pii/S0021999199962952
@@ -29,7 +31,8 @@ namespace godunov_hydro
 // ====================================================================
 // ====================================================================
 /**
- * Implement user data initialization to solve implosion test.
+ * \class InitImplodeDataFunctor
+ * \brief Implement user data initialization to solve implosion test.
  */
 template <size_t dim, typename device_t>
 class InitImplodeDataFunctor
@@ -109,7 +112,8 @@ extern template class InitImplodeDataFunctor<3, kalypsso::DefaultDevice>;
 // ====================================================================
 // ====================================================================
 /**
- * Implement initial refinement to solve Implode problem.
+ * \class InitImplodeRefineFunctor
+ * \brief Implement initial refinement to solve Implode problem.
  *
  * Use distance to interface as refine criterion.
  *
@@ -215,7 +219,7 @@ extern template class InitImplodeRefineFunctor<3, kalypsso::DefaultDevice>;
 /**
  * \class InitImplode
  *
- * Hydrodynamical implode shock tube init.
+ * \brief Hydrodynamical implode shock tube init.
  *
  * \sa references
  * - https://www.astro.princeton.edu/~jstone/Athena/tests/implode/Implode.html

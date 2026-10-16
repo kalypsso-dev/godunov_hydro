@@ -5,6 +5,8 @@
 /**
  * \file FillOutside.h
  *
+ * \brief Contains the functor used to fill in the outside blocks.
+ *
  * Implement border conditions (other than periodic) for Hydrodynamics.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_FILLOUTSIDE_H_
@@ -34,7 +36,8 @@ namespace godunov_hydro
 {
 
 /**
- * Define a (better) enum to list supported boundary conditions.
+ * \enum BC_HYDRO
+ * \brief Define a (better) enum to list supported boundary conditions.
  *
  * - NONE: don't fill this border
  * - PERIODIC : don't fill this border (it will be filled by MPI ghost exchange operations).
@@ -63,7 +66,7 @@ BETTER_ENUM(BC_HYDRO, uint32_t,
 /**
  * \class FillOutsideCellFunctor
  *
- * A simple prototyping boundary condition class.
+ * \brief A simple prototyping boundary condition class.
  *
  * \note periodic boundary condition is a special case that is not managed here.
  * \note in a given direction, either all opposite sides are periodic, or none.
@@ -106,7 +109,7 @@ public:
 
   // ==============================================================
   // ==============================================================
-  /** Fill outside octant cells.
+  /** \brief Fill outside octant cells.
    *
    * \param[in,out] userdata_out data array which we want to fill the block ghosts cells
    * \param[in] amr_info gives the number of owned, ghost, outside, ghost_outside quads
@@ -126,7 +129,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * range policy functor to sweep outside leaves.
+   * \brief range policy functor to sweep outside leaves.
    *
    * Just explaining inside/outside mirroring.
    *                       _
@@ -159,7 +162,7 @@ public:
 
 private:
   /**
-   * Fill outside octant cells.
+   * \brief Fill outside octant cells.
    *
    * \param[in,out] userdata_out data array which we want to fill the block ghosts cells
    * \param[in] amr_info gives the number of owned, ghost, outside, ghost_outside quads

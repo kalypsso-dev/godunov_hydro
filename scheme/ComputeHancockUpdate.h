@@ -5,6 +5,8 @@
 /**
  * \file ComputeHancockUpdate.h
  *
+ * \brief Contains the function used to compute hydrodynamics fluxes for the MUSCL-Hancock scheme.
+ *
  * Muscl-Hancock is a second order in time and space Godunov method.
  * Here we isolate the Hancock half time step in order to decouple space reconstruction from time
  * integration. This we allow to have either MUSCL-Hancock or THINC-Hancock half time step.
@@ -36,7 +38,6 @@
  *  \f${\bf U}_{i}^{n+1}={\bf U}_{i}^{n}-\frac{\Delta}{\Delta x}\left[ {\bf
  F}_{x,i+1/2}^{n+1/2}-{\bf F}_{x,i-1/2}^{n+1/2}\right]\f$
  *
- *
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTEHANCOCKUPDATE_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTEHANCOCKUPDATE_H_
@@ -50,7 +51,7 @@ namespace godunov_hydro
 {
 
 /**
- * Compute hydrodynamics fluxes.
+ * \brief Compute hydrodynamics fluxes.
  *
  * \param[in] q primitive variables: rho, u, v, w, P
  * \param[in] eos Equation of state wrapper

@@ -5,10 +5,10 @@
 /**
  * \file SolverGodunovHydro.h
  *
- * Class SolverGodunovHydro definition.
+ * \brief Contains the definition of the main class SolverGodunovHydro.
  *
  * Main class for solving 2d/3d hydrodynamics (Euler) with
- * a Godunov scheme, e.g MUSCL-Hancock.
+ * a Godunov scheme, e.g. MUSCL-Hancock.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_SOLVER_GODUNOV_HYDRO_H_
 #define KALYPSSO_GODUNOV_HYDRO_SOLVER_GODUNOV_HYDRO_H_
@@ -59,7 +59,8 @@ namespace godunov_hydro
 {
 
 /**
- * Main hydrodynamics data structure for 2D/3D MUSCL-Hancock or MUSCL-RK2 scheme
+ * \class SolverGodunovHydro
+ * \brief Main hydrodynamics data structure for 2D/3D MUSCL-Hancock or MUSCL-RK2 scheme
  * for block AMR.
  *
  * The trade-off explored here is to design the main data array
@@ -110,7 +111,7 @@ public:
   virtual ~SolverGodunovHydro();
 
   /**
-   * Static creation method called by the solver factory.
+   * \brief Static creation method called by the solver factory.
    */
   static SolverBase *
   create(ParallelEnv const & par_env, HydroParams const & params, ConfigMap const & config_map)
@@ -410,8 +411,8 @@ private:
   DataArrayBlock_t m_U_RK;
 
   /**
-   * border condition (other than periodic), specified in the following order: XMIN, XMAX, YMIN,
-   * YMAX, ....
+   * \brief border condition (other than periodic), specified in the following order: XMIN,
+   * XMAX, YMAX, ....
    */
   BorderConditionsConfig<BC_HYDRO>::bc_array_t<dim> m_bc_types;
 

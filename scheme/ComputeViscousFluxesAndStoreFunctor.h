@@ -4,6 +4,9 @@
 
 /**
  * \file ComputeViscousFluxesAndStoreFunctor.h
+ *
+ * \brief Contains the functor used to compute hydrodynamics fluxes (on conservative variables) due
+ * to viscous forces and store them.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_COMPUTE_VISCOUS_FLUXES_AND_STORE_FUNCTOR_H_
 #define KALYPSSO_GODUNOV_HYDRO_COMPUTE_VISCOUS_FLUXES_AND_STORE_FUNCTOR_H_
@@ -32,7 +35,8 @@ namespace godunov_hydro
 /*************************************************/
 /*************************************************/
 /**
- * Compute hydrodynamics fluxes (on conservative variables) due to viscous forces and store.
+ * \class ComputeViscousFluxesAndStoreFunctor
+ * \brief Compute hydrodynamics fluxes (on conservative variables) due to viscous forces and store.
  *
  * As for Godunov hydrodynamics fluxes, the actual update of conservative
  * variables will be done in a separate functor (taking into account non-conformal mesh interface).
@@ -108,7 +112,7 @@ private:
 
 public:
   /**
-   * Compute viscous fluxes along a given direction.
+   * \brief Compute viscous fluxes along a given direction.
    *
    * \param[in]  time step (as computed by CFL condition)
    *
@@ -143,7 +147,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get velocities.
+   * \brief Get velocities.
    *
    * \param[in] i identifies location in the ghosted block
    * \param[in] j identifies location in the ghosted block
@@ -166,7 +170,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Get velocities.
+   * \brief Get velocities.
    *
    * \param[in] i identifies location in the ghosted block
    * \param[in] j identifies location in the ghosted block
@@ -191,7 +195,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Set viscous flux.
+   * \brief Set viscous flux.
    *
    * \param[in] i identifies location in the flux in block
    * \param[in] j identifies location in the flux in block
@@ -214,7 +218,7 @@ public:
   // ====================================================================
   // ====================================================================
   /**
-   * Set viscous flux.
+   * \brief Set viscous flux.
    *
    * \param[in] i identifies location in the flux in block
    * \param[in] j identifies location in the flux in block

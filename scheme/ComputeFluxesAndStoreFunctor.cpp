@@ -4,6 +4,8 @@
 
 /**
  * \file ComputeFluxesAndStoreFunctor.cpp
+ *
+ * \brief Contains the definition of ComputeFluxesAndStoreFunctor.
  */
 #include <godunov_hydro/scheme/ComputeFluxesAndStoreFunctor.h>
 #include <kalypsso/core/config_utils.h>

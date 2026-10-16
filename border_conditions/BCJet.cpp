@@ -5,6 +5,8 @@
 /**
  * \file BCJet.cpp
  *
+ * \brief Contains the definition of FillOutsideJet.
+ *
  * Implement inlet jet border conditions.
  */
 

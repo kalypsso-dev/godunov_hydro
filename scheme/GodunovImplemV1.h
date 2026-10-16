@@ -5,7 +5,8 @@
 /**
  * \file GodunovImplemV1.h
  *
- * Godunov time integration implementation detail version v1.
+ * \brief Contains the Godunov time integration implementation detail version v1.
+ *
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_GODUNOV_IMPLEM_V1_H_
 #define KALYPSSO_GODUNOV_HYDRO_GODUNOV_IMPLEM_V1_H_
@@ -22,7 +23,7 @@ namespace godunov_hydro
 /**
  * \class GodunovImplemV1
  *
- * version 1 features:
+ * \brief version 1 features:
  *
  * - same as version 0 (store flux) but computation of fluxes is done using spatial subcycling;
  *   subcycling is done along the Morton curve.
@@ -109,7 +110,7 @@ public:
   ~GodunovImplemV1() = default;
 
   /**
-   * Static creation method called by the solver factory.
+   * \brief Static creation method called by the solver factory.
    */
   static GodunovImplemBase_t *
   create(ParallelEnv const &      par_env,

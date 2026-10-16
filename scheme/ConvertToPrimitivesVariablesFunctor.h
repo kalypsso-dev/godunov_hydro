@@ -4,6 +4,9 @@
 
 /**
  * \file ConvertToPrimitivesVariablesFunctor.h
+ *
+ * \brief Contains the functor used to convert conservative variables to primitive ones in a ghosted
+ * block data array.
  */
 #ifndef KALYPSSO_GODUNOV_HYDRO_CONVERTTOPRIMITIVESVARIABLES_H_
 #define KALYPSSO_GODUNOV_HYDRO_CONVERTTOPRIMITIVESVARIABLES_H_
@@ -27,8 +30,8 @@ namespace godunov_hydro
 /**
  * \class ConvertToPrimitivesVariablesFunctor
  *
- * This class is a direct adaptation of FillBlockGhostsFunctor modified to the special need of
- * converting conservative variables to primitives ones in a ghosted block data array.
+ * \brief This class is a direct adaptation of FillBlockGhostsFunctor modified to the special
+ * need of converting conservative variables to primitives ones in a ghosted block data array.
  *
  */
 template <size_t dim, typename device_t>
@@ -92,7 +95,7 @@ public:
 
   /**
    *
-   * Compute primitives variables in a group of owned quadrants.
+   * \brief Compute primitives variables in a group of owned quadrants.
    *
    * \param[in] stencil helper
    * \param[in] amr_mesh_info number of octants (owned, ghost, outside, ...)
@@ -184,7 +187,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * fill interior of ghosted block.
+   * \brief fill interior of ghosted block.
    *
    * \param[in] cellindex_in cell index where to read data from
    * \param[in] cellindex_out cell index (ghost) where to write data to
@@ -202,8 +205,9 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * Fill a ghost cell data by copying data from a neighbor either at same level, or finer level
-   * (doing actually a restriction) a neighbor octant in case neighbor is at the same AMR level.
+   * \brief Fill a ghost cell data by copying data from a neighbor either at same level, or finer
+   * level (doing actually a restriction) a neighbor octant in case neighbor is at the same AMR
+   * level.
    *
    * \param[in] cell_loc_out is the cell location where to write data
    * \param[in] cell_loc_in is the cell location where to read data
@@ -219,7 +223,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * Do linear extrapolation using limited slopes.
+   * \brief Do linear extrapolation using limited slopes.
    */
   template <size_t dim_ = dim, std::enable_if_t<(dim_ == 2), bool> = true>
   KOKKOS_INLINE_FUNCTION void
@@ -232,7 +236,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * Do linear extrapolation using limited slopes.
+   * \brief Do linear extrapolation using limited slopes.
    */
   template <size_t dim_ = dim, std::enable_if_t<(dim_ == 3), bool> = true>
   KOKKOS_INLINE_FUNCTION void
@@ -245,7 +249,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * Do second order conservative interpolation from coarse to fine cells.
+   * \brief Do second order conservative interpolation from coarse to fine cells.
    */
   template <size_t dim_ = dim, std::enable_if_t<(dim_ == 2), bool> = true>
   KOKKOS_INLINE_FUNCTION void
@@ -258,7 +262,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * Do second order conservative interpolation from coarse to fine cells.
+   * \brief Do second order conservative interpolation from coarse to fine cells.
    */
   template <size_t dim_ = dim, std::enable_if_t<(dim_ == 3), bool> = true>
   KOKKOS_INLINE_FUNCTION void
@@ -271,7 +275,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * Do fourth order conservative interpolation from coarse to fine cells.
+   * \brief Do fourth order conservative interpolation from coarse to fine cells.
    */
   template <size_t dim_ = dim, std::enable_if_t<(dim_ == 2), bool> = true>
   KOKKOS_INLINE_FUNCTION void
@@ -284,7 +288,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * Do fourth order conservative interpolation from coarse to fine cells.
+   * \brief Do fourth order conservative interpolation from coarse to fine cells.
    */
   template <size_t dim_ = dim, std::enable_if_t<(dim_ == 3), bool> = true>
   KOKKOS_INLINE_FUNCTION void
@@ -297,7 +301,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * Fill (copy) ghost cell data of current octant (iOct_global) from
+   * \brief Fill (copy) ghost cell data of current octant (iOct_global) from
    * a neighbor octant in case neighbor is at coarser level.
    *
    * \param[in] key is current octant orchard key
@@ -335,7 +339,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * Fill (copy) ghost cell data of current octant (iOct_global) from
+   * \brief Fill (copy) ghost cell data of current octant (iOct_global) from
    * a neighbor octant in case neighbor is at finer level.
    *
    * \param[in] key_neigh_same_level is orchard key of neighbor in direction dir at same AMR level
@@ -367,7 +371,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * Fill (copy) ghost cell data all around current octant (iOct_global).
+   * \brief Fill (copy) ghost cell data all around current octant (iOct_global).
    *
    * This is (almost) the main entry point of the functor, i.e. directly called inside operator().
    *
@@ -386,7 +390,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * range policy functor when computing in all group quadrants.
+   * \brief range policy functor when computing in all group quadrants.
    */
   KOKKOS_INLINE_FUNCTION void
   operator()(TagComputeAllQuad const &, const index_t & global_index) const;
@@ -394,7 +398,7 @@ public:
   // ==============================================================
   // ==============================================================
   /**
-   * range policy functor when computing only mirror quadrant
+   * \brief range policy functor when computing only mirror quadrant
    */
   KOKKOS_INLINE_FUNCTION void
   operator()(TagComputeMirrorQuad const &, const index_t & global_index) const;

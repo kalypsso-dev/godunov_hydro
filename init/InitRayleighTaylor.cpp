@@ -4,6 +4,9 @@
 
 /**
  * \file InitRayleighTaylor.cpp
+ *
+ * \brief Contains the definitions of InitRayleighTaylorDataFunctor,
+ * InitRayleighTaylorRefineFunctor, InitRayleighTaylor.
  */
 
 #include <godunov_hydro/init/InitRayleighTaylor.h>
