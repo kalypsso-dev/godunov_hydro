@@ -36,7 +36,6 @@ namespace godunov_hydro
 BETTER_ENUM(ProfilingZone, uint32_t,
   AMR_CYCLE,
     AMR_CYCLE_RESIZE_AUX,
-    AMR_CYCLE_COPY_HASHMAP,
     AMR_CYCLE_SYNC_MPI_GHOSTS,
     AMR_CYCLE_COMPUTE_REFINE_FLAGS,
     AMR_CYCLE_ADAPT_MESH,
@@ -72,7 +71,6 @@ private:
       // clang-format off
       ADD_CASE(AMR_CYCLE,                         "AMR_CYCLE                              ", FullBlue);
       ADD_CASE(AMR_CYCLE_RESIZE_AUX,              "AMR_CYCLE::RESIZE_AUX                  ", RoyalBlue);
-      ADD_CASE(AMR_CYCLE_COPY_HASHMAP,            "AMR_CYCLE::COPY_HASHMAP                ", DodgerBlue);
       ADD_CASE(AMR_CYCLE_SYNC_MPI_GHOSTS,         "AMR_CYCLE::SYNC_MPI_GHOSTS             ", SteelBlue);
       ADD_CASE(AMR_CYCLE_COMPUTE_REFINE_FLAGS,    "AMR_CYCLE::COMPUTE_REFINE_FLAGS        ", SteelBlue);
       ADD_CASE(AMR_CYCLE_ADAPT_MESH,              "AMR_CYCLE::ADAPT_MESH                  ", Lavender);
