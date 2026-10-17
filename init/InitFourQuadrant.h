@@ -7,8 +7,8 @@
  *
  * \brief Contains the functors used to initialize the data and AMR status of four quadrant cases.
  */
-#ifndef KALYPSSO_GODUNOV_HYDRO_INIT_FOUR_QUANDRANT_H_
-#define KALYPSSO_GODUNOV_HYDRO_INIT_FOUR_QUANDRANT_H_
+#ifndef KALYPSSO_GODUNOV_HYDRO_INIT_FOURQUADRANT_H_
+#define KALYPSSO_GODUNOV_HYDRO_INIT_FOURQUADRANT_H_
 
 #include <godunov_hydro/common.h>
 
@@ -73,10 +73,10 @@ private:
   //! Four-quadrant problem parameters
   core::FourQuadrantParams m_params;
 
-  // get geometrical scaling factor
+  //! get geometrical scaling factor
   const real_t m_scaling_factor;
 
-  // get domain lower left corner
+  //! get domain lower left corner
   const Kokkos::Array<real_t, dim> m_xyz_min;
 
   InitFourQuadrantDataFunctor(DataArrayBlock_t const &             Udata,
@@ -260,4 +260,4 @@ extern template class InitFourQuadrant<3, kalypsso::DefaultDevice>;
 
 } // namespace kalypsso
 
-#endif // KALYPSSO_GODUNOV_HYDRO_INIT_FOUR_QUANDRANT_H_
+#endif // KALYPSSO_GODUNOV_HYDRO_INIT_FOURQUADRANT_H_
