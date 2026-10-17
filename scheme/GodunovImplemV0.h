@@ -119,6 +119,7 @@ public:
   uint64_t
   total_mem_size_in_bytes() override;
 
+  //! Perform actual time integration.
   void
   do_time_step(DataArrayBlock_t const & U, DataArrayBlock_t const & U2, real_t dt) override;
 
@@ -159,15 +160,14 @@ private:
   //! Fills m_Q_ghosted_mg
   //!
   //! \param[in] U conservative variables array (owned + MPI ghost + outside quadrants)
-  //!
   void
-  convert_to_primitives_in_mirror_quads(DataArrayBlock_t U);
+  convert_to_primitives_in_mirror_quads(DataArrayBlock_t const & U);
 
   //! Convert conservative variables to primitive variables in owned octants + copy ghost octants
   //!
   //! \param[in] U conservative variables (owned + MPI ghost + outside quadrants)
   void
-  convert_to_primitives(DataArrayBlock_t U);
+  convert_to_primitives(DataArrayBlock_t const & U);
 
   //! compute limited slopes in owned and ghosts quadrants
   void
@@ -183,7 +183,7 @@ private:
 
   //! Update conservative variable in owned quadrants.
   void
-  read_fluxes_and_update_in_owned(DataArrayBlock_t u_out, real_t dt, int direction);
+  read_fluxes_and_update_in_owned(DataArrayBlock_t const & u_out, real_t dt, int direction);
 
 }; // class GodunovImplemV0
 

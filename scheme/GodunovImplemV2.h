@@ -179,9 +179,8 @@ private:
   //! convert conservative variables to primitive variables in mirror quadrants.
   //!
   //! \param[in] U conservative variables array (owned + MPI ghost + outside quadrants)
-  //! \param[in] half_dt
   void
-  convert_to_primitives_in_mirror_quads(DataArrayBlock_t U);
+  convert_to_primitives_in_mirror_quads(DataArrayBlock_t const & U);
 
   //! convert conservative variables to primitive variables in a group of quadrants.
   //!
@@ -190,7 +189,7 @@ private:
   //! \param[in] num_quadrants_in_group is the number of quadrants to process
   //! \param[in] half_dt halt time step
   void
-  convert_to_primitives_in_group_of_quads(DataArrayBlock_t U,
+  convert_to_primitives_in_group_of_quads(DataArrayBlock_t const & U,
                                           int32_t          iOct_begin,
                                           int32_t          num_quadrants_in_group);
 
@@ -211,8 +210,8 @@ private:
   //! this update can be either conservative on non-conservative (at interface between two octants
   //! of different levels)
   void
-  compute_fluxes_and_update_in_group(DataArrayBlock_t u_in,
-                                     DataArrayBlock_t u_out,
+  compute_fluxes_and_update_in_group(DataArrayBlock_t const & u_in,
+                                     DataArrayBlock_t const & u_out,
                                      int32_t          iOct_begin,
                                      int32_t          num_octants_to_process,
                                      real_t           dt);
@@ -223,7 +222,9 @@ private:
   //! from a finer level neighbor that is a ghost, flux must be computed in the ghost quadrant,
   //! before updating the owned quadrant.
   void
-  compute_fluxes_and_update_in_ghosts(DataArrayBlock_t u_in, DataArrayBlock_t u_out, real_t dt);
+  compute_fluxes_and_update_in_ghosts(DataArrayBlock_t const & u_in,
+                                      DataArrayBlock_t const & u_out,
+                                      real_t                   dt);
 
 }; // class GodunovImplemV2
 

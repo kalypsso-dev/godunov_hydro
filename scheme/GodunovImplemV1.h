@@ -165,7 +165,7 @@ private:
   //! \param[in] half_dt
   //!
   void
-  convert_to_primitives_in_mirror_quads(DataArrayBlock_t U);
+  convert_to_primitives_in_mirror_quads(DataArrayBlock_t const & U);
 
   //! convert conservative variables to primitive variables in a group of quadrants/octants.
   //!
@@ -180,7 +180,7 @@ private:
   //! \param[in] iOct_begin
   //! \param[in] num_quadrants_in_group number of quadrant data to fill
   void
-  convert_to_primitives_in_group(DataArrayBlock_t U,
+  convert_to_primitives_in_group(DataArrayBlock_t const & U,
                                  int32_t          iOct_begin,
                                  int32_t          num_quadrants_in_group);
 
@@ -195,7 +195,7 @@ private:
 
   //! Update conservative variable in owned quadrants.
   void
-  read_fluxes_and_update_in_owned(DataArrayBlock_t u_out, real_t dt);
+  read_fluxes_and_update_in_owned(DataArrayBlock_t const & u_out, real_t dt);
 
 }; // class GodunovImplemV1
 
