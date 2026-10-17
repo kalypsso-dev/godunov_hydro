@@ -148,7 +148,7 @@ GodunovImplemV2<dim, device_t>::do_time_step(DataArrayBlock_t const & U,
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV2<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayBlock_t U)
+GodunovImplemV2<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayBlock_t const & U)
 {
 
   KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
@@ -173,8 +173,8 @@ GodunovImplemV2<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayB
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV2<dim, device_t>::convert_to_primitives_in_group_of_quads(DataArrayBlock_t U,
-                                                                        int32_t          iOct_begin,
+GodunovImplemV2<dim, device_t>::convert_to_primitives_in_group_of_quads(DataArrayBlock_t const & U,
+                                                                        int32_t iOct_begin,
                                                                         int32_t num_octant_in_group)
 {
 
@@ -239,9 +239,9 @@ GodunovImplemV2<dim, device_t>::compute_limited_slopes_in_ghosts()
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_group(DataArrayBlock_t u_in,
-                                                                   DataArrayBlock_t u_out,
-                                                                   int32_t          iOct_begin,
+GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_group(DataArrayBlock_t const & u_in,
+                                                                   DataArrayBlock_t const & u_out,
+                                                                   int32_t iOct_begin,
                                                                    int32_t num_octants_to_process,
                                                                    real_t  dt)
 {
@@ -275,9 +275,9 @@ GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_group(DataArrayBloc
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_ghosts(DataArrayBlock_t u_in,
-                                                                    DataArrayBlock_t u_out,
-                                                                    real_t           dt)
+GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_ghosts(DataArrayBlock_t const & u_in,
+                                                                    DataArrayBlock_t const & u_out,
+                                                                    real_t                   dt)
 {
 
   KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_UPDATE);

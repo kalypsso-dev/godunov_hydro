@@ -147,7 +147,7 @@ GodunovImplemV1<dim, device_t>::do_time_step(DataArrayBlock_t const & U,
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV1<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayBlock_t U)
+GodunovImplemV1<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayBlock_t const & U)
 {
 
   KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
@@ -172,9 +172,9 @@ GodunovImplemV1<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayB
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV1<dim, device_t>::convert_to_primitives_in_group(DataArrayBlock_t U,
-                                                               int32_t          iOct_begin,
-                                                               int32_t          num_quads_in_group)
+GodunovImplemV1<dim, device_t>::convert_to_primitives_in_group(DataArrayBlock_t const & U,
+                                                               int32_t                  iOct_begin,
+                                                               int32_t num_quads_in_group)
 {
 
   KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
@@ -345,7 +345,8 @@ GodunovImplemV1<dim, device_t>::compute_fluxes_and_store_in_group(real_t  dt,
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV1<dim, device_t>::read_fluxes_and_update_in_owned(DataArrayBlock_t u_out, real_t dt)
+GodunovImplemV1<dim, device_t>::read_fluxes_and_update_in_owned(DataArrayBlock_t const & u_out,
+                                                                real_t                   dt)
 {
 
   KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_UPDATE);
