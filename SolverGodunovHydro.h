@@ -389,8 +389,8 @@ private:
   //! \param[in] amr_hashmap_before_adapt is the amr hashmap before mesh adaptation
   //! \param[in] orchard_keys_before_adapt is the keys before mesh adaptation
   void
-  map_userdata_after_adapt(amr_hashmap_t const &               amr_hashmap_before_adapt,
-                           core::OrchardKeys<device_t> const & orchard_keys_before_adapt);
+  map_userdata_after_adapt(amr_hashmap_t const &               old_hashmap,
+                           core::OrchardKeys<device_t> const & old_keys);
 
 }; // class SolverGodunovHydro
 
