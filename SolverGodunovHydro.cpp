@@ -275,7 +275,7 @@ SolverGodunovHydro<dim, device_t>::do_amr_cycle()
   // 3. adapt mesh (refine/coarsen/balance) + re-compute connectivity
 
   // 3.1 store hashmap and orchard keys before mesh adaptation
-  auto old_hashmap = m_amr_mgr.get_mesh_map()->hashmap_clone();
+  auto old_hashmap = m_amr_mgr.get_hashmap_clone();
 
   // old orchard keys are needed in case, one wants to compute stencil computation over the old map
   // this happens when doing prolongation with linear extrapolation using limited slopes
