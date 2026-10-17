@@ -73,10 +73,10 @@ init(SolverGodunovHydro<dim, device_t> & solver)
     {
       InitFourQuadrant<dim, device_t>::apply(solver);
     }
-    // // else if ( !problem_name.compare("gresho_vortex") )
-    // // {
-    // //   init_gresho_vortex(&solver);
-    // // }
+    // else if ( !problem_name.compare("gresho_vortex") )
+    // {
+    //   init_gresho_vortex(&solver);
+    // }
     else if (!problem_name.compare("implode"))
     {
       InitImplode<dim, device_t>::apply(solver);
@@ -101,22 +101,22 @@ init(SolverGodunovHydro<dim, device_t> & solver)
     {
       InitShockBubble<dim, device_t>::apply(solver);
     }
-    // else if (!problem_name.compare("shu_osher"))
-    // {
-    //   InitShuOsher<dim, device_t>::apply(solver);
-    // }
-    // else if (!problem_name.compare("sod"))
-    // {
-    //   InitSod<dim, device_t>::apply(solver);
-    // }
-    // else if (!problem_name.compare("triple_point"))
-    // {
-    //   InitTriplePoint<dim, device_t>::apply(solver);
-    // }
-    // else if (!problem_name.compare("woodward"))
-    // {
-    //   InitWoodward<dim, device_t>::apply(solver);
-    // }
+    else if (!problem_name.compare("shu_osher"))
+    {
+      InitShuOsher<dim, device_t>::apply(solver);
+    }
+    else if (!problem_name.compare("sod"))
+    {
+      InitSod<dim, device_t>::apply(solver);
+    }
+    else if (!problem_name.compare("triple_point"))
+    {
+      InitTriplePoint<dim, device_t>::apply(solver);
+    }
+    else if (!problem_name.compare("woodward"))
+    {
+      InitWoodward<dim, device_t>::apply(solver);
+    }
     else
     {
       KALYPSSO_WARN("Problem : {} is not recognized / implemented.", problem_name);
