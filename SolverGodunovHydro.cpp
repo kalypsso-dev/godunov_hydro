@@ -85,6 +85,8 @@ SolverGodunovHydro<dim, device_t>::SolverGodunovHydro(ParallelEnv const & par_en
   , m_bc_types(BorderConditionsConfig<BC_HYDRO>::read_border_condition<dim>(config_map, par_env))
 #ifdef KALYPSSO_CORE_USE_HDF5
   , m_hdf5_writer(std::make_shared<HDF5_Xdmf_Writer_t>(m_par_env, m_config_map, m_mesh_map))
+  , m_inv_dt("inv_dt")
+  , m_inv_dt_global("inv_dt_global")
 #endif // KALYPSSO_CORE_USE_HDF5
 {
   // TODO: evaluate if we should abort earlier, i.e. before this constructor
@@ -402,6 +404,83 @@ SolverGodunovHydro<dim, device_t>::compute_dt_local()
   return dt;
 
 } // SolverGodunovHydro<dim, device_t>::compute_dt_local
+
+// =======================================================
+// =======================================================
+template <size_t dim, typename device_t>
+void
+SolverGodunovHydro<dim, device_t>::compute_invdt_local()
+{
+  KALYPSSO_PROFILING_REGION_DEVICE(m_profiling_mgr, NUM_CFL_LOCAL);
+
+  Kokkos::deep_copy(m_inv_dt, ZERO_F);
+
+  // call device functor - compute invDt
+  ComputeDtHydroFunctor<dim, device_t>::apply(m_config_map,
+                                              m_mesh_map->orchard_keys(),
+                                              m_mesh_map->get_amr_mesh_info().local_num_quadrants(),
+                                              m_hydro_settings,
+                                              m_block_sizes,
+                                              m_U,
+                                              m_godunov_implem->m_eos,
+                                              m_inv_dt);
+
+} // SolverGodunovHydro<dim, device_t>::compute_dt_local
+
+// =======================================================
+// =======================================================
+template <size_t dim, typename device_t>
+void
+SolverGodunovHydro<dim, device_t>::compute_dt()
+{
+
+
+  if (!this->m_compute_cfl_mpi_reduction_on_device)
+  {
+#ifdef KALYPSSO_CORE_USE_MPI
+    // get local time step
+    real_t dt_local = compute_dt_local();
+
+    // perform MPI_Allreduce to get global time step
+    real_t dt_global;
+    m_par_env.comm().MPI_Allreduce<MpiComm::MIN>(&dt_local, &dt_global, 1);
+
+    m_dt = dt_global;
+#else
+    m_dt = compute_dt_local();
+#endif // KALYPSSO_CORE_USE_MPI
+  }
+  else
+  {
+    // compute on device
+    compute_invdt_local();
+
+#ifdef KALYPSSO_CORE_USE_MPI
+    // do a device aware MPI comm
+    m_par_env.comm().MPI_Allreduce<MpiComm::MAX>(m_inv_dt.data(), m_inv_dt_global.data(), 1);
+#endif
+
+    real_t host_invdt = ZERO_F;
+    auto   host_view_invdt =
+      Kokkos::View<real_t, kalypsso::HostDevice, Kokkos::MemoryTraits<Kokkos::Unmanaged>>(
+        &host_invdt);
+
+#ifdef KALYPSSO_CORE_USE_MPI
+    Kokkos::deep_copy(host_view_invdt, m_inv_dt_global);
+#else
+    Kokkos::deep_copy(host_view_invdt, m_inv_dt);
+#endif
+
+    m_dt = m_hydro_settings.cfl / host_invdt;
+  }
+
+  // correct m_dt if necessary
+  if (m_t + m_dt > m_tEnd)
+  {
+    m_dt = m_tEnd - m_t;
+  }
+
+} // SolverGodunovHydro<dim, device_t>::compute_dt(
 
 // =======================================================
 // =======================================================
