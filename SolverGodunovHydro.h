@@ -168,6 +168,14 @@ public:
   real_t
   compute_dt_local() override;
 
+  //! compute inverse of time step inside an MPI process, at shared memory level (on device).
+  void
+  compute_invdt_local();
+
+  //! compute time step inside an MPI process, at shared memory level.
+  void
+  compute_dt() override;
+
   //! perform 1 time step (time integration).
   void
   next_iteration_impl() override;
@@ -456,6 +464,12 @@ private:
   //! \param[in] amr_hashmap_before_adapt is the amr hashmap before mesh adaptation
   void
   map_userdata_after_adapt(amr_hashmap_t const & amr_hashmap_before_adapt);
+
+  //! temporary variable made a class member to avoid calling malloc/free at each time step
+  Kokkos::View<real_t, kalypsso::DefaultDevice> m_inv_dt;
+
+  //! temporary variable made a class member to avoid calling malloc/free at each time step
+  Kokkos::View<real_t, kalypsso::DefaultDevice> m_inv_dt_global;
 
 }; // class SolverGodunovHydro
 

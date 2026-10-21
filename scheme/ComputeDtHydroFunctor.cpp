@@ -86,6 +86,46 @@ ComputeDtHydroFunctor<dim, device_t>::apply(ConfigMap const &            config_
 // ====================================================================
 // ====================================================================
 template <size_t dim, typename device_t>
+void
+ComputeDtHydroFunctor<dim, device_t>::apply(ConfigMap const &            config_map,
+                                            orchard_key_view_t const &   orchard_keys,
+                                            int32_t                      local_num_octants,
+                                            HydroSettings const &        hydro_settings,
+                                            block_size_t<dim> const &    block_sizes,
+                                            DataArrayBlock_t const &     Udata,
+                                            EosWrapper<device_t> const & eos,
+                                            Kokkos::View<real_t, kalypsso::DefaultDevice> & invDt)
+{
+  const auto gravity_enabled = config_map.getBool("gravity", "enabled", false);
+  const auto gravity_field = get_uniform_gravity_vector<dim>(config_map);
+
+  ComputeDtHydroFunctor functor(config_map,
+                                orchard_keys,
+                                local_num_octants,
+                                hydro_settings,
+                                block_sizes,
+                                Udata,
+                                eos,
+                                gravity_enabled,
+                                gravity_field);
+
+  Kokkos::Max<real_t, kalypsso::DefaultDevice> reducer(invDt);
+
+  const auto nbCellsPerLeaf = Udata.num_cells();
+
+  // compute total number of cells
+  const auto nbCellsTotal = local_num_octants * nbCellsPerLeaf;
+
+  Kokkos::parallel_reduce("kalypsso::godunov_hydro::ComputeDtHydroFunctor",
+                          Kokkos::RangePolicy<exec_space>(0, nbCellsTotal),
+                          functor,
+                          reducer);
+
+} // apply
+
+// ====================================================================
+// ====================================================================
+template <size_t dim, typename device_t>
 KOKKOS_INLINE_FUNCTION void
 ComputeDtHydroFunctor<dim, device_t>::compute_cfl(int32_t const & iOct,
                                                   int32_t const & cell_index,

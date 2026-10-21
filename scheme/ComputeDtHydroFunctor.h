@@ -126,6 +126,21 @@ public:
   // ====================================================================
   // ====================================================================
   /**
+   * compute cfl on device
+   */
+  static void
+  apply(ConfigMap const &                               config_map,
+        orchard_key_view_t const &                      orchard_keys,
+        int32_t                                         local_num_octants,
+        HydroSettings const &                           hydro_settings,
+        block_size_t<dim> const &                       block_sizes,
+        DataArrayBlock_t const &                        Udata,
+        EosWrapper<device_t> const &                    eos,
+        Kokkos::View<real_t, kalypsso::DefaultDevice> & invDt);
+
+  // ====================================================================
+  // ====================================================================
+  /**
    * \brief Update reduced variable when visiting a cell.
    *
    * \param[in] iOct is the visited octant id
