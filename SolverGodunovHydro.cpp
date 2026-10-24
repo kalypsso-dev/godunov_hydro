@@ -394,8 +394,8 @@ SolverGodunovHydro<dim, device_t>::compute_invdt_local()
 
   // call device functor - compute invDt
   ComputeDtHydroFunctor<dim, device_t>::apply(m_config_map,
-                                              m_mesh_map->orchard_keys(),
-                                              m_mesh_map->get_amr_mesh_info().local_num_quadrants(),
+                                              m_amr_mgr.get_orchard_keys(),
+                                              m_amr_mgr.get_amr_mesh_info().local_num_quadrants(),
                                               m_hydro_settings,
                                               m_block_sizes,
                                               m_U,
