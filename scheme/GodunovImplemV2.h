@@ -190,8 +190,8 @@ private:
   //! \param[in] half_dt halt time step
   void
   convert_to_primitives_in_group_of_quads(DataArrayBlock_t const & U,
-                                          int32_t          iOct_begin,
-                                          int32_t          num_quadrants_in_group);
+                                          int32_t                  iOct_begin,
+                                          int32_t                  num_quadrants_in_group);
 
   //! compute limited slopes in a group of owned quadrants.
   //!
@@ -212,9 +212,9 @@ private:
   void
   compute_fluxes_and_update_in_group(DataArrayBlock_t const & u_in,
                                      DataArrayBlock_t const & u_out,
-                                     int32_t          iOct_begin,
-                                     int32_t          num_octants_to_process,
-                                     real_t           dt);
+                                     int32_t                  iOct_begin,
+                                     int32_t                  num_octants_to_process,
+                                     real_t                   dt);
 
   //! perform Godunov MUSCL Update in ghost octants.
   //! this function is only needed when performing a conservative update.

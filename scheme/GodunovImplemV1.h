@@ -181,8 +181,8 @@ private:
   //! \param[in] num_quadrants_in_group number of quadrant data to fill
   void
   convert_to_primitives_in_group(DataArrayBlock_t const & U,
-                                 int32_t          iOct_begin,
-                                 int32_t          num_quadrants_in_group);
+                                 int32_t                  iOct_begin,
+                                 int32_t                  num_quadrants_in_group);
 
   //! compute limited slopes in a group of owned octant
   void
