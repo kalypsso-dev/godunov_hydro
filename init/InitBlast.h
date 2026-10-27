@@ -14,6 +14,7 @@
 #include <kalypsso/utils/mpi/ParallelEnv.h>
 #include <kalypsso/core/problems/BlastParams.h>
 #include <kalypsso/core/orchard_key_utils.h>
+#include <kalypsso/core/amr_cycle_types.h>
 
 namespace kalypsso
 {
@@ -85,10 +86,9 @@ private:
   real_t m_total_volume_inside;
 
   InitBlastDataFunctor(DataArrayBlock_t const &             Udata,
-                       orchard_key_view_t<device_t> const & orchard_keys,
+                       core::OrchardKeys<device_t> const &  orchard_keys,
                        int32_t                              local_num_octants,
                        HydroSettings const &                settings,
-                       BlastParams const &                  bParams,
                        InitialStates<dim, device_t> const & initial_states,
                        bool                                 replicated_init_cond,
                        real_t                               total_volume_inside,
@@ -98,7 +98,7 @@ public:
   //! static method which does it all: create and execute functor
   static auto
   apply(DataArrayBlock_t const &             Udata,
-        orchard_key_view_t<device_t> const & orchard_keys,
+        core::OrchardKeys<device_t> const &  orchard_keys,
         int32_t                              local_num_octants,
         HydroSettings const &                settings,
         InitialStates<dim, device_t> const & initial_states,

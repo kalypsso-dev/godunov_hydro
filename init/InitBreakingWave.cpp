@@ -142,7 +142,6 @@ void
 InitBreakingWave<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
 {
 
-  auto              amr_mesh = solver.amr_mesh();
   ConfigMap const & config_map = solver.config_map();
   const auto        settings = HydroSettings(solver.config_map());
   const int         level_min = solver.hydro_params().level_min;
@@ -159,8 +158,8 @@ InitBreakingWave<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solve
 
   // first init of Udata
   InitBreakingWaveDataFunctor<dim, device_t>::apply(solver.U(),
-                                                    solver.mesh_map()->orchard_keys(),
-                                                    solver.amr_mesh()->local_num_quadrants(),
+                                                    solver.amr_mgr().get_orchard_keys(),
+                                                    solver.amr_mgr().get_nb_owned(),
                                                     settings,
                                                     t_init,
                                                     config_map);
@@ -183,8 +182,8 @@ InitBreakingWave<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solve
       // 2. update Udata
       //
       InitBreakingWaveDataFunctor<dim, device_t>::apply(solver.U(),
-                                                        solver.mesh_map()->orchard_keys(),
-                                                        solver.amr_mesh()->local_num_quadrants(),
+                                                        solver.amr_mgr().get_orchard_keys(),
+                                                        solver.amr_mgr().get_nb_owned(),
                                                         settings,
                                                         t_init,
                                                         config_map);
@@ -201,46 +200,40 @@ InitBreakingWave<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solve
     while (level < level_max)
     {
       //
-      // 1. create context data for AMR cycle
+      // 1. reset AMR flags
       //
-      AMRContext<dim, device_t> amr_context(amr_mesh->forest()->local_num_quadrants);
-      auto                      flags_d = amr_context.m_amrflags_d;
-      auto                      flags_h = amr_context.m_amrflags_h;
+      solver.amr_mgr().reset_amr_flags();
+      auto flags_h = solver.amr_mgr().get_amr_flags_on_host();
+      auto flags_d = solver.amr_mgr().get_amr_flags_on_device();
 
       //
       // 2. compute refine/coarsen flags
       //
       InitBreakingWaveRefineFunctor<dim, device_t>::apply(
-        flags_d, solver.amr_mesh()->local_num_quadrants(), solver.config_map());
+        flags_d, solver.amr_mgr().get_nb_owned(), solver.config_map());
 
       // amr context will adapt mesh on CPU, so we need flags on host up to date
       Kokkos::deep_copy(flags_h, flags_d);
 
       //
-      // 3. apply AMR cycle on device : refine + coarsen + 2:1 balance
+      // 3. apply AMR cycle on device :
+      // - refine + coarsen + 2:1 balance
+      // - rebuild mesh
+      // - remap solver data
       //
-      {
-        Kokkos::Profiling::ScopedRegion prof("AMR_refinement_device");
-        [[maybe_unused]] auto changed = amr_context.adapt_mesh(solver.amr_mesh()->forest());
-        KALYPSSO_INFO_ALL("Mesh changed ? {}", static_cast<int>(changed));
-      }
+      solver.amr_mgr().rebuild_from_context();
 
-      //
-      // 4. re-compute update orchard keys
-      //
-      solver.update_mesh(do_reset_ghosts);
-
-      // 5. resize Udata
+      // 4. resize Udata
       // now we know the size of the mesh, we can allocate memory for
       // heavy data (U, U2, Uhost, ...)
       solver.resize_solver_data();
 
       //
-      // 6. update Udata
+      // 5. update Udata
       //
       InitBreakingWaveDataFunctor<dim, device_t>::apply(solver.U(),
-                                                        solver.mesh_map()->orchard_keys(),
-                                                        solver.amr_mesh()->local_num_quadrants(),
+                                                        solver.amr_mgr().get_orchard_keys(),
+                                                        solver.amr_mgr().get_nb_owned(),
                                                         settings,
                                                         t_init,
                                                         config_map);

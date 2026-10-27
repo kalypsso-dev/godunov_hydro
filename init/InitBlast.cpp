@@ -27,10 +27,9 @@ namespace godunov_hydro
 template <size_t dim, typename device_t>
 InitBlastDataFunctor<dim, device_t>::InitBlastDataFunctor(
   DataArrayBlock_t const &             Udata,
-  orchard_key_view_t<device_t> const & orchard_keys,
+  core::OrchardKeys<device_t> const &  orchard_keys,
   int32_t                              local_num_octants,
   HydroSettings const &                settings,
-  BlastParams const &                  bParams,
   InitialStates<dim, device_t> const & initial_states,
   bool                                 replicated_init_cond,
   real_t                               total_volume_inside,
@@ -39,7 +38,7 @@ InitBlastDataFunctor<dim, device_t>::InitBlastDataFunctor(
   , m_orchard_keys(orchard_keys)
   , m_local_num_octants(local_num_octants)
   , m_settings(settings)
-  , m_bParams(bParams)
+  , m_bParams(config_map)
   , m_initial_states(initial_states)
   , m_scaling_factor(get_scaling_factor(config_map))
   , m_xyz_min(get_xyz_min<dim>(config_map))
@@ -59,14 +58,11 @@ InitBlastDataFunctor<dim, device_t>::apply(DataArrayBlock_t const &             
                                            ConfigMap const & config_map,
                                            [[maybe_unused]] ParallelEnv const & par_env)
 {
-  BlastParams blastParams = BlastParams(config_map);
-
   // data init functor
   InitBlastDataFunctor functor(Udata,
                                orchard_keys,
                                local_num_octants,
                                settings,
-                               blastParams,
                                initial_states,
                                replicated_init_cond,
                                ZERO_F,
@@ -110,14 +106,11 @@ InitBlastDataFunctor<dim, device_t>::rescale_energy(
   [[maybe_unused]] ParallelEnv const & par_env,
   real_t                               total_volume_inside)
 {
-  BlastParams blastParams = BlastParams(config_map);
-
   // data init functor
   InitBlastDataFunctor functor(Udata,
                                orchard_keys,
                                local_num_octants,
                                settings,
-                               blastParams,
                                initial_states,
                                replicated_init_cond,
                                total_volume_inside,
@@ -496,7 +489,6 @@ template <size_t dim, typename device_t>
 void
 InitBlast<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
 {
-  auto              amr_mesh = solver.amr_mesh();
   ConfigMap const & config_map = solver.config_map();
   const auto        settings = HydroSettings(solver.config_map());
   const int         level_min = solver.hydro_params().level_min;
@@ -517,8 +509,8 @@ InitBlast<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
   // first init of Udata
   total_volume_inside =
     InitBlastDataFunctor<dim, device_t>::apply(solver.U(),
-                                               solver.mesh_map()->orchard_keys(),
-                                               solver.amr_mesh()->local_num_quadrants(),
+                                               solver.amr_mgr().get_orchard_keys(),
+                                               solver.amr_mgr().get_nb_owned(),
                                                settings,
                                                initial_states,
                                                replicated_init_cond,
@@ -545,8 +537,8 @@ InitBlast<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
       //
       total_volume_inside =
         InitBlastDataFunctor<dim, device_t>::apply(solver.U(),
-                                                   solver.mesh_map()->orchard_keys(),
-                                                   solver.amr_mesh()->local_num_quadrants(),
+                                                   solver.amr_mgr().get_orchard_keys(),
+                                                   solver.amr_mgr().get_nb_owned(),
                                                    settings,
                                                    initial_states,
                                                    replicated_init_cond,
@@ -565,19 +557,19 @@ InitBlast<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
     while (level < level_max)
     {
       //
-      // 1. create context data for AMR cycle
+      // 1. reset AMR flags
       //
-      AMRContext<dim, device_t> amr_context(amr_mesh->forest()->local_num_quadrants);
-      auto                      flags_d = amr_context.m_amrflags_d;
-      auto                      flags_h = amr_context.m_amrflags_h;
+      solver.amr_mgr().reset_amr_flags();
+      auto flags_h = solver.amr_mgr().get_amr_flags_on_host();
+      auto flags_d = solver.amr_mgr().get_amr_flags_on_device();
 
       //
       // 2. compute refine/coarsen flags
       //
       InitBlastRefineFunctor<dim, device_t>::apply(solver.U(),
-                                                   solver.mesh_map()->orchard_keys(),
+                                                   solver.amr_mgr().get_orchard_keys(),
                                                    flags_d,
-                                                   solver.amr_mesh()->local_num_quadrants(),
+                                                   solver.amr_mgr().get_nb_owned(),
                                                    settings,
                                                    level,
                                                    replicated_init_cond,
@@ -587,31 +579,25 @@ InitBlast<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
       Kokkos::deep_copy(flags_h, flags_d);
 
       //
-      // 3. apply AMR cycle on device : refine + coarsen + 2:1 balance
+      // 3. apply AMR cycle on device :
       //
-      {
-        Kokkos::Profiling::ScopedRegion prof("AMR_refinement_device");
-        [[maybe_unused]] auto changed = amr_context.adapt_mesh(solver.amr_mesh()->forest());
-        KALYPSSO_INFO_ALL("Mesh changed ? {}", static_cast<int>(changed));
-      }
+      // - refine + coarsen + 2:1 balance
+      // - rebuild mesh
+      //
+      solver.amr_mgr().rebuild_from_context();
 
-      //
-      // 4. re-compute update orchard keys
-      //
-      solver.update_mesh(do_reset_ghosts);
-
-      // 5. resize Udata
+      // 4. resize Udata
       // now we know the size of the mesh, we can allocate memory for
       // heavy data (U, U2, Uhost, ...)
       solver.resize_solver_data();
 
       //
-      // 6. update Udata
+      // 5. update Udata
       //
       total_volume_inside =
         InitBlastDataFunctor<dim, device_t>::apply(solver.U(),
-                                                   solver.mesh_map()->orchard_keys(),
-                                                   solver.amr_mesh()->local_num_quadrants(),
+                                                   solver.amr_mgr().get_orchard_keys(),
+                                                   solver.amr_mgr().get_nb_owned(),
                                                    settings,
                                                    initial_states,
                                                    replicated_init_cond,
@@ -636,8 +622,8 @@ InitBlast<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
   if (blastParams.total_energy_inside > 0)
   {
     InitBlastDataFunctor<dim, device_t>::rescale_energy(solver.U(),
-                                                        solver.mesh_map()->orchard_keys(),
-                                                        solver.amr_mesh()->local_num_quadrants(),
+                                                        solver.amr_mgr().get_orchard_keys(),
+                                                        solver.amr_mgr().get_nb_owned(),
                                                         settings,
                                                         initial_states,
                                                         replicated_init_cond,

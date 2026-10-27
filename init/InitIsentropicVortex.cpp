@@ -121,7 +121,6 @@ void
 InitIsentropicVortex<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & solver)
 {
 
-  auto              amr_mesh = solver.amr_mesh();
   ConfigMap const & config_map = solver.config_map();
   const auto        settings = HydroSettings(solver.config_map());
   const int         level_min = solver.hydro_params().level_min;
@@ -137,8 +136,8 @@ InitIsentropicVortex<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & s
 
   // first init of Udata
   InitIsentropicVortexDataFunctor<dim, device_t>::apply(solver.U(),
-                                                        solver.mesh_map()->orchard_keys(),
-                                                        solver.amr_mesh()->local_num_quadrants(),
+                                                        solver.amr_mgr().get_orchard_keys(),
+                                                        solver.amr_mgr().get_nb_owned(),
                                                         settings,
                                                         config_map);
 
@@ -156,8 +155,8 @@ InitIsentropicVortex<dim, device_t>::apply(SolverGodunovHydro<dim, device_t> & s
     // 2. update Udata
     //
     InitIsentropicVortexDataFunctor<dim, device_t>::apply(solver.U(),
-                                                          solver.mesh_map()->orchard_keys(),
-                                                          solver.amr_mesh()->local_num_quadrants(),
+                                                          solver.amr_mgr().get_orchard_keys(),
+                                                          solver.amr_mgr().get_nb_owned(),
                                                           settings,
                                                           config_map);
 

@@ -41,28 +41,12 @@ public:
   using DataArrayGhostedBlock_t = typename GodunovImplemBase_t::DataArrayGhostedBlock_t;
 
 
-  GodunovImplemV2(ParallelEnv const &      par_env,
-                  HydroParams const &      params,
-                  ConfigMap const &        config_map,
-                  ProfilingManager &       profiling_manager,
-                  AMRmesh<dim> const &     amr_mesh,
-                  MeshMap<dim, device_t> & mesh_map
-#ifdef KALYPSSO_CORE_USE_MPI
-                  ,
-                  MeshGhostsExchanger<dim, real_t, device_t> & mesh_ghosts_exchanger
-#endif // KALYPSSO_CORE_USE_MPI
-                  )
-    : GodunovImplemBase_t(par_env,
-                          params,
-                          config_map,
-                          profiling_manager,
-                          amr_mesh,
-                          mesh_map
-#ifdef KALYPSSO_CORE_USE_MPI
-                          ,
-                          mesh_ghosts_exchanger
-#endif // KALYPSSO_CORE_USE_MPI
-                          )
+  GodunovImplemV2(ParallelEnv const &               par_env,
+                  HydroParams const &               params,
+                  ConfigMap const &                 config_map,
+                  ProfilingManager &                profiling_manager,
+                  core::AMRManager<dim, device_t> & amr_mgr)
+    : GodunovImplemBase_t(par_env, params, config_map, profiling_manager, amr_mgr)
     , m_nbOctsPerGroup(config_map.getInteger("amr", "nbOctsPerGroup", 128))
     , m_Q_ghosted_group(this->m_block_sizes,
                         this->m_block_sizes + 2 * 2,
@@ -121,25 +105,14 @@ public:
    * \brief Static creation method called by the solver factory.
    */
   static GodunovImplemBase_t *
-  create(ParallelEnv const &      par_env,
-         HydroParams const &      params,
-         ConfigMap const &        config_map,
-         ProfilingManager &       profiling_manager,
-         AMRmesh<dim> const &     amr_mesh,
-         MeshMap<dim, device_t> & mesh_map
-#ifdef KALYPSSO_CORE_USE_MPI
-         ,
-         MeshGhostsExchanger<dim, real_t, device_t> & mesh_ghosts_exchanger
-#endif // KALYPSSO_CORE_USE_MPI
-  )
+  create(ParallelEnv const &               par_env,
+         HydroParams const &               params,
+         ConfigMap const &                 config_map,
+         ProfilingManager &                profiling_manager,
+         core::AMRManager<dim, device_t> & amr_mgr)
   {
-#ifdef KALYPSSO_CORE_USE_MPI
-    GodunovImplemV2<dim, device_t> * impl = new GodunovImplemV2<dim, device_t>(
-      par_env, params, config_map, profiling_manager, amr_mesh, mesh_map, mesh_ghosts_exchanger);
-#else
-    GodunovImplemV2<dim, device_t> * impl = new GodunovImplemV2<dim, device_t>(
-      par_env, params, config_map, profiling_manager, amr_mesh, mesh_map);
-#endif // KALYPSSO_CORE_USE_MPI
+    GodunovImplemV2<dim, device_t> * impl =
+      new GodunovImplemV2<dim, device_t>(par_env, params, config_map, profiling_manager, amr_mgr);
 
     return impl;
   }
@@ -206,9 +179,8 @@ private:
   //! convert conservative variables to primitive variables in mirror quadrants.
   //!
   //! \param[in] U conservative variables array (owned + MPI ghost + outside quadrants)
-  //! \param[in] half_dt
   void
-  convert_to_primitives_in_mirror_quads(DataArrayBlock_t U);
+  convert_to_primitives_in_mirror_quads(DataArrayBlock_t const & U);
 
   //! convert conservative variables to primitive variables in a group of quadrants.
   //!
@@ -217,9 +189,9 @@ private:
   //! \param[in] num_quadrants_in_group is the number of quadrants to process
   //! \param[in] half_dt halt time step
   void
-  convert_to_primitives_in_group_of_quads(DataArrayBlock_t U,
-                                          int32_t          iOct_begin,
-                                          int32_t          num_quadrants_in_group);
+  convert_to_primitives_in_group_of_quads(DataArrayBlock_t const & U,
+                                          int32_t                  iOct_begin,
+                                          int32_t                  num_quadrants_in_group);
 
   //! compute limited slopes in a group of owned quadrants.
   //!
@@ -238,11 +210,11 @@ private:
   //! this update can be either conservative on non-conservative (at interface between two octants
   //! of different levels)
   void
-  compute_fluxes_and_update_in_group(DataArrayBlock_t u_in,
-                                     DataArrayBlock_t u_out,
-                                     int32_t          iOct_begin,
-                                     int32_t          num_octants_to_process,
-                                     real_t           dt);
+  compute_fluxes_and_update_in_group(DataArrayBlock_t const & u_in,
+                                     DataArrayBlock_t const & u_out,
+                                     int32_t                  iOct_begin,
+                                     int32_t                  num_octants_to_process,
+                                     real_t                   dt);
 
   //! perform Godunov MUSCL Update in ghost octants.
   //! this function is only needed when performing a conservative update.
@@ -250,7 +222,9 @@ private:
   //! from a finer level neighbor that is a ghost, flux must be computed in the ghost quadrant,
   //! before updating the owned quadrant.
   void
-  compute_fluxes_and_update_in_ghosts(DataArrayBlock_t u_in, DataArrayBlock_t u_out, real_t dt);
+  compute_fluxes_and_update_in_ghosts(DataArrayBlock_t const & u_in,
+                                      DataArrayBlock_t const & u_out,
+                                      real_t                   dt);
 
 }; // class GodunovImplemV2
 

@@ -34,14 +34,14 @@ GodunovImplemV2<dim, device_t>::resize_auxiliary_data()
   // because ghost quadrant will be populated with MeshGhostsExchanger
 
   // clang-format off
-  m_Q_ghosted_mg.resize(this->m_amr_mesh.local_num_mirrors() +
-                        this->m_amr_mesh.local_num_ghosts());
+  m_Q_ghosted_mg.resize(this->m_amr_mgr.get_nb_mirrors() +
+                        this->m_amr_mgr.get_nb_ghosts());
   // clang-format on
 
-  m_Slopes_x_g.resize(this->m_amr_mesh.local_num_ghosts());
-  m_Slopes_y_g.resize(this->m_amr_mesh.local_num_ghosts());
+  m_Slopes_x_g.resize(this->m_amr_mgr.get_nb_ghosts());
+  m_Slopes_y_g.resize(this->m_amr_mgr.get_nb_ghosts());
   if constexpr (dim == 3)
-    m_Slopes_z_g.resize(this->m_amr_mesh.local_num_ghosts());
+    m_Slopes_z_g.resize(this->m_amr_mgr.get_nb_ghosts());
 
 } // GodunovImplemV2<dim, device_t>::resize_auxiliary_data
 
@@ -73,7 +73,7 @@ GodunovImplemV2<dim, device_t>::do_time_step(DataArrayBlock_t const & U,
                                              real_t                   dt)
 {
 
-  int32_t nbOcts = static_cast<int32_t>(this->m_amr_mesh.local_num_quadrants());
+  int32_t nbOcts = static_cast<int32_t>(this->m_amr_mgr.get_nb_owned());
 
   /*
    * When doing conservative update, we need to ensure that at the interface between two quads at
@@ -148,7 +148,7 @@ GodunovImplemV2<dim, device_t>::do_time_step(DataArrayBlock_t const & U,
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV2<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayBlock_t U)
+GodunovImplemV2<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayBlock_t const & U)
 {
 
   KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
@@ -156,10 +156,10 @@ GodunovImplemV2<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayB
   // compute primitive variables in owned mirror blocks (U must have MPI ghost up to date)
   ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_in_mirrors(
     this->m_config_map,
-    this->m_mesh_map.hashmap(),
-    this->m_mesh_map.orchard_keys(),
-    this->m_mesh_map.mirror_orchard_keys(),
-    this->m_mesh_map.get_amr_mesh_info(),
+    this->m_amr_mgr.get_hashmap(),
+    this->m_amr_mgr.get_orchard_keys(),
+    this->m_amr_mgr.get_mirror_orchard_keys(),
+    this->m_amr_mgr.get_amr_mesh_info(),
     U,
     m_Q_ghosted_mg,
     this->m_brick_sizes,
@@ -173,8 +173,8 @@ GodunovImplemV2<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayB
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV2<dim, device_t>::convert_to_primitives_in_group_of_quads(DataArrayBlock_t U,
-                                                                        int32_t          iOct_begin,
+GodunovImplemV2<dim, device_t>::convert_to_primitives_in_group_of_quads(DataArrayBlock_t const & U,
+                                                                        int32_t iOct_begin,
                                                                         int32_t num_octant_in_group)
 {
 
@@ -183,9 +183,9 @@ GodunovImplemV2<dim, device_t>::convert_to_primitives_in_group_of_quads(DataArra
   // compute primitive variables in all owned blocks (U must have MPI ghost up to date)
   ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_on_group(
     this->m_config_map,
-    this->m_mesh_map.hashmap(),
-    this->m_mesh_map.orchard_keys(),
-    this->m_mesh_map.get_amr_mesh_info(),
+    this->m_amr_mgr.get_hashmap(),
+    this->m_amr_mgr.get_orchard_keys(),
+    this->m_amr_mgr.get_amr_mesh_info(),
     iOct_begin,
     num_octant_in_group,
     U,
@@ -229,8 +229,8 @@ GodunovImplemV2<dim, device_t>::compute_limited_slopes_in_ghosts()
                                                               m_Slopes_x_g,
                                                               m_Slopes_y_g,
                                                               m_Slopes_z_g,
-                                                              this->m_amr_mesh.local_num_mirrors(),
-                                                              this->m_amr_mesh.local_num_ghosts(),
+                                                              this->m_amr_mgr.get_nb_mirrors(),
+                                                              this->m_amr_mgr.get_nb_ghosts(),
                                                               this->m_hydro_settings);
 
 } // GodunovImplemV2<dim, device_t>::compute_limited_slopes_in_ghosts
@@ -239,9 +239,9 @@ GodunovImplemV2<dim, device_t>::compute_limited_slopes_in_ghosts()
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_group(DataArrayBlock_t u_in,
-                                                                   DataArrayBlock_t u_out,
-                                                                   int32_t          iOct_begin,
+GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_group(DataArrayBlock_t const & u_in,
+                                                                   DataArrayBlock_t const & u_out,
+                                                                   int32_t iOct_begin,
                                                                    int32_t num_octants_to_process,
                                                                    real_t  dt)
 {
@@ -251,10 +251,10 @@ GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_group(DataArrayBloc
   // compute fluxes and update all quadrant in a group of quadrants
   ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::apply_on_group(
     this->m_config_map,
-    this->m_mesh_map.hashmap(),
-    this->m_mesh_map.orchard_keys(),
-    this->m_mesh_map.conformal_status(),
-    this->m_mesh_map.get_amr_mesh_info(),
+    this->m_amr_mgr.get_hashmap(),
+    this->m_amr_mgr.get_orchard_keys(),
+    this->m_amr_mgr.get_conformal_status(),
+    this->m_amr_mgr.get_amr_mesh_info(),
     u_in,
     u_out,
     m_Q_ghosted_group,
@@ -275,9 +275,9 @@ GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_group(DataArrayBloc
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_ghosts(DataArrayBlock_t u_in,
-                                                                    DataArrayBlock_t u_out,
-                                                                    real_t           dt)
+GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_ghosts(DataArrayBlock_t const & u_in,
+                                                                    DataArrayBlock_t const & u_out,
+                                                                    real_t                   dt)
 {
 
   KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_UPDATE);
@@ -287,10 +287,10 @@ GodunovImplemV2<dim, device_t>::compute_fluxes_and_update_in_ghosts(DataArrayBlo
   // ghost quadrant)
   ComputeFluxesAndConservativeUpdateFunctor<dim, device_t>::apply_on_ghosts(
     this->m_config_map,
-    this->m_mesh_map.hashmap(),
-    this->m_mesh_map.orchard_keys(),
-    this->m_mesh_map.conformal_status(),
-    this->m_mesh_map.get_amr_mesh_info(),
+    this->m_amr_mgr.get_hashmap(),
+    this->m_amr_mgr.get_orchard_keys(),
+    this->m_amr_mgr.get_conformal_status(),
+    this->m_amr_mgr.get_amr_mesh_info(),
     u_in,
     u_out,
     m_Q_ghosted_mg,

@@ -31,9 +31,9 @@ template <size_t dim, typename device_t>
 void
 GodunovImplemV1<dim, device_t>::resize_auxiliary_data()
 {
-  const auto num_owned = this->m_mesh_map.get_amr_mesh_info().local_num_quadrants();
-  const auto num_ghosts = this->m_amr_mesh.local_num_ghosts();
-  const auto num_mirrors = this->m_amr_mesh.local_num_mirrors();
+  const auto num_owned = this->m_amr_mgr.get_nb_owned();
+  const auto num_ghosts = this->m_amr_mgr.get_nb_ghosts();
+  const auto num_mirrors = this->m_amr_mgr.get_nb_mirrors();
 
   // note: m_Q_ghosted_mg is sized with the number of mirror + number of ghost quadrants,
   // because ghost quadrant will be populated with MeshGhostsExchanger
@@ -100,8 +100,8 @@ GodunovImplemV1<dim, device_t>::do_time_step(DataArrayBlock_t const & U,
   this->mpi_exchange_mirrors_and_ghosts(m_Q_ghosted_mg);
 
   // number of quadrants used to do spatial subcycling: owned + ghosts
-  int32_t nbQuads = static_cast<int32_t>(this->m_amr_mesh.local_num_quadrants() +
-                                         this->m_amr_mesh.local_num_ghosts());
+  int32_t nbQuads =
+    static_cast<int32_t>(this->m_amr_mgr.get_nb_owned() + this->m_amr_mgr.get_nb_ghosts());
 
   // number of group of octants, rounding to upper value
   int32_t nbGroups = (nbQuads + m_nbQuadsPerGroup - 1) / m_nbQuadsPerGroup;
@@ -147,7 +147,7 @@ GodunovImplemV1<dim, device_t>::do_time_step(DataArrayBlock_t const & U,
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV1<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayBlock_t U)
+GodunovImplemV1<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayBlock_t const & U)
 {
 
   KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
@@ -155,10 +155,10 @@ GodunovImplemV1<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayB
   // compute primitive variables in owned mirror blocks (U must have MPI ghost up to date)
   ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_in_mirrors(
     this->m_config_map,
-    this->m_mesh_map.hashmap(),
-    this->m_mesh_map.orchard_keys(),
-    this->m_mesh_map.mirror_orchard_keys(),
-    this->m_mesh_map.get_amr_mesh_info(),
+    this->m_amr_mgr.get_hashmap(),
+    this->m_amr_mgr.get_orchard_keys(),
+    this->m_amr_mgr.get_mirror_orchard_keys(),
+    this->m_amr_mgr.get_amr_mesh_info(),
     U,
     m_Q_ghosted_mg,
     this->m_brick_sizes,
@@ -172,17 +172,16 @@ GodunovImplemV1<dim, device_t>::convert_to_primitives_in_mirror_quads(DataArrayB
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV1<dim, device_t>::convert_to_primitives_in_group(DataArrayBlock_t U,
-                                                               int32_t          iOct_begin,
-                                                               int32_t          num_quads_in_group)
+GodunovImplemV1<dim, device_t>::convert_to_primitives_in_group(DataArrayBlock_t const & U,
+                                                               int32_t                  iOct_begin,
+                                                               int32_t num_quads_in_group)
 {
 
   KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_CONV_PRIM);
 
-  const auto num_quads_owned_total =
-    static_cast<int32_t>(this->m_mesh_map.get_amr_mesh_info().local_num_quadrants());
-  const auto num_quads_mirrors_total = static_cast<int32_t>(this->m_amr_mesh.local_num_mirrors());
-  const auto num_quads_ghosts_total = static_cast<int32_t>(this->m_amr_mesh.local_num_ghosts());
+  const auto    num_quads_owned_total = static_cast<int32_t>(this->m_amr_mgr.get_nb_owned());
+  const auto    num_quads_mirrors_total = static_cast<int32_t>(this->m_amr_mgr.get_nb_mirrors());
+  const auto    num_quads_ghosts_total = static_cast<int32_t>(this->m_amr_mgr.get_nb_ghosts());
   const int32_t num_quads_total = (num_quads_owned_total + num_quads_ghosts_total);
 
   int32_t num_quads_owned = 0;
@@ -217,9 +216,9 @@ GodunovImplemV1<dim, device_t>::convert_to_primitives_in_group(DataArrayBlock_t 
     // compute primitive variables in range of owned blocks
     ConvertToPrimitivesVariablesFunctor<dim, device_t>::apply_on_group(
       this->m_config_map,
-      this->m_mesh_map.hashmap(),
-      this->m_mesh_map.orchard_keys(),
-      this->m_mesh_map.get_amr_mesh_info(),
+      this->m_amr_mgr.get_hashmap(),
+      this->m_amr_mgr.get_orchard_keys(),
+      this->m_amr_mgr.get_amr_mesh_info(),
       iOct_begin,
       num_quads_owned,
       U,
@@ -290,8 +289,8 @@ GodunovImplemV1<dim, device_t>::compute_fluxes_and_store_in_group(real_t  dt,
 
   // compute fluxes and update all quadrant in a group of quadrants
   ComputeFluxesAndStoreFunctor<dim, device_t>::apply(this->m_config_map,
-                                                     this->m_mesh_map.orchard_keys(),
-                                                     this->m_mesh_map.get_amr_mesh_info(),
+                                                     this->m_amr_mgr.get_orchard_keys(),
+                                                     this->m_amr_mgr.get_amr_mesh_info(),
                                                      m_Fluxes_x,
                                                      m_Q_ghosted_group,
                                                      m_Slopes_x,
@@ -306,8 +305,8 @@ GodunovImplemV1<dim, device_t>::compute_fluxes_and_store_in_group(real_t  dt,
                                                      dt);
 
   ComputeFluxesAndStoreFunctor<dim, device_t>::apply(this->m_config_map,
-                                                     this->m_mesh_map.orchard_keys(),
-                                                     this->m_mesh_map.get_amr_mesh_info(),
+                                                     this->m_amr_mgr.get_orchard_keys(),
+                                                     this->m_amr_mgr.get_amr_mesh_info(),
                                                      m_Fluxes_y,
                                                      m_Q_ghosted_group,
                                                      m_Slopes_x,
@@ -324,8 +323,8 @@ GodunovImplemV1<dim, device_t>::compute_fluxes_and_store_in_group(real_t  dt,
   if constexpr (dim == 3)
   {
     ComputeFluxesAndStoreFunctor<dim, device_t>::apply(this->m_config_map,
-                                                       this->m_mesh_map.orchard_keys(),
-                                                       this->m_mesh_map.get_amr_mesh_info(),
+                                                       this->m_amr_mgr.get_orchard_keys(),
+                                                       this->m_amr_mgr.get_amr_mesh_info(),
                                                        m_Fluxes_z,
                                                        m_Q_ghosted_group,
                                                        m_Slopes_x,
@@ -346,7 +345,8 @@ GodunovImplemV1<dim, device_t>::compute_fluxes_and_store_in_group(real_t  dt,
 // =====================================================================
 template <size_t dim, typename device_t>
 void
-GodunovImplemV1<dim, device_t>::read_fluxes_and_update_in_owned(DataArrayBlock_t u_out, real_t dt)
+GodunovImplemV1<dim, device_t>::read_fluxes_and_update_in_owned(DataArrayBlock_t const & u_out,
+                                                                real_t                   dt)
 {
 
   KALYPSSO_PROFILING_REGION_DEVICE(this->m_profiling_mgr, NUM_SCHEME_UPDATE);
@@ -354,40 +354,42 @@ GodunovImplemV1<dim, device_t>::read_fluxes_and_update_in_owned(DataArrayBlock_t
   // compute incoming fluxes in all ghost quadrants and perform conservative update only at
   // interface between ghost and owned quadrants (in case the owned quadrant is coarser than the
   // ghost quadrant)
-  ReadFluxesAndConservativeUpdateFunctor<dim, device_t>::apply(this->m_config_map,
-                                                               this->m_mesh_map.hashmap(),
-                                                               this->m_mesh_map.orchard_keys(),
-                                                               this->m_mesh_map.conformal_status(),
-                                                               this->m_mesh_map.get_amr_mesh_info(),
-                                                               u_out,
-                                                               m_Fluxes_x,
-                                                               IX,
-                                                               this->m_brick_sizes,
-                                                               this->m_is_brick_periodic,
-                                                               this->m_hydro_settings,
-                                                               dt);
+  ReadFluxesAndConservativeUpdateFunctor<dim, device_t>::apply(
+    this->m_config_map,
+    this->m_amr_mgr.get_hashmap(),
+    this->m_amr_mgr.get_orchard_keys(),
+    this->m_amr_mgr.get_conformal_status(),
+    this->m_amr_mgr.get_amr_mesh_info(),
+    u_out,
+    m_Fluxes_x,
+    IX,
+    this->m_brick_sizes,
+    this->m_is_brick_periodic,
+    this->m_hydro_settings,
+    dt);
 
-  ReadFluxesAndConservativeUpdateFunctor<dim, device_t>::apply(this->m_config_map,
-                                                               this->m_mesh_map.hashmap(),
-                                                               this->m_mesh_map.orchard_keys(),
-                                                               this->m_mesh_map.conformal_status(),
-                                                               this->m_mesh_map.get_amr_mesh_info(),
-                                                               u_out,
-                                                               m_Fluxes_y,
-                                                               IY,
-                                                               this->m_brick_sizes,
-                                                               this->m_is_brick_periodic,
-                                                               this->m_hydro_settings,
-                                                               dt);
+  ReadFluxesAndConservativeUpdateFunctor<dim, device_t>::apply(
+    this->m_config_map,
+    this->m_amr_mgr.get_hashmap(),
+    this->m_amr_mgr.get_orchard_keys(),
+    this->m_amr_mgr.get_conformal_status(),
+    this->m_amr_mgr.get_amr_mesh_info(),
+    u_out,
+    m_Fluxes_y,
+    IY,
+    this->m_brick_sizes,
+    this->m_is_brick_periodic,
+    this->m_hydro_settings,
+    dt);
 
   if constexpr (dim == 3)
   {
     ReadFluxesAndConservativeUpdateFunctor<dim, device_t>::apply(
       this->m_config_map,
-      this->m_mesh_map.hashmap(),
-      this->m_mesh_map.orchard_keys(),
-      this->m_mesh_map.conformal_status(),
-      this->m_mesh_map.get_amr_mesh_info(),
+      this->m_amr_mgr.get_hashmap(),
+      this->m_amr_mgr.get_orchard_keys(),
+      this->m_amr_mgr.get_conformal_status(),
+      this->m_amr_mgr.get_amr_mesh_info(),
       u_out,
       m_Fluxes_z,
       IZ,
