@@ -119,14 +119,13 @@ init(SolverGodunovHydro<dim, device_t> & solver)
     }
     else
     {
-      KALYPSSO_WARN("Problem : {} is not recognized / implemented.", problem_name);
-      KALYPSSO_WARN("Use default - blast");
-      InitBlast<dim, device_t>::apply(solver);
+      KALYPSSO_ERROR("Problem : {} is not recognized / implemented.", problem_name);
+      Kokkos::abort("Check your input parameter file for \"problem\"");
     }
 
     // print mesh info
     {
-      const auto amr_mesh_info = solver.amr_mgr().get_mesh_map()->get_amr_mesh_info();
+      const auto amr_mesh_info = solver.amr_mgr().get_amr_mesh_info();
       if (solver.par_env().rank() == 0)
       {
         amr_mesh_info.print();
